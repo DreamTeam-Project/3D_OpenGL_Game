@@ -12,42 +12,56 @@
 #include "Types.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Model.h"
 
 using std::string;
 using std::exception;
+using glm::vec3;
 
-void StartWindow();
-void DrawInWindow();
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+static void StartWindow();
+static void DrawInWindow();
+
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
 
-GLFWwindow* game_window = nullptr;
+static GLFWwindow* game_window = nullptr;
 const GLuint WIDTH = 800, HEIGHT = 600;
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-GLfloat yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
-GLfloat pitch = 0.0f;
+
+Camera camera(vec3(0.0f, 0.0f, 3.0f));
+vec3 cameraPos = vec3(0.0f, 0.0f, 3.0f);
+vec3 cameraFront = vec3(0.0f, 0.0f, -1.0f);
+vec3 cameraUp = vec3(0.0f, 1.0f, 0.0f);
+
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
-bool keys[1024];
+
 bool firstMouse = true;
-GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
-GLfloat lastFrame = 0.0f;  	// Time of last frame
+GLfloat deltaTime = 0.0f;
+GLfloat lastFrame = 0.0f;
+
+struct Map static_models = {
+	 { "island/Small Tropical Island.obj", "nanosuit/nanosuit.obj" },
+	 { vec3(0.0f, 0.0f, 0.0f), vec3(15.0f, 15.0f, 15.0f) }
+};
 
 int main() {
-	printf("main\n");
+	#if _DEBUG
+		printf("go to main\n");
+	#endif
 	StartWindow();
-	system("pause");
+	#if _DEBUG
+		system("pause");
+	#endif
 	return 0;
 }
 
-void StartWindow() {
+static void StartWindow() {
 	try {
-		printf("StartWindow\n");
+		#if _DEBUG 
+			printf("go to StartWindow\n");
+		#endif
 		if (!glfwInit()) {
 			throw Exception_t(__LINE__, __FILE__, "error initialization GLFW");
 		}
@@ -61,11 +75,8 @@ void StartWindow() {
 		}
 
 		glfwMakeContextCurrent(game_window);
-		glfwSetKeyCallback(game_window, KeyCallback);
 		glfwSetCursorPosCallback(game_window, MouseCallback);
-		glfwSetInputMode(game_window, GLFW_STICKY_KEYS, GL_TRUE);
 		glfwSetInputMode(game_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		glfwSetCursorPos(game_window, WIDTH / 2, HEIGHT / 2);
 		glfwSetScrollCallback(game_window, ScrollCallback);
 		glfwSetFramebufferSizeCallback(game_window, FramebufferSizeCallback);
 
@@ -84,132 +95,53 @@ void StartWindow() {
 		return;
 	}
 	catch (Exception_t& exc) {
-		exc.print();
+		PrintException(exc.what());
 	}
-	catch (exception& e) {
-		printf("Standard exception: %s\n", e.what());
+	catch (exception& exc) {
+		PrintException(string(exc.what()));
 	}
 }
 
-void DrawInWindow() {
+static void DrawInWindow() {
 	try {
-		printf("DrawWindow\n");
-
-
-		GLuint VAO, VBO;
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
-
-		// Create and compile our GLSL program from the shaders
-		//GLuint programID = LoadShaders("TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader");
-		// Get a handle for our "MVP" uniform
-		//GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-		// Load the texture
-		//GLuint Texture = loadDDS("uvmap.DDS");
-		// Get a handle for our "myTextureSampler" uniform
-		//GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
-		Shader_t ourShader("shader.vs", "shader.frag");
-		// Read our .obj file
-		//std::vector<glm::vec3> vertices;
-		//std::vector<glm::vec2> uvs;
-		//std::vector<glm::vec3> normals; // Won't be used at the moment.
-		//bool res = loadOBJ("cube.obj", vertices, uvs, normals);
-		// Load it into a VBO
-		GLuint vertexbuffer;
-		//glGenBuffers(1, &vertexbuffer);
-		//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-		//GLuint uvbuffer;
-		//glGenBuffers(1, &uvbuffer);
-		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		//glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-		
+		#if _DEBUG
+			printf("go to DrawWindow\n");
+		#endif	
+		Shader_t Shader("shader.vs", "shader.frag");
+		Model_t Model(&static_models);
 		while (!glfwWindowShouldClose(game_window)) {
+			GLfloat currentFrame = glfwGetTime();
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+			processInput(game_window);
 
-			//// Clear the screen
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClearColor(0.01f, 0.05f, 0.01f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Shader.Use();
 
-			//// Use our shader
-			//glUseProgram(programID);
+			glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+			glm::mat4 view = camera.GetViewMatrix();
+			Shader.setMat4("projection", projection);
+			Shader.setMat4("view", view);
 
-			//// Compute the MVP matrix from keyboard and mouse input
-			//computeMatricesFromInputs();
-			//glm::mat4 ProjectionMatrix = getProjectionMatrix();
-			//glm::mat4 ViewMatrix = getViewMatrix();
-			//glm::mat4 ModelMatrix = glm::mat4(1.0);
-			//glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-
-			//// Send our transformation to the currently bound shader, 
-			//// in the "MVP" uniform
-			//glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-			//// Bind our texture in Texture Unit 0
-			//glActiveTexture(GL_TEXTURE0);
-			//glBindTexture(GL_TEXTURE_2D, Texture);
-			//// Set our "myTextureSampler" sampler to use Texture Unit 0
-			//glUniform1i(TextureID, 0);
-
-			//// 1rst attribute buffer : vertices
-			//glEnableVertexAttribArray(0);
-			//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-			//glVertexAttribPointer(
-			//	0,                  // attribute
-			//	3,                  // size
-			//	GL_FLOAT,           // type
-			//	GL_FALSE,           // normalized?
-			//	0,                  // stride
-			//	(void*)0            // array buffer offset
-			//);
-
-			//// 2nd attribute buffer : UVs
-			//glEnableVertexAttribArray(1);
-			//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-			//glVertexAttribPointer(
-			//	1,                                // attribute
-			//	2,                                // size
-			//	GL_FLOAT,                         // type
-			//	GL_FALSE,                         // normalized?
-			//	0,                                // stride
-			//	(void*)0                          // array buffer offset
+			glm::mat4 model;
+			model = glm::translate(model, vec3(0.0f, -1.75f, 0.0f));
+			model = glm::scale(model, vec3(0.2f, 0.2f, 0.2f));
+			Shader.setMat4("model", model);
+			Model.ReplaceModel(vec3(15.0f, 15.0f, 15.0f), 2);
+			Model.Draw(Shader);
+			glfwSwapBuffers(game_window);
+			glfwPollEvents();
 		}
-		glDeleteVertexArrays(1, &VAO);
-		glDeleteBuffers(1, &VBO);
 		glfwTerminate();
 	}
 	catch (Exception_t& exc) {
-		exc.print();
+		PrintException(exc.what());
 	}
-	catch (exception& e) {
-		printf("Standard exception: %s\n", e.what());
-	}
-	return;
-}
-
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-	if (action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
+	catch (exception& exc) {
+		PrintException(string(exc.what()));
 	}
 	return;
-}
-
-void DoMovement() {
-	GLfloat cameraSpeed = 5.0f * deltaTime; 
-	if (keys[GLFW_KEY_W]) {
-		cameraPos += cameraSpeed * cameraFront;
-	}
-	if (keys[GLFW_KEY_S]) {
-		cameraPos -= cameraSpeed * cameraFront;
-	}
-	if (keys[GLFW_KEY_A]) {
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	}
-	if (keys[GLFW_KEY_D]) {
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	}
 }
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -218,27 +150,14 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 		lastY = ypos;
 		firstMouse = false;
 	}
-	GLfloat xoffset = xpos - lastX;
-	GLfloat yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to left
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+
 	lastX = xpos;
 	lastY = ypos;
-	GLfloat sensitivity = 0.05;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-	yaw += xoffset;
-	pitch += yoffset;
-	// Make sure that when pitch is out of bounds, screen doesn't get flipped
-	if (pitch > 89.0f) {
-		pitch = 89.0f;
-	}
-	if (pitch < -89.0f) {
-		pitch = -89.0f;
-	}
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
@@ -247,4 +166,22 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow *window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
 }
