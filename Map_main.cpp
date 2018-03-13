@@ -9,7 +9,9 @@
 #include <exception>
 #include <vector>
 #include <string>
-#include "Types.h"
+
+#include "Physics.h"
+#include "System.h"
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
@@ -26,7 +28,7 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
-static GLFWwindow* game_window = nullptr;
+GLFWwindow* game_window = nullptr;
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
@@ -42,26 +44,29 @@ GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
 struct Map static_models = {
-	 { "island/Small Tropical Island.obj", "nanosuit/nanosuit.obj" },
-	 { vec3(0.0f, 0.0f, 0.0f), vec3(15.0f, 15.0f, 15.0f) }
+	//{ "obj/Enginer/MP_US_Engi.3DS" },
+	//{ "obj/l00_intro/l00_intro.3ds" },
+	{ "obj/island/Small Tropical Island.obj", "obj/test/p3.obj"},
+	//{ "obj/island/Small Tropical Island.obj" },
+	{ vec3(0.0f, -50.0f, 0.0f),  vec3(0.0f, 0.0f, 0.0f) }
 };
 
 int main() {
-	#if _DEBUG
-		printf("go to main\n");
-	#endif
+#if _DEBUG
+	printf("go to main\n");
+#endif
 	StartWindow();
-	#if _DEBUG
-		system("pause");
-	#endif
+#if _DEBUG
+	system("pause");
+#endif
 	return 0;
 }
 
 static void StartWindow() {
 	try {
-		#if _DEBUG 
-			printf("go to StartWindow\n");
-		#endif
+#if _DEBUG 
+		printf("go to StartWindow\n");
+#endif
 		if (!glfwInit()) {
 			throw Exception_t(__LINE__, __FILE__, "error initialization GLFW");
 		}
@@ -95,20 +100,23 @@ static void StartWindow() {
 		return;
 	}
 	catch (Exception_t& exc) {
-		PrintException(exc.what());
+		//PrintException(exc.what());
+		printf("%s\n", exc.what().c_str());
 	}
 	catch (exception& exc) {
-		PrintException(string(exc.what()));
+		//PrintException(string(exc.what()));
+		printf("%s\n", exc.what());
 	}
 }
 
 static void DrawInWindow() {
 	try {
-		#if _DEBUG
-			printf("go to DrawWindow\n");
-		#endif	
+#if _DEBUG
+		printf("go to DrawWindow\n");
+#endif	
 		Shader_t Shader("shader.vs", "shader.frag");
 		Model_t Model(&static_models);
+		//Physics tmp(Model.meshes_c[0].vertices_c.size(), Model.meshes_c[0].vertices_c);
 		while (!glfwWindowShouldClose(game_window)) {
 			GLfloat currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
@@ -128,7 +136,6 @@ static void DrawInWindow() {
 			model = glm::translate(model, vec3(0.0f, -1.75f, 0.0f));
 			model = glm::scale(model, vec3(0.2f, 0.2f, 0.2f));
 			Shader.setMat4("model", model);
-			Model.ReplaceModel(vec3(15.0f, 15.0f, 15.0f), 2);
 			Model.Draw(Shader);
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
@@ -136,10 +143,12 @@ static void DrawInWindow() {
 		glfwTerminate();
 	}
 	catch (Exception_t& exc) {
-		PrintException(exc.what());
+		//PrintException(exc.what());
+		printf("%s\n", exc.what().c_str());
 	}
 	catch (exception& exc) {
-		PrintException(string(exc.what()));
+		//PrintException(string(exc.what()));
+		printf("%s\n", exc.what());
 	}
 	return;
 }

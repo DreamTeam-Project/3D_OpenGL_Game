@@ -12,7 +12,7 @@
 #include <string>
 #include <gl/glew.h>
 #include <glm\glm.hpp>
-#include "Types.h"
+#include "System.h"
 
 using std::string;
 using std::ifstream;

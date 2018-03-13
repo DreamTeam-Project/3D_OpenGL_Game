@@ -6,39 +6,19 @@ void Model_t::Draw(Shader_t shader) {
 	}
 }
 
-void Model_t::LoadModels(Map_t* objects) {
+void Model_t::LoadModels(Map* objects) {
 	Assimp::Importer importer;
 	int i = 0;
 	for (auto it : objects->object) {
-		const aiScene* scene = importer.ReadFile(it, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		const aiScene* scene = importer.ReadFile(it, \
+			aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |\
+			aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_FindInvalidData);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			printf("%s\n", importer.GetErrorString());
 			throw Exception_t(__LINE__, __FILE__, "ERROR::ASSIMP::", importer.GetErrorString());
 		}
 		directory_c = it.substr(0, it.find_last_of('/'));
 		ProcessNode(scene->mRootNode, scene, objects->place[i]);
 		i++;
-	}
-}
-
-void Model_t::ReplaceModel(vec3 replace, size_t model) {
-	for (auto it : meshes_c[model-1].vertices_c) {
-		it.Position.x += replace.x;
-		it.Position.y += replace.y;
-		it.Position.z += replace.z;
-		it.Normal.x += replace.x;
-		it.Normal.y += replace.y;
-		it.Normal.z += replace.z;
-		it.Bitangent.x += replace.x;
-		it.Bitangent.y += replace.y;
-		it.Bitangent.z += replace.z;
-		it.Tangent.x += replace.x;
-		it.Tangent.y += replace.y;
-		it.Tangent.z += replace.z;
-		if (it.TexCoords[0]) {
-			it.TexCoords.x += replace.x;
-			it.TexCoords.y += replace.y;
-		}
 	}
 }
 
@@ -76,15 +56,25 @@ Mesh_t Model_t::ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place) {
 		}
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		}	
-		vector.x = mesh->mTangents[i].x + place.x;
-		vector.y = mesh->mTangents[i].y + place.y;
-		vector.z = mesh->mTangents[i].z + place.z;
-		vertex.Tangent = vector;
-		vector.x = mesh->mBitangents[i].x + place.x;
-		vector.y = mesh->mBitangents[i].y + place.y;
-		vector.z = mesh->mBitangents[i].z + place.z;
-		vertex.Bitangent = vector;
+		}
+		if (mesh->mTangents != NULL) {
+			vector.x = mesh->mTangents[i].x + place.x;
+			vector.y = mesh->mTangents[i].y + place.y;
+			vector.z = mesh->mTangents[i].z + place.z;
+			vertex.Tangent = vector;
+		}
+		else {
+			vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+		if(mesh->mBitangents != NULL) {
+			vector.x = mesh->mBitangents[i].x + place.x;
+			vector.y = mesh->mBitangents[i].y + place.y;
+			vector.z = mesh->mBitangents[i].z + place.z;
+			vertex.Bitangent = vector;
+		}
+		else {
+			vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
 		vertices.push_back(vertex);
 	}
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
