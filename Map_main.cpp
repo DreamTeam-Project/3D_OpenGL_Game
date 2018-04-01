@@ -46,9 +46,13 @@ GLfloat lastFrame = 0.0f;
 struct Map static_models = {
 	//{ "obj/Enginer/MP_US_Engi.3DS" },
 	//{ "obj/l00_intro/l00_intro.3ds" },
-	{ "obj/island/Small Tropical Island.obj", "obj/test/p3.obj"},
+	{ "obj/island/Small Tropical Island.obj" },
 	//{ "obj/island/Small Tropical Island.obj" },
-	{ vec3(0.0f, -100.0f, 0.0f),  vec3(0.0f, 50.0f, 0.0f) }
+	{ vec3(0.0f, -100.0f, 0.0f) }
+};
+
+struct  Map dinamic_models = {
+	{ "obj/test/p3.obj" }, 	{ vec3(0.0f, 100.0f, 0.0f) }
 };
 
 int main() {
@@ -115,15 +119,16 @@ static void DrawInWindow() {
 		printf("go to DrawWindow\n");
 #endif	
 		Shader_t Shader("shader.vs", "shader.frag");
-		Model_t Model(&static_models);
-		//Physics tmp(Model.meshes_c[0].vertices_c.size(), Model.meshes_c[0].vertices_c);
+		Model_t ModelStatic(&static_models);
+		Model_t ModelDinamic(&dinamic_models);
+		Physics tmp;
 		while (!glfwWindowShouldClose(game_window)) {
+			tmp.step_do();
 			GLfloat currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 			processInput(game_window);
-
-			glClearColor(0.01f, 0.05f, 0.01f, 1.0f);
+			glClearColor(1.f, 1.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			Shader.Use();
 
@@ -131,12 +136,17 @@ static void DrawInWindow() {
 			glm::mat4 view = camera.GetViewMatrix();
 			Shader.setMat4("projection", projection);
 			Shader.setMat4("view", view);
-
-			glm::mat4 model;
-			model = glm::translate(model, vec3(0.0f, -1.75f, 0.0f));
-			model = glm::scale(model, vec3(0.2f, 0.2f, 0.2f));
+			
+			glm::mat4 model, model_2;
+			model_2 = glm::translate(model_2, vec3(1, 1, 1));
+			model = glm::translate(model, get_glm_vec(tmp.get_rig()));
+			model = glm::scale(model, vec3(1.f, 1.f, 1.f));
+			model_2 = glm::scale(model_2, vec3(1.f, 1.f, 1.f));
 			Shader.setMat4("model", model);
-			Model.Draw(Shader);
+
+			ModelDinamic.Draw(Shader);
+			Shader.setMat4("model", model_2);
+			ModelStatic.Draw(Shader);
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
 		}

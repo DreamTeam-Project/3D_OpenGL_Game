@@ -10,6 +10,7 @@
 #include <vector>
 
 using std::vector;
+using glm::vec3;
 using std::string;
 using std::exception;
 using std::ios_base;
@@ -26,6 +27,7 @@ struct Vertex {
 	glm::vec2 TexCoords;
 	glm::vec3 Tangent;
 	glm::vec3 Bitangent;
+	void addvec(vec3 a);
 };
 
 extern GLFWwindow* game_window;
