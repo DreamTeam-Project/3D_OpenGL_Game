@@ -5,3 +5,10 @@ void PrintException(const string& exc) {
 	error_log << &exc << std::endl;
 	error_log.close();
 }
+void Vertex::addvec(vec3 a) {
+	Position += a;
+	Normal += a;
+	Tangent+= a;
+	Bitangent+=a;
+	TexCoords += glm::vec2(a.x, a.y);
+}

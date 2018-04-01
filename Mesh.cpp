@@ -36,9 +36,9 @@ void Mesh_t::SetupMesh() {
 	glGenBuffers(1, &EBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices_c.size() * sizeof(Vertex), &vertices_c[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices_c.size() * sizeof(Vertex), &vertices_c[0], GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_c.size() * sizeof(unsigned int), &indices_c[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_c.size() * sizeof(unsigned int), &indices_c[0], GL_DYNAMIC_DRAW);
 	// vertex positions
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);

@@ -46,9 +46,11 @@ GLfloat lastFrame = 0.0f;
 struct Map static_models = {
 	//{ "obj/Enginer/MP_US_Engi.3DS" },
 	//{ "obj/l00_intro/l00_intro.3ds" },
-	{ "obj/island/Small Tropical Island.obj", "obj/test/p3.obj"},
+	{ //"obj/island/Small Tropical Island.obj",
+	"obj/test/p3.obj"},
 	//{ "obj/island/Small Tropical Island.obj" },
-	{ vec3(0.0f, -100.0f, 0.0f),  vec3(0.0f, 50.0f, 0.0f) }
+	{ //vec3(0.0f, -100.0f, 0.0f),  
+	vec3(0.0f, 100.0f, 0.0f) }
 };
 
 int main() {
@@ -116,14 +118,14 @@ static void DrawInWindow() {
 #endif	
 		Shader_t Shader("shader.vs", "shader.frag");
 		Model_t Model(&static_models);
-		//Physics tmp(Model.meshes_c[0].vertices_c.size(), Model.meshes_c[0].vertices_c);
+		Physics tmp;
 		while (!glfwWindowShouldClose(game_window)) {
+			tmp.step_do();
 			GLfloat currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 			processInput(game_window);
-
-			glClearColor(0.01f, 0.05f, 0.01f, 1.0f);
+			glClearColor(1.f, 1.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			Shader.Use();
 
@@ -132,10 +134,25 @@ static void DrawInWindow() {
 			Shader.setMat4("projection", projection);
 			Shader.setMat4("view", view);
 
+			//static glm::mat4 model_tmp;
+			//model_tmp = glm::translate(model_tmp, vec3(0.0f, 0.1f, 0.0f));
+			//glm::mat4 model = glm::scale(model_tmp, vec3(1.f, 1.f, 1.f));
+			//Shader.setMat4("model", model);
+			/*static float timess;
+			timess += 0.001;
 			glm::mat4 model;
-			model = glm::translate(model, vec3(0.0f, -1.75f, 0.0f));
-			model = glm::scale(model, vec3(0.2f, 0.2f, 0.2f));
+			model = glm::translate(model, vec3(0.0f,timess* 9.1f, 0.0f));
+			model = glm::scale(model, vec3(1.f, 1.f, 1.f));
+			Shader.setMat4("model", model);*/
+
+			/*static float time;
+			time += deltaTime;
+			printf("%f\n ", time);*/
+			glm::mat4 model;
+			model = glm::translate(model, get_glm_vec(tmp.get_rig()));
+			model = glm::scale(model, vec3(1.f, 1.f, 1.f));
 			Shader.setMat4("model", model);
+
 			Model.Draw(Shader);
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
