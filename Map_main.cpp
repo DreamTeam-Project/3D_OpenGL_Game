@@ -48,7 +48,7 @@ struct Map static_models = {
 	//{ "obj/l00_intro/l00_intro.3ds" },
 	{ "obj/island/Small Tropical Island.obj", "obj/test/p3.obj"},
 	//{ "obj/island/Small Tropical Island.obj" },
-	{ vec3(0.0f, -50.0f, 0.0f),  vec3(0.0f, 0.0f, 0.0f) }
+	{ vec3(0.0f, -100.0f, 0.0f),  vec3(0.0f, 50.0f, 0.0f) }
 };
 
 int main() {

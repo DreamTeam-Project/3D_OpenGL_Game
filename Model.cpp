@@ -1,6 +1,6 @@
 #include "Model.h"
 
-void Model_t::Draw(Shader_t shader) {
+void Model_t::Draw(const Shader_t& shader) {
 	for (size_t i = 0; i < meshes_c.size(); i++) {
 		meshes_c[i].Draw(shader);
 	}
@@ -97,7 +97,7 @@ Mesh_t Model_t::ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place) {
 	return Mesh_t(vertices, indices, textures);
 }
 
-vector<Texture> Model_t::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName) {
+vector<Texture> Model_t::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName) {
 	vector<Texture> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;

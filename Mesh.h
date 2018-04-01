@@ -29,7 +29,7 @@ public:
 		: vertices_c(vertices), indices_c(indices), textures_c(textures) {
 		SetupMesh();
 	}
-	void Draw(Shader_t shader); 	// render the mesh
+	void Draw(const Shader_t& shader); 	// render the mesh
 
 private:
 	unsigned int VBO, EBO, VAO;

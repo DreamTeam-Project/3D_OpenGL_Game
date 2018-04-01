@@ -30,7 +30,7 @@ struct Vertex {
 
 extern GLFWwindow* game_window;
 
-void PrintException(string& exc);
+void PrintException(const string& exc);
 
 class Exception_t {
 public:

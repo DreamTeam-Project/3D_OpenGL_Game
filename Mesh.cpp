@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-void Mesh_t::Draw(Shader_t shader) {
+void Mesh_t::Draw(const Shader_t& shader) {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;

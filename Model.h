@@ -35,13 +35,13 @@ public:
 	string directory_c;
 	bool gammaCorrection_c;
 	Model_t(Map* objects, bool gamma = false) : gammaCorrection_c(gamma) { LoadModels(objects); }
-	void Draw(Shader_t shader);
+	void Draw(const Shader_t& shader);
 
 private:
 	void LoadModels(Map* objects);
 	void ProcessNode(aiNode *node, const aiScene *scene, vec3 place);
 	Mesh_t ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place);
-	vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
+	vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName);
 };
 
 #endif
