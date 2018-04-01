@@ -46,6 +46,7 @@ GLfloat lastFrame = 0.0f;
 struct Map static_models = {
 	//{ "obj/Enginer/MP_US_Engi.3DS" },
 	//{ "obj/l00_intro/l00_intro.3ds" },
+<<<<<<< HEAD
 	{ "obj/island/Small Tropical Island.obj" },
 	//{ "obj/island/Small Tropical Island.obj" },
 	{ vec3(0.0f, -100.0f, 0.0f) }
@@ -53,6 +54,13 @@ struct Map static_models = {
 
 struct  Map dinamic_models = {
 	{ "obj/test/p3.obj" }, 	{ vec3(0.0f, 100.0f, 0.0f) }
+=======
+	{ //"obj/island/Small Tropical Island.obj",
+	"obj/test/p3.obj"},
+	//{ "obj/island/Small Tropical Island.obj" },
+	{ //vec3(0.0f, -100.0f, 0.0f),  
+	vec3(0.0f, 100.0f, 0.0f) }
+>>>>>>> 33b3d21fc6ad1bf0d1d2bb3a837cc67e65d2a373
 };
 
 int main() {
@@ -119,8 +127,12 @@ static void DrawInWindow() {
 		printf("go to DrawWindow\n");
 #endif	
 		Shader_t Shader("shader.vs", "shader.frag");
+<<<<<<< HEAD
 		Model_t ModelStatic(&static_models);
 		Model_t ModelDinamic(&dinamic_models);
+=======
+		Model_t Model(&static_models);
+>>>>>>> 33b3d21fc6ad1bf0d1d2bb3a837cc67e65d2a373
 		Physics tmp;
 		while (!glfwWindowShouldClose(game_window)) {
 			tmp.step_do();
@@ -136,6 +148,7 @@ static void DrawInWindow() {
 			glm::mat4 view = camera.GetViewMatrix();
 			Shader.setMat4("projection", projection);
 			Shader.setMat4("view", view);
+<<<<<<< HEAD
 			
 			glm::mat4 model, model_2;
 			model_2 = glm::translate(model_2, vec3(1, 1, 1));
@@ -147,6 +160,29 @@ static void DrawInWindow() {
 			ModelDinamic.Draw(Shader);
 			Shader.setMat4("model", model_2);
 			ModelStatic.Draw(Shader);
+=======
+
+			//static glm::mat4 model_tmp;
+			//model_tmp = glm::translate(model_tmp, vec3(0.0f, 0.1f, 0.0f));
+			//glm::mat4 model = glm::scale(model_tmp, vec3(1.f, 1.f, 1.f));
+			//Shader.setMat4("model", model);
+			/*static float timess;
+			timess += 0.001;
+			glm::mat4 model;
+			model = glm::translate(model, vec3(0.0f,timess* 9.1f, 0.0f));
+			model = glm::scale(model, vec3(1.f, 1.f, 1.f));
+			Shader.setMat4("model", model);*/
+
+			/*static float time;
+			time += deltaTime;
+			printf("%f\n ", time);*/
+			glm::mat4 model;
+			model = glm::translate(model, get_glm_vec(tmp.get_rig()));
+			model = glm::scale(model, vec3(1.f, 1.f, 1.f));
+			Shader.setMat4("model", model);
+
+			Model.Draw(Shader);
+>>>>>>> 33b3d21fc6ad1bf0d1d2bb3a837cc67e65d2a373
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
 		}
