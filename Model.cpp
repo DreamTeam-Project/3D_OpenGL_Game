@@ -6,19 +6,17 @@ void Model_t::Draw(const Shader_t& shader) {
 	}
 }
 
-void Model_t::LoadModels(Map* objects) {
+void Model_t::LoadModels(const Objects& objects) {
 	Assimp::Importer importer;
-	int i = 0;
-	for (auto it : objects->object) {
-		const aiScene* scene = importer.ReadFile(it, \
-			aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |\
+	for (auto& it : objects.LoadedInfo) {
+		const aiScene* scene = importer.ReadFile(it.path_, \
+			aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | \
 			aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_FindInvalidData);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			throw Exception_t(__LINE__, __FILE__, "ERROR::ASSIMP::", importer.GetErrorString());
 		}
-		directory_c = it.substr(0, it.find_last_of('/'));
-		ProcessNode(scene->mRootNode, scene, objects->place[i]);
-		i++;
+		directory_c = it.path_.substr(0, it.path_.find_last_of('\\'));
+		ProcessNode(scene->mRootNode, scene, it.place_);
 	}
 }
 
@@ -66,7 +64,7 @@ Mesh_t Model_t::ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place) {
 		else {
 			vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
-		if(mesh->mBitangents != NULL) {
+		if (mesh->mBitangents != NULL) {
 			vector.x = mesh->mBitangents[i].x + place.x;
 			vector.y = mesh->mBitangents[i].y + place.y;
 			vector.z = mesh->mBitangents[i].z + place.z;
@@ -122,9 +120,61 @@ vector<Texture> Model_t::LoadMaterialTextures(aiMaterial *mat, aiTextureType typ
 	return textures;
 }
 
+void Model_t::LoadInfoAboutModels(const string& path) {
+	std::ifstream fin(path);
+	if (!fin.is_open()) {
+		throw Exception_t(__LINE__, __FILE__, "error open file level.file");
+	}
+	Objects mas;
+	Object buf;
+	print(string("try to read: ") + path);
+	while (!fin.eof()) {
+		getStringFromFile(fin, buf.path_);
+		if (buf.path_ == "null") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+		if (buf.path_ == "end_of_file") {
+			break;
+		}
+		if (buf.path_ != "path") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+		getStringFromFile(fin, buf.path_);
+		if (buf.path_ == "null" || buf.path_ == "end_of_file") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+
+		string strbuf = "";
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "type" || strbuf == "end_of_file") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+		getStringFromFile(fin, buf.type_);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "place" || strbuf == "end_of_file") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+		getStringFromFile(fin, buf.place_);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "quat" || strbuf == "end_of_file") {
+			throw Exception_t(__LINE__, __FILE__, "error level.path");
+		}
+		getStringFromFile(fin, buf.quat_);
+		mas.LoadedInfo.push_back(buf);
+	}
+	if (mas.LoadedInfo.size() == 0) {
+		throw Exception_t(__LINE__, __FILE__, "level.file is empty");
+	}
+	LoadModels(mas);
+	print("success");
+}
+
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma) {
 	string filename = string(path);
-	filename = directory + '/' + filename;
+	filename = directory + '\\' + filename;
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);

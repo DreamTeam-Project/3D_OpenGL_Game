@@ -9,6 +9,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <omp.h>
 
 #include "Mesh.h"
 #include "Shader.h"
@@ -34,11 +35,12 @@ public:
 	vector<Mesh_t> meshes_c;
 	string directory_c;
 	bool gammaCorrection_c;
-	Model_t(Map* objects, bool gamma = false) : gammaCorrection_c(gamma) { LoadModels(objects); }
+	Model_t(bool gamma = false) : gammaCorrection_c(gamma) { }
 	void Draw(const Shader_t& shader);
+	void LoadInfoAboutModels(const string& path);
 
 private:
-	void LoadModels(Map* objects);
+	void LoadModels(const Objects& objects);
 	void ProcessNode(aiNode *node, const aiScene *scene, vec3 place);
 	Mesh_t ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place);
 	vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName);
