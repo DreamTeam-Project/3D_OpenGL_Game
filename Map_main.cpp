@@ -16,6 +16,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Skybox.h"
 
 using std::string;
 using std::exception;
@@ -30,11 +31,18 @@ static void LoadInfoAboutLevels(Levels& levels);
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 const char* LoadImage = "textures/please-stand-by.jpg";
-const GLuint WIDTH = 1024, HEIGHT = 768;
+vector<string> faces {
+	("textures/skybox/nightsky_ft.tga"),
+	("textures/skybox/nightsky_bk.tga"),
+	("textures/skybox/nightsky_up.tga"),
+	("textures/skybox/nightsky_dn.tga"),
+	("textures/skybox/nightsky_rt.tga"),
+	("textures/skybox/nightsky_lf.tga")
+};
+const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
@@ -82,6 +90,8 @@ static void StartWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 	game_window = glfwCreateWindow(WIDTH, HEIGHT, "Test window", nullptr, nullptr);
 	if (game_window == nullptr) {
 		glfwTerminate();
@@ -92,10 +102,9 @@ static void StartWindow() {
 	glfwSetCursorPosCallback(game_window, MouseCallback);
 	glfwSetInputMode(game_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetScrollCallback(game_window, ScrollCallback);
-	glfwSetFramebufferSizeCallback(game_window, FramebufferSizeCallback);
 
 	glfwPollEvents();
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) {
@@ -108,16 +117,21 @@ static void StartWindow() {
 
 static void DrawInWindow(Model_t& Models) {
 #if _DEBUG
-	print("go to DrawWindow");
+	print("\ngo to DrawWindow");
 #endif	
-	deltaTime = 0;
-	lastFrame = 0;
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
-
+	Shader_t SkyboxShader("Skybox.vs", "Skybox.frag");
 	Shader_t Shader("shader.vs", "shader.frag");
+
+	Skybox box;
+	box.GenBuffer();
+	box.cubemapTexture = box.loadCubemap(faces);
+
+	SkyboxShader.Use();
+	SkyboxShader.setInt("skybox", 0);
+
 	while (!glfwWindowShouldClose(game_window)) {
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -127,19 +141,21 @@ static void DrawInWindow(Model_t& Models) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Shader.Use();
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		Shader.setMat4("projection", projection);
 		Shader.setMat4("view", view);
 		glm::mat4 model;
 		model = glm::scale(model, vec3(1.f, 1.f, 1.f));
 		Shader.setMat4("model", model);
-
 		Models.Draw(Shader);
+
+		GLfloat fogColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+		box.Bind(camera, SkyboxShader, projection);
 		glfwSwapBuffers(game_window);
 		glfwPollEvents();
 	}
-	return;
 }
 
 static void LoadLevels() {
@@ -251,10 +267,6 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
-}
-
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
 }
 
 void processInput(GLFWwindow *window) {
