@@ -1,7 +1,7 @@
-#define GLEW_STATIC
-
 #ifndef MODEL_H
 #define MODEL_H
+
+#define GLEW_STATIC
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,7 +9,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <omp.h>
+#include <assimp/anim.h>
 
 #include "Mesh.h"
 #include "Shader.h"
@@ -26,24 +26,55 @@ using std::map;
 using std::vector;
 using std::string;
 using glm::vec3;
+using glm::mat4;
+
+//#define NUM_BONES_PER_VEREX 4
+//struct BoneInfo {
+//	aiMatrix4x4 BoneOffset;
+//	aiMatrix4x4 FinalTransformation;
+//};
+
+//struct VertexBoneData {
+//	uint IDs[NUM_BONES_PER_VEREX];
+//	float Weights[NUM_BONES_PER_VEREX];
+//	//void AddBoneData(uint BoneID, float Weight);
+//};
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
-class Model_t {
+class GameModel { // type 0 or default
 public:
-	vector<Texture> textures_loaded_c;
-	vector<Mesh_t> meshes_c;
-	string directory_c;
-	bool gammaCorrection_c;
-	Model_t(bool gamma = false) : gammaCorrection_c(gamma) { }
-	void Draw(const Shader_t& shader);
-	void LoadInfoAboutModels(const string& path);
+	GameModel(bool gamma = false ) : gammaCorrection_(gamma) {	}
+	void Draw(const GameShader& shader);
+	void LoadModel();
+
+	virtual void Move(mat4& model);
+	virtual void PrintModel();
+
+	string directory_;
+	string path_;
+	vec3 place_;
+	vec3 quat_;
+	vec3 scale_;
+	int type_;
 
 private:
-	void LoadModels(const Objects& objects);
-	void ProcessNode(aiNode *node, const aiScene *scene, vec3 place);
-	Mesh_t ProcessMesh(aiMesh *mesh, const aiScene *scene, vec3 place);
+	void ProcessNode(aiNode *node, const aiScene *scene);
+	Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 	vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName);
+	//void LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones);
+	//aiMatrix4x4 GlobalInverseTransform;
+	Assimp::Importer importer;
+	vector<Texture> textures_loaded_;
+	vector<Mesh> meshes_;
+	bool gammaCorrection_;
+};
+
+class Structure : public GameModel { // type 3
+public:
+	void Move(mat4& model) override;
+	void PrintModel() override;
+	void Kill() {	}
 };
 
 #endif

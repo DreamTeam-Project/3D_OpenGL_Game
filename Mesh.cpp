@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-void Mesh_t::Draw(const Shader_t& shader) {
+void Mesh::Draw(const GameShader& shader) {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;
@@ -30,7 +30,7 @@ void Mesh_t::Draw(const Shader_t& shader) {
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh_t::SetupMesh() {
+void Mesh::SetupMesh() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);

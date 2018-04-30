@@ -1,8 +1,7 @@
-#define GLEW_STATIC
-
 #ifndef SHADER_H
 #define SHADER_H
 
+#define GLEW_STATIC
 #define INFOLOG_SIZE 512
 
 #include <string>
@@ -17,11 +16,11 @@
 using std::string;
 using std::ifstream;
 
-class Shader_t {
+class GameShader {
 public:
 	GLuint program_c;
-	Shader_t(const char* vertexPath, const char* fragmentPath);
-	Shader_t(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+	GameShader(const char* vertexPath, const char* fragmentPath);
+	GameShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 	void Use();
 	// utility uniform functions
 	void setBool(const std::string &name, bool value) const;

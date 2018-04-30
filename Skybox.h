@@ -1,7 +1,7 @@
-#define GLEW_STATIC
-
 #ifndef SKYBOX_H
 #define SKYBOX_H
+
+#define GLEW_STATIC
 
 #include <string>
 #include <gl\glew.h>
@@ -63,7 +63,7 @@ public:
 	~Skybox();
 	unsigned int loadCubemap(vector<string> faces);
 	void GenBuffer();
-	void Bind(Camera& camera, Shader_t& Skybox, glm::mat4& projection);
+	void Bind(Camera& camera, GameShader& Skybox,const glm::mat4& projection);
 
 	unsigned int cubemapTexture;
 private:

@@ -1,8 +1,12 @@
+#ifndef MESH_H
+#define MESH_H
+
 #define GLEW_STATIC
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Shader.h"
+#include "System.h"
 
 #include <string>
 #include <fstream>
@@ -19,19 +23,25 @@ struct Texture {
 	string path;
 };
 
-class Mesh_t {
+class Mesh {
 public:
 	vector<Vertex> vertices_c;
 	vector<unsigned int> indices_c;
 	vector<Texture> textures_c;
 
-	Mesh_t(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<Texture>& textures)
+	Mesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<Texture>& textures)
 		: vertices_c(vertices), indices_c(indices), textures_c(textures) {
+#if DEBUG_MESH
+		print(string("sizeof indices: " + std::to_string(indices_c.size())));
+#endif
 		SetupMesh();
 	}
-	void Draw(const Shader_t& shader); 	// render the mesh
+
+	void Draw(const GameShader& shader); 	// render the mesh
 
 private:
 	unsigned int VBO, EBO, VAO;
 	void SetupMesh();	// initializes all the buffer objects/arrays
 };
+
+#endif

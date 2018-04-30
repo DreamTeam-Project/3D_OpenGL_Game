@@ -20,7 +20,7 @@ bool IsItNumber(const string& word) {
 	return true;
 }
 
-string write(const vec3& a) {
+string vec3_toString(const vec3& a) {
 	return to_string(a.x) + string(" ") + to_string(a.y) + string(" ") + to_string(a.z);
 }
 
@@ -55,7 +55,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		return;
 	}
 	if (buf != "<") {
-		throw Exception_t(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __FILE__, "error format \">\" ");
 	}
 	fin >> buf;
 	while (buf != ">" || fin.eof()) {
@@ -66,7 +66,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		fin >> buf;
 	}
 	if (buf != ">" && fin.eof()) {
-		throw Exception_t(__LINE__, __FILE__, "error format >");
+		throw GameException(__LINE__, __FILE__, "error format >");
 	}
 	if (buf == ">" && fin.eof() && ret == "") {
 		ret = "end_of_file";
@@ -84,7 +84,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw Exception_t(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __FILE__, "error format \">\" ");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -92,20 +92,24 @@ void getStringFromFile(ifstream& fin, int& ret) {
 			ret = std::stoi(buf);
 		}
 		else {
-			throw Exception_t(__LINE__, __FILE__, "error format \"int\" ");
+			throw GameException(__LINE__, __FILE__, "error format \"int\" ");
 		}
+	}
+	if (buf == ">") {
+		ret = 0;
+		return;
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw Exception_t(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __FILE__, "error format \">\" ");
 	}
 }
 
-void getStringFromFile(ifstream& fin, glm::vec3& ret) {
+void getStringFromFile(ifstream& fin, vec3& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw Exception_t(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __FILE__, "error format \">\" ");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -136,6 +140,6 @@ void getStringFromFile(ifstream& fin, glm::vec3& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw Exception_t(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __FILE__, "error format \">\" ");
 	}
 }

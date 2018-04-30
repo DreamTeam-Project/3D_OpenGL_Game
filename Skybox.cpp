@@ -14,7 +14,7 @@ unsigned int Skybox::loadCubemap(vector<string> faces) {
 		}
 		else {
 			stbi_image_free(data);
-			throw Exception_t(__LINE__, __FILE__, "ERROR::LOAD::FAILED::PATH::", faces[i]);
+			throw GameException(__LINE__, __FILE__, string("ERROR::LOAD::FAILED::PATH::"), faces[i]);
 		}
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -41,7 +41,7 @@ void Skybox::GenBuffer() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void Skybox::Bind(Camera& camera, Shader_t& Shader, glm::mat4& projection) {
+void Skybox::Bind(Camera& camera, GameShader& Shader, const glm::mat4& projection) {
 	glDepthFunc(GL_LEQUAL);
 	Shader.Use();
 	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));

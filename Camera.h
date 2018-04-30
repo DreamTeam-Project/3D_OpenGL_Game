@@ -1,7 +1,7 @@
-#define GLEW_STATIC
-
 #ifndef CAMERA_H
 #define CAMERA_H
+
+#define GLEW_STATIC
 
 #include <vector>
 #include <gl/glew.h>

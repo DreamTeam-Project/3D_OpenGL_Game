@@ -1,5 +1,5 @@
-#ifndef Types_H
-#define Types_H
+#ifndef SYSTEM_H
+#define SYSTEM_H
 
 #include <string>
 #include <glm\glm.hpp>
@@ -10,6 +10,12 @@
 #include <vector>
 
 #define SUCCESS 42
+#define DEBUG_MODEL 0
+#define DEBUG_MESH 0
+#define DEBUG_MANAGER 0
+
+//#define NUM_BONES_PER_VEREX 4
+//typedef unsigned int uint;
 
 using std::vector;
 using glm::vec3;
@@ -20,18 +26,23 @@ using std::ofstream;
 using std::ifstream;
 using std::to_string;
 
-class Exception_t {
+
+class GameException : public exception
+{
 public:
-	Exception_t(size_t LINE, string FILE, string INF = "default") : LINE_(LINE), FILE_(FILE), INF_(INF) { }
-	Exception_t(size_t LINE, string FILE, string INF1, string INF2) : LINE_(LINE), FILE_(FILE), INF_(INF1 + INF2) { }
-	string what() {
-		string tmp = string("Line:") + std::to_string(LINE_) + string("\nFile:") + FILE_ + string("\nInfo:") + INF_;
-		return tmp;
+	GameException() = delete;
+	GameException(string &&whatStr) noexcept : whatStr_(std::move(whatStr)) { }
+	GameException(const string &whatStr) noexcept : whatStr_(whatStr) { }
+	GameException(size_t LINE, const string& FILE, const string& INF1 = "", const string& INF2 = "") noexcept {
+		whatStr_ = string("Line: ") + std::to_string(LINE) + string("\nFILE: ") + FILE + string("\nWhy: ") + INF1 + string(" ") + INF2;
+	};
+
+	const char* what() const noexcept override {
+		return whatStr_.c_str();
 	}
+	~GameException() noexcept = default;
 private:
-	size_t LINE_;
-	string FILE_;
-	string INF_;
+	string whatStr_;
 };
 
 bool IsItNumber(const string& word);
@@ -40,42 +51,16 @@ void print(const char* what);
 void print(const string& what);
 void getStringFromFile(ifstream& fin, string& ret);
 void getStringFromFile(ifstream& fin, int& ret);
-void getStringFromFile(ifstream& fin, glm::vec3& ret);
-string write(const vec3& a);
+void getStringFromFile(ifstream& fin, vec3& ret);
+string vec3_toString(const vec3& a);
 
 extern GLFWwindow* game_window;
 const string LoadFile = "Load.file";
 
-struct Level {
-	string name_;
-	string pathLoader_;
-	Level(string name = "default", string path = "default") : name_(name), pathLoader_(path) { }
-};
-
-struct Levels {
-	vector<Level> levels_;
-	void push_back(Level one) {
-		if (one.name_ != "null" && one.pathLoader_ != "null") {
-			levels_.push_back(one);
-		}
-		else {
-			throw Exception_t(__LINE__, __FILE__, "error push back level");
-		}
-	}
-};
-
-struct Object {
-	int type_;
-	string path_;
-	vec3 quat_;
-	vec3 place_;
-	Object(int type = 0, string path = "default", vec3 quat = { 0.0f, 0.0f, 0.0f }, vec3 place = { 0, 0, 0 }) :
-		type_(type), path_(path), quat_(quat), place_(place) { }
-};
-
-struct Objects {
-	vector<Object> LoadedInfo;
-};
+//struct VertexBoneData {
+//	uint IDs[NUM_BONES_PER_VEREX];
+//	float Weights[NUM_BONES_PER_VEREX];
+//};
 
 struct Vertex {
 	glm::vec3 Position;
