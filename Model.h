@@ -30,7 +30,7 @@ using glm::mat4;
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
-class GameModel { // type 0 or default
+class GameModel {
 public:
 	struct VertexBoneData {
 		uint IDs[NUM_BONES_PER_VEREX];
@@ -88,8 +88,14 @@ private:
 	bool gammaCorrection_;
 };
 
-class Structure : public GameModel { // type 3
+class Structure : public GameModel {
 public:
+	void Move(mat4& model) override;
+	void PrintModel() override;
+	void Kill() {	}
+};
+
+class Animation : public GameModel {
 	void Move(mat4& model) override;
 	void PrintModel() override;
 	void Kill() {	}

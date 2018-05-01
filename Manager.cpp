@@ -61,11 +61,14 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 		}
 		if (!NewModel) {
 			switch (type) {
-			case 3:
-				NewModel = new Structure();
-				break;
-			case 0:
+			case GAMEMODEL:
 				NewModel = new GameModel();
+				break;
+			case ANIMATION:
+				NewModel = new Animation();
+				break;
+			case STRUCTURE:
+				NewModel = new Structure();
 				break;
 			default:
 				NewModel = new GameModel();

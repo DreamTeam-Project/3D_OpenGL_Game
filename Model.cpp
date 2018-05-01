@@ -164,26 +164,38 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 }
 
 void GameModel::PrintModel() {
-	if (type_ != 0) {
+	if (type_ != GAMEMODEL) {
 		print(string("Wrong Class!"));
 	}
-	string str = string("path: ") + path_ + string("\n");
+	string str = string("type: ") + to_string(type_) + string(" - GameModel") + string("\n");
+	str += string("path: ") + path_ + string("\n");
 	str += string("place: ") + vec3_toString(place_) + string("\n");
 	str += string("quat: ") + vec3_toString(quat_) + string("\n");
 	str += string("scale: ") + vec3_toString(scale_) + string("\n");
-	str += string("type: ") + to_string(type_) + string("\n");
 	print(str);
 }
 
 void Structure::PrintModel() {
-	if (type_ != 3) {
+	if (type_ != STRUCTURE) {
 		print(string("Wrong Class!"));
 	}
-	string str = string("path: ") + path_ + string("\n");
+	string str = string("type: ") + to_string(type_) + string(" - Structure") + string("\n");
+	str += string("path: ") + path_ + string("\n");
 	str += string("place: ") + vec3_toString(place_) + string("\n");
 	str += string("quat: ") + vec3_toString(quat_) + string("\n");
 	str += string("scale: ") + vec3_toString(scale_) + string("\n");
-	str += string("type: ") + to_string(type_) + string("\n");
+	print(str);
+}
+
+void Animation::PrintModel() {
+	if (type_ != ANIMATION) {
+		print(string("Wrong Class!"));
+	}
+	string str = string("type: ") + to_string(type_) + string(" - Animation") + string("\n");
+	str += string("path: ") + path_ + string("\n");
+	str += string("place: ") + vec3_toString(place_) + string("\n");
+	str += string("quat: ") + vec3_toString(quat_) + string("\n");
+	str += string("scale: ") + vec3_toString(scale_) + string("\n");
 	print(str);
 }
 
@@ -196,6 +208,14 @@ void GameModel::Move(mat4& model) {
 }
 
 void Structure::Move(mat4& model) {
+	model = glm::translate(model, place_);
+	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
+	model = glm::scale(model, scale_);
+}
+
+void Animation::Move(mat4& model) {
 	model = glm::translate(model, place_);
 	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
@@ -245,9 +265,9 @@ void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBone
 		BoneInfo_[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
 
 		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
-			//uint VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
+			uint VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
 			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
-			//Bones[VertexID].AddBoneData(BoneIndex, Weight);
+			Bones[VertexID].AddBoneData(BoneIndex, Weight);
 		}
 	}
 }

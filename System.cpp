@@ -161,22 +161,22 @@ int ArraySizeInElements(uint* a) {
 }
 
 void InitIdentity(aiMatrix4x4& matrix) {
-	/*matrix[0][0] = 1.0f;	matrix[0][1] = 0.0f;	matrix[0][2] = 0.0f;	matrix[0][3] = 0.0f;
-	matrix[1][0] = 0.0f;	matrix[1][1] = 1.0f;	matrix[1][2] = 0.0f;	matrix[1][3] = 0.0f;
-	matrix[2][0] = 0.0f;	matrix[2][1] = 0.0f;	matrix[2][2] = 1.0f;	matrix[2][3] = 0.0f;
-	matrix[3][0] = 0.0f;	matrix[3][1] = 0.0f;	matrix[3][2] = 0.0f;	matrix[3][3] = 1.0f;*/
+	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
+	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = 0.0f;
+	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;	matrix.c3 = 1.0f;	matrix.c4 = 0.0f;
+	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;	matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
 }
 
-void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& m) {
-	/*m[0][0] = ScaleX; m[0][1] = 0.0f;   m[0][2] = 0.0f;   m[0][3] = 0.0f;
-	m[1][0] = 0.0f;   m[1][1] = ScaleY; m[1][2] = 0.0f;   m[1][3] = 0.0f;
-	m[2][0] = 0.0f;   m[2][1] = 0.0f;   m[2][2] = ScaleZ; m[2][3] = 0.0f;
-	m[3][0] = 0.0f;   m[3][1] = 0.0f;   m[3][2] = 0.0f;   m[3][3] = 1.0f;*/
+void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& matrix) {
+	matrix.a1 = ScaleX;	matrix.a2 = 0.0f;   matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
+	matrix.b1 = 0.0f;	matrix.b2 = ScaleY; matrix.b3 = 0.0f;	matrix.b4 = 0.0f;
+	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;   matrix.c3 = ScaleZ;	matrix.c4 = 0.0f;
+	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;   matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
 }
 
-void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& m) {
-	/*m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = x;
-	m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = y;
-	m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = z;
-	m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;*/
+void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix) {
+	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = x;
+	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = y;
+	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;	matrix.c3 = 1.0f;	matrix.c4 = z;
+	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;	matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
 }
