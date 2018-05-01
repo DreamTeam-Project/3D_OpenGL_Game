@@ -35,7 +35,7 @@ private:
 				levels_.push_back(one);
 			}
 			else {
-				throw GameException(__LINE__, __FILE__, "error push back level");
+				throw GameException(__LINE__, __func__, "error push back level");
 			}
 		}
 	};

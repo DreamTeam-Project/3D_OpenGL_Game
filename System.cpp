@@ -1,11 +1,7 @@
 #include "System.h"
 
-void Vertex::addvec(vec3 a) {
-	Position += a;
-	Normal += a;
-	Tangent+= a;
-	Bitangent+=a;
-	TexCoords += glm::vec2(a.x, a.y);
+void SetZero(aiMatrix4x4* matrix) {
+	memset(matrix, 0, sizeof(*matrix));
 }
 
 bool IsItNumber(const string& word) {
@@ -33,7 +29,15 @@ void print(const char* what) {
 		printf("%s\n", what);
 	}
 	else {
-		doNothing();
+		ofstream fout("log.file");
+		if (!fout.is_open()) {
+			throw;
+		}
+		else {
+			doNothing();
+		}
+		fout << what << std::endl;
+		fout.close();
 	}
 }
 
@@ -42,7 +46,15 @@ void print(const string& what) {
 		printf("%s\n", what.c_str());
 	}
 	else {
-		doNothing();
+		ofstream fout("log.file");
+		if (!fout.is_open()) {
+			throw;
+		}
+		else {
+			doNothing();
+		}
+		fout << what << std::endl;
+		fout.close();
 	}
 }
 
@@ -55,7 +67,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		return;
 	}
 	if (buf != "<") {
-		throw GameException(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
 	fin >> buf;
 	while (buf != ">" || fin.eof()) {
@@ -66,7 +78,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		fin >> buf;
 	}
 	if (buf != ">" && fin.eof()) {
-		throw GameException(__LINE__, __FILE__, "error format >");
+		throw GameException(__LINE__, __func__, "error format >");
 	}
 	if (buf == ">" && fin.eof() && ret == "") {
 		ret = "end_of_file";
@@ -84,7 +96,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -92,7 +104,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 			ret = std::stoi(buf);
 		}
 		else {
-			throw GameException(__LINE__, __FILE__, "error format \"int\" ");
+			throw GameException(__LINE__, __func__, "error format \"int\" ");
 		}
 	}
 	if (buf == ">") {
@@ -101,7 +113,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw GameException(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
 }
 
@@ -109,7 +121,7 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -140,6 +152,31 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw GameException(__LINE__, __FILE__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
+}
+
+int ArraySizeInElements(uint* a) {
+	return sizeof(a) / sizeof(a[0]);
+}
+
+void InitIdentity(aiMatrix4x4& matrix) {
+	/*matrix[0][0] = 1.0f;	matrix[0][1] = 0.0f;	matrix[0][2] = 0.0f;	matrix[0][3] = 0.0f;
+	matrix[1][0] = 0.0f;	matrix[1][1] = 1.0f;	matrix[1][2] = 0.0f;	matrix[1][3] = 0.0f;
+	matrix[2][0] = 0.0f;	matrix[2][1] = 0.0f;	matrix[2][2] = 1.0f;	matrix[2][3] = 0.0f;
+	matrix[3][0] = 0.0f;	matrix[3][1] = 0.0f;	matrix[3][2] = 0.0f;	matrix[3][3] = 1.0f;*/
+}
+
+void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& m) {
+	/*m[0][0] = ScaleX; m[0][1] = 0.0f;   m[0][2] = 0.0f;   m[0][3] = 0.0f;
+	m[1][0] = 0.0f;   m[1][1] = ScaleY; m[1][2] = 0.0f;   m[1][3] = 0.0f;
+	m[2][0] = 0.0f;   m[2][1] = 0.0f;   m[2][2] = ScaleZ; m[2][3] = 0.0f;
+	m[3][0] = 0.0f;   m[3][1] = 0.0f;   m[3][2] = 0.0f;   m[3][3] = 1.0f;*/
+}
+
+void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& m) {
+	/*m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = x;
+	m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = y;
+	m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = z;
+	m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;*/
 }

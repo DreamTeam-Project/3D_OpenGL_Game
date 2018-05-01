@@ -1,6 +1,6 @@
 #include "Skybox.h"
 
-unsigned int Skybox::loadCubemap(vector<string> faces) {
+unsigned int Skybox::loadCubemap(const vector<string>& faces) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

@@ -19,7 +19,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 		fragmentCode = fShaderStream.str();
 	}
 	catch (std::ifstream::failure e) {
-		throw GameException(__LINE__, __FILE__, "FILE_NOT_SUCCESFULLY_READ", e.what());
+		throw GameException(__LINE__, __func__, "FILE_NOT_SUCCESFULLY_READ", e.what());
 	}
 	const GLchar* vShaderCode = vertexCode.c_str();
 	const GLchar * fShaderCode = fragmentCode.c_str();
@@ -33,7 +33,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(vertex, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::VERTEX::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::VERTEX::COMPILATION_FAILED", infoLog);
 	}
 	//Fragment Program
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -43,7 +43,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(fragment, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::FRAGMENT::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::FRAGMENT::COMPILATION_FAILED", infoLog);
 	}
 	// Shader Program
 	this->program_c = glCreateProgram();
@@ -54,7 +54,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetProgramInfoLog(this->program_c, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::PROGRAM::LINKING_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::PROGRAM::LINKING_FAILED", infoLog);
 	}
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
@@ -86,7 +86,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 		geometryCode = gShaderStream.str();
 	}
 	catch (std::ifstream::failure e) {
-		throw GameException(__LINE__, __FILE__, "FILE_NOT_SUCCESFULLY_READ", e.what());
+		throw GameException(__LINE__, __func__, "FILE_NOT_SUCCESFULLY_READ", e.what());
 	}
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();
@@ -101,7 +101,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(vertex, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::VERTEX::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::VERTEX::COMPILATION_FAILED", infoLog);
 	}
 	// fragment shader
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -110,7 +110,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(fragment, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::FRAGMENT::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::FRAGMENT::COMPILATION_FAILED", infoLog);
 	}
 	// geometry shader
 	geometry = glCreateShader(GL_GEOMETRY_SHADER);
@@ -119,7 +119,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(geometry, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::GEOMETRY::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::GEOMETRY::COMPILATION_FAILED", infoLog);
 	}
 	// shader Program
 	program_c = glCreateProgram();
@@ -131,7 +131,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetProgramInfoLog(this->program_c, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __FILE__, "SHADER::PROGRAM::LINKING_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "SHADER::PROGRAM::LINKING_FAILED", infoLog);
 	}
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);

@@ -61,9 +61,9 @@ class Skybox {
 public:
 	Skybox() {}
 	~Skybox();
-	unsigned int loadCubemap(vector<string> faces);
+	unsigned int loadCubemap(const vector<string>& faces);
 	void GenBuffer();
-	void Bind(Camera& camera, GameShader& Skybox,const glm::mat4& projection);
+	void Bind(Camera& camera, GameShader& Skybox, const glm::mat4& projection);
 
 	unsigned int cubemapTexture;
 private:

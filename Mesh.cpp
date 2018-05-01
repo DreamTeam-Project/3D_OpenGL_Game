@@ -1,5 +1,13 @@
 #include "Mesh.h"
 
+void Vertex::addvec(const vec3& a) {
+	Position += a;
+	Normal += a;
+	Tangent += a;
+	Bitangent += a;
+	TexCoords += glm::vec2(a.x, a.y);
+}
+
 void Mesh::Draw(const GameShader& shader) {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;

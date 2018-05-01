@@ -7,17 +7,17 @@ void GameModel::Draw(const GameShader& shader) {
 }
 
 void GameModel::LoadModel() {
-	const aiScene* scene = importer.ReadFile(path_, \
+	scene_ = importer_.ReadFile(path_, \
 		aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | \
 		aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_FindInvalidData | aiProcess_ImproveCacheLocality);
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		throw GameException(__LINE__, __FILE__, "Error Assimp, Error:", importer.GetErrorString());
+	if (!scene_ || scene_->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene_->mRootNode) {
+		throw GameException(__LINE__, __func__, "Error Assimp, Error:", importer_.GetErrorString());
 	}
-	//GlobalInverseTransform = scene->mRootNode->mTransformation;
-	//GlobalInverseTransform.Inverse();
+	GlobalInverseTransform_ = scene_->mRootNode->mTransformation;
+	GlobalInverseTransform_.Inverse();
 
 	directory_ = path_.substr(0, path_.find_last_of('\\'));
-	ProcessNode(scene->mRootNode, scene);
+	ProcessNode(scene_->mRootNode, scene_);
 }
 
 void GameModel::ProcessNode(aiNode *node, const aiScene *scene) {
@@ -157,7 +157,7 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 	}
 	else {
 		stbi_image_free(data);
-		throw GameException(__LINE__, __FILE__, string("Error load path: ") + path, string("Why: ") + string(stbi_failure_reason()));
+		throw GameException(__LINE__, __func__, string("Error load path: ") + path, string("Why: ") + string(stbi_failure_reason()));
 	}
 
 	return textureID;
@@ -203,30 +203,238 @@ void Structure::Move(mat4& model) {
 	model = glm::scale(model, scale_);
 }
 
-//void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones)
-//{
-//	for (uint i = 0; i < pMesh->mNumBones; i++) {
-//		uint BoneIndex = 0;
-//		string BoneName(pMesh->mBones[i]->mName.data);
-//
-//		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-//			BoneIndex = m_NumBones;
-//			m_NumBones++;
-//			BoneInfo bi;
-//			m_BoneInfo.push_back(bi);
-//		}
-//		else {
-//			BoneIndex = m_BoneMapping[BoneName];
-//		}
-//
-//		m_BoneMapping[BoneName] = BoneIndex;
-//		m_BoneInfo[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
-//
-//		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
-//			uint VertexID = m_Entries[MeshIndex].BaseVertex +
-//				pMesh->mBones[i]->mWeights[j].mVertexId;
-//			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
-//			Bones[VertexID].AddBoneData(BoneIndex, Weight);
-//		}
-//	}
-//}
+//%%%%%%%%%
+//Skinning
+//%%%%%%%%%
+
+//When called, the current time in seconds and array of matrices are specified,
+//which we need to update. We will find the relative time within the animation loop and processing the hierarchy sheets.
+//The result is an array of transformations that return to the place of the call
+void GameModel::BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms) {
+	aiMatrix4x4 Identity;
+	InitIdentity(Identity);
+	float TicksPerSecond = scene_->mAnimations[0]->mTicksPerSecond != 0 ? scene_->mAnimations[0]->mTicksPerSecond : 25.0f;
+	float TimeInTicks = TimeInSeconds * TicksPerSecond;
+	float AnimationTime = fmod(TimeInTicks, scene_->mAnimations[0]->mDuration);
+	ReadNodeHeirarchy(AnimationTime, scene_->mRootNode, Identity);
+	Transforms.resize(NumBones_);
+	for (uint i = 0; i < NumBones_; i++) {
+		Transforms[i] = BoneInfo_[i].FinalTransformation;
+	}
+}
+
+//The function below loads the bone information for one aiMesh object.
+//In addition to filling the VertexBoneData structure, this function also updates the links between the name of the bone and
+//ID number (the index is determined at startup) and writes the displacement matrix to a vector depending on the bone id.
+void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones) {
+	for (uint i = 0; i < pMesh->mNumBones; i++) {
+		uint BoneIndex = 0;
+		string BoneName(pMesh->mBones[i]->mName.data);
+
+		if (BoneMapping_.find(BoneName) == BoneMapping_.end()) {
+			BoneIndex = NumBones_;
+			NumBones_++;
+			BoneInfo bi;
+			BoneInfo_.push_back(bi);
+		}
+		else {
+			BoneIndex = BoneMapping_[BoneName];
+		}
+
+		BoneMapping_[BoneName] = BoneIndex;
+		BoneInfo_[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
+
+		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
+			//uint VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
+			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
+			//Bones[VertexID].AddBoneData(BoneIndex, Weight);
+		}
+	}
+}
+
+//This helper function finds free slots in the VertexBoneData structure and places inside
+//the id and bone weight.
+void GameModel::VertexBoneData::AddBoneData(uint BoneID, float Weight)
+{
+	for (uint i = 0; i < ArraySizeInElements(IDs); i++) {
+		if (Weights[i] == 0.0) {
+			IDs[i] = BoneID;
+			Weights[i] = Weight;
+			return;
+		}
+	}
+	throw GameException(__LINE__, __func__, string("Error: to mush bones"));
+}
+
+//This method interpolates the quaternion of rotation of the specified channel according to the animation time
+//First we find the key quaternion index, which is up to the required animation time.
+//We calculate the ratio between the distance from this key to the required time and the distance 
+//from the animation time to the next key. When interpolating this coefficient will be used.
+void GameModel::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim) {
+	if (pNodeAnim->mNumRotationKeys == 1) {
+		Out = pNodeAnim->mRotationKeys[0].mValue;
+		return;
+	}
+	uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+	uint NextRotationIndex = (RotationIndex + 1);
+	if (NextRotationIndex > pNodeAnim->mNumRotationKeys) {
+		throw GameException(__LINE__, __func__, string("Error: NextRotationIndex > mNumRotationKeys"));
+	}
+	float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
+	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+	if (Factor < 0.0f && Factor > 1.0f) {
+		throw GameException(__LINE__, __func__, string("Error: factor"));
+	}
+	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+	Out = Out.Normalize();
+}
+
+void GameModel::CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	if (pNodeAnim->mNumScalingKeys == 1) {
+		Out = pNodeAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	uint ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+	uint NextScalingIndex = (ScalingIndex + 1);
+	if (NextScalingIndex > pNodeAnim->mNumScalingKeys) {
+		throw GameException(__LINE__, __func__, "Error: NextScalingIndex > mNumScalingKeys");
+	}
+	float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+	if (Factor < 0.0f && Factor > 1.0f) {
+		throw GameException(__LINE__, __func__, "Error: Factor");
+	}
+	const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+void GameModel::CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim) {
+	if (pNodeAnim->mNumPositionKeys == 1) {
+		Out = pNodeAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	uint PositionIndex = FindPosition(AnimationTime, pNodeAnim);
+	uint NextPositionIndex = (PositionIndex + 1);
+	if (NextPositionIndex > pNodeAnim->mNumPositionKeys) {
+		throw GameException(__LINE__, __func__, "Error: NextPositionIndex > mNumPositionKeys");
+	}
+	float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+	if(Factor < 0.0f && Factor > 1.0f) {
+		throw GameException(__LINE__, __func__, "Error: Factor");
+	}
+	const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+//This function bypasses the sheets of the tree and generates the final transformation for
+//each leaf / bone according to the specified animation time.It is limited in the sense that
+//we can only use 1 animation sequence.
+void GameModel::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform) {
+	string NodeName(pNode->mName.data);
+	const aiAnimation* pAnimation = scene_->mAnimations[0];
+	aiMatrix4x4 NodeTransformation(pNode->mTransformation);
+	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+
+	if (pNodeAnim) {
+		// Интерполируем масштабирование и генерируем матрицу преобразования масштаба
+		aiVector3D Scaling;
+		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+		aiMatrix4x4 ScalingM;
+		InitScaleTransform(Scaling.x, Scaling.y, Scaling.z, ScalingM);
+		// Интерполируем вращение и генерируем матрицу вращения
+		aiQuaternion RotationQ;
+		CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+		aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
+		//  Интерполируем смещение и генерируем матрицу смещения
+		aiVector3D Translation;
+		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+		aiMatrix4x4 TranslationM;
+		InitTranslationTransform(Translation.x, Translation.y, Translation.z, TranslationM);
+		// Объединяем преобразования
+		NodeTransformation = TranslationM * RotationM * ScalingM;
+	}
+
+	aiMatrix4x4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+	if (BoneMapping_.find(NodeName) != BoneMapping_.end()) {
+		uint BoneIndex = BoneMapping_[NodeName];
+
+		BoneInfo_[BoneIndex].FinalTransformation = GlobalInverseTransform_ *
+			GlobalTransformation *
+			BoneInfo_[BoneIndex].BoneOffset;
+	}
+
+	for (uint i = 0; i < pNode->mNumChildren; i++) {
+		ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+	}
+}
+
+//This additional method finds the key rotation just before the animation time.
+//Если мы имеем N ключевых вращений, то результат может быть от 0 до N - 2
+uint GameModel::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim) {
+	if (pNodeAnim->mNumRotationKeys < 0) {
+		throw GameException(__LINE__, __func__, string("Error: mNumRotationKeys < 0"));
+	}
+
+	for (uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	if (DEBUG_SKINNING) {
+		throw GameException(__LINE__, __func__, string("Error: to mush elements"));
+	}
+	return 0;
+}
+
+uint GameModel::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim) {
+	if (pNodeAnim->mNumScalingKeys < 0) {
+		throw GameException(__LINE__, __func__, "Error: mNumScalingKeys < 0");
+	}
+
+	for (uint i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	if (DEBUG_SKINNING) {
+		throw GameException(__LINE__, __func__, string("Error: to mush elements"));
+	}
+	return 0;
+}
+
+uint GameModel::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim) {
+	for (uint i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	if (DEBUG_SKINNING) {
+		throw GameException(__LINE__, __func__, string("Error: to mush elements"));
+	}
+	return 0;
+}
+
+const aiNodeAnim* GameModel::FindNodeAnim(const aiAnimation* pAnimation, const string NodeName) {
+	for (uint i = 0; i < pAnimation->mNumChannels; i++) {
+		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+
+		if (string(pNodeAnim->mNodeName.data) == NodeName) {
+			return pNodeAnim;
+		}
+	}
+	return NULL;
+}

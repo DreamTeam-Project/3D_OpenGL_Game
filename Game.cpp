@@ -30,8 +30,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
 
-const char* LoadImage = "textures/please-stand-by.jpg";
-vector<string> faces {
+vector<string> faces{
 	("textures/skybox/nightsky_ft.tga"),
 	("textures/skybox/nightsky_bk.tga"),
 	("textures/skybox/nightsky_up.tga"),
@@ -55,11 +54,11 @@ GLfloat lastFrame = 0.0f;
 
 int main() {
 	try {
-#if _DEBUG
+#if DEBUG_GAME
 		print("go to main");
 #endif
 		StartWindow();
-#if _DEBUG
+#if DEBUG_GAME
 		system("pause");
 #endif
 		return 0;
@@ -70,17 +69,17 @@ int main() {
 	catch (...) {
 		print("Error default\n");
 	}
-#if _DEBUG
+#if DEBUG_GAME
 	system("pause");
 #endif
 }
 
 static void StartWindow() {
-#if _DEBUG 
+#if DEBUG_GAME 
 	print("go to StartWindow");
 #endif
 	if (!glfwInit()) {
-		throw GameException(__LINE__, __FILE__, "error initialization GLFW");
+		throw GameException(__LINE__, __func__, "Error: initialization GLFW");
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -90,7 +89,7 @@ static void StartWindow() {
 	game_window = glfwCreateWindow(WIDTH, HEIGHT, "Test window", nullptr, nullptr);
 	if (game_window == nullptr) {
 		glfwTerminate();
-		throw GameException(__LINE__, __FILE__, "Failed to create GLFW window");
+		throw GameException(__LINE__, __func__, "Error: Failed to create GLFW window");
 	}
 
 	glfwMakeContextCurrent(game_window);
@@ -103,7 +102,7 @@ static void StartWindow() {
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) {
-		throw GameException(__LINE__, __FILE__, "Failed to initialize GLEW");
+		throw GameException(__LINE__, __func__, "Error: Failed to initialize GLEW");
 	}
 
 	bool play = true;
@@ -119,12 +118,11 @@ static void StartWindow() {
 }
 
 static void DrawInWindow() {
-#if _DEBUG
+#if DEBUG_GAME
 	print("\ngo to DrawWindow");
 #endif	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
 	GameShader SkyboxShader("Skybox.vs", "Skybox.frag");
 	GameShader StaticShader("shader.vs", "shader.frag");
 
@@ -199,14 +197,15 @@ static void Loading() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	int width, height, nrChannels;
-	unsigned char *image = stbi_load(LoadImage, &width, &height, &nrChannels, 0);
+	unsigned char *image = stbi_load(LoadImage.c_str(), &width, &height, &nrChannels, 0);
 	if (image) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
 	}
 	else {
 		stbi_image_free(image);
-		throw GameException(__LINE__, __FILE__, string("ERROR::LOAD::FAILED::PATH::"), LoadImage);
+		throw GameException(__LINE__, __func__, string("Error load: path: ") + LoadImage.c_str(),
+			string("Why: ") + string(stbi_failure_reason()));
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);

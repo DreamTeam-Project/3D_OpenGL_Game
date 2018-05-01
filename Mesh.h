@@ -23,6 +23,15 @@ struct Texture {
 	string path;
 };
 
+struct Vertex {
+	glm::vec3 Position;
+	glm::vec3 Normal;
+	glm::vec2 TexCoords;
+	glm::vec3 Tangent;
+	glm::vec3 Bitangent;
+	void addvec(const vec3& a);
+};
+
 class Mesh {
 public:
 	vector<Vertex> vertices_c;

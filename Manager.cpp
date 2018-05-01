@@ -3,7 +3,7 @@
 void GameManager::LoadInfoAboutLevels() {
 	std::ifstream fin(LoadFile);
 	if (!fin.is_open()) {
-		throw GameException(__LINE__, __FILE__, "error open file Load.file");
+		throw GameException(__LINE__, __func__, "error open file Load.file");
 	}
 	string name_buf = "";
 	string path_buf = "";
@@ -13,7 +13,7 @@ void GameManager::LoadInfoAboutLevels() {
 	while (!fin.eof()) {
 		getStringFromFile(fin, name_buf);
 		if (name_buf == "end_of_file" || name_buf == "null") {
-			throw GameException(__LINE__, __FILE__, "error format Load.file");
+			throw GameException(__LINE__, __func__, "error format Load.file");
 		}
 		getStringFromFile(fin, path_buf);
 		if (path_buf == "end_of_file" || name_buf == "null") {
@@ -22,7 +22,7 @@ void GameManager::LoadInfoAboutLevels() {
 		levels.push_back(Level(name_buf, path_buf));
 	}
 	if (levels.levels_.size() == 0) {
-		throw GameException(__LINE__, __FILE__, "LoadFile.file is empty");
+		throw GameException(__LINE__, __func__, "LoadFile.file is empty");
 	}
 #if DEBUG_MANAGER
 	print("success\n");
@@ -33,7 +33,7 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 	string path = levels.levels_.at(levelNumber).pathLoader_;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
-		throw GameException(__LINE__, __FILE__, "error open file level.file");
+		throw GameException(__LINE__, __func__, "error open file level.file");
 	}
 
 #if DEBUG_MANAGER
@@ -45,19 +45,19 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf == "null") {
-			throw GameException(__LINE__, __FILE__, "error level.path");
+			throw GameException(__LINE__, __func__, "error level.path");
 		}
 		if (strbuf == "end_of_file") {
 			break;
 		}
 		if (strbuf != "type") {
-			throw GameException(__LINE__, __FILE__, "error level.path");
+			throw GameException(__LINE__, __func__, "error level.path");
 		}
 
 		int type = 0;
 		getStringFromFile(fin, type);
 		if (strbuf == "null" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __FILE__, "error level.path");
+			throw GameException(__LINE__, __func__, "error level.path");
 		}
 		if (!NewModel) {
 			switch (type) {
@@ -73,30 +73,30 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 			NewModel->type_ = type;
 		}
 		else {
-			throw GameException(__LINE__, __FILE__, "Error wrong type of class");
+			throw GameException(__LINE__, __func__, "Error wrong type of class");
 		}
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "path" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __FILE__, "error type");
+			throw GameException(__LINE__, __func__, "error type");
 		}
 		getStringFromFile(fin, NewModel->path_);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "place" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __FILE__, "error place");
+			throw GameException(__LINE__, __func__, "error place");
 		}
 		getStringFromFile(fin, NewModel->place_);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "quat" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __FILE__, "error quat");
+			throw GameException(__LINE__, __func__, "error quat");
 		}
 		getStringFromFile(fin, NewModel->quat_);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "scale" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __FILE__, "error scale");
+			throw GameException(__LINE__, __func__, "error scale");
 		}
 		getStringFromFile(fin, NewModel->scale_);
 #if DEBUG_MANAGER
@@ -105,7 +105,7 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 		AllModels.push_back(NewModel);
 	}
 	if (AllModels.size() == 0) {
-		throw GameException(__LINE__, __FILE__, "level.file is empty");
+		throw GameException(__LINE__, __func__, "level.file is empty");
 	}
 	LoadModels();
 #if DEBUG_MANAGER
