@@ -2149,7 +2149,7 @@
     </library_lights>
     <library_images>
         <image id="cat_diff" name="cat_diff">
-            <init_from>file:///C:/Users/ASUS/Downloads/Test_OpenGl-master/Test_OpenGl-master/level1/cat/cat_diff.tga</init_from>
+            <init_from>file://cat_diff.tga</init_from>
         </image>
     </library_images>
     <library_materials>

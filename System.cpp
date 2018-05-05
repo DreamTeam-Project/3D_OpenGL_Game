@@ -156,10 +156,6 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 }
 
-int ArraySizeInElements(uint* a) {
-	return sizeof(a) / sizeof(a[0]);
-}
-
 void InitIdentity(aiMatrix4x4& matrix) {
 	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
 	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = 0.0f;

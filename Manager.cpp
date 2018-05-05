@@ -65,7 +65,7 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 				NewModel = new GameModel();
 				break;
 			case ANIMATION:
-				NewModel = new Animation();
+				NewModel = new AnimatedModel();
 				break;
 			case STRUCTURE:
 				NewModel = new Structure();

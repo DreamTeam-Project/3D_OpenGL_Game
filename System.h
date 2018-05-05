@@ -11,11 +11,11 @@
 #include <assimp\matrix4x4.h>
 
 #if _DEBUG
-#define DEBUG_GAME		1
-#define DEBUG_MODEL		1
-#define DEBUG_MESH		1
-#define DEBUG_MANAGER	1
-#define DEBUG_SKINNING	1
+#define DEBUG_GAME		0
+#define DEBUG_MODEL		0
+#define DEBUG_MESH		0
+#define DEBUG_MANAGER	0
+#define DEBUG_SKINNING	0
 #endif
 
 #define SUCCESS 42
@@ -65,7 +65,6 @@ void getStringFromFile(ifstream& fin, vec3& ret);
 void InitIdentity(aiMatrix4x4& matrix);
 void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& matrix);
 void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix);
-int ArraySizeInElements(uint* a);
 int doNothing();
 
 extern GLFWwindow* game_window;

@@ -69,7 +69,7 @@ int main() {
 	catch (...) {
 		print("Error default\n");
 	}
-#if DEBUG_GAME
+#if _DEBUG
 	system("pause");
 #endif
 }
@@ -125,6 +125,7 @@ static void DrawInWindow() {
 	glDepthFunc(GL_LESS);
 	GameShader SkyboxShader("Skybox.vs", "Skybox.frag");
 	GameShader StaticShader("shader.vs", "shader.frag");
+	GameShader AnimatedShader("Skinning.vs", "shader.frag");
 
 	Skybox box;
 	box.GenBuffer();
@@ -153,6 +154,7 @@ static void DrawInWindow() {
 			it->Move(model);
 			StaticShader.setMat4("model", model);
 			it->Draw(StaticShader);
+			//it->Draw(AnimatedShader);
 		}
 
 		box.Bind(camera, SkyboxShader, projection);
