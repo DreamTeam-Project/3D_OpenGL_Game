@@ -26,18 +26,14 @@ static void StartWindow();
 static void DrawInWindow();
 static void Loading();
 
+void SetSpotLights(GameShader& shader);
+void SetGlobalLight(GameShader& shader);
+void SetPointLights(GameShader& shader);
+
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
 
-vector<string> faces{
-	("textures/skybox/nightsky_ft.tga"),
-	("textures/skybox/nightsky_bk.tga"),
-	("textures/skybox/nightsky_up.tga"),
-	("textures/skybox/nightsky_dn.tga"),
-	("textures/skybox/nightsky_rt.tga"),
-	("textures/skybox/nightsky_lf.tga")
-};
 const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
@@ -86,6 +82,7 @@ static void StartWindow() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	game_window = glfwCreateWindow(WIDTH, HEIGHT, "Test window", nullptr, nullptr);
 	if (game_window == nullptr) {
 		glfwTerminate();
@@ -121,11 +118,12 @@ static void DrawInWindow() {
 #if DEBUG_GAME
 	print("\ngo to DrawWindow");
 #endif	
+	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
 	GameShader SkyboxShader("Skybox.vs", "Skybox.frag");
-	GameShader StaticShader("shader.vs", "shader.frag");
-	GameShader AnimatedShader("Skinning.vs", "shader.frag");
+	GameShader Shader("Light.vs", "Light.frag");
 
 	Skybox box;
 	box.GenBuffer();
@@ -141,26 +139,58 @@ static void DrawInWindow() {
 		processInput(game_window);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		StaticShader.Use();
+		Shader.Use();
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		StaticShader.setMat4("projection", projection);
-		StaticShader.setMat4("view", view);
-		glm::mat4 model;
+		mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
+		mat4 view = camera.GetViewMatrix();
+
+		Shader.setMat4("projection", projection);
+		Shader.setMat4("view", view);
+		Shader.setVec3("viewPos", camera.Position);
+
+		SetGlobalLight(Shader);
+		SetPointLights(Shader);
+		SetSpotLights(Shader);
 
 		for (auto it : Manager.AllModels) {
-			glm::mat4 model;
-			it->Move(model);
-			StaticShader.setMat4("model", model);
-			it->Draw(StaticShader);
-			//it->Draw(AnimatedShader);
+			it->SetShaderParameters(Shader);
+			it->Draw(Shader);
 		}
 
 		box.Bind(camera, SkyboxShader, projection);
 		glfwSwapBuffers(game_window);
 		glfwPollEvents();
 	}
+}
+
+void SetGlobalLight(GameShader& shader) {
+	shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	shader.setVec3("dirLight.ambient", 0.0f, 0.0f, 0.0f);
+	shader.setVec3("dirLight.diffuse", 0.05f, 0.05f, 0.05f);
+	shader.setVec3("dirLight.specular", 0.2f, 0.2f, 0.2f);
+}
+
+void SetPointLights(GameShader& shader) {
+	shader.setVec3("pointLights[0].position", vec3(10, 10, 10));
+	shader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+	shader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+	shader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+	shader.setFloat("pointLights[0].constant", 1.0f);
+	shader.setFloat("pointLights[0].linear", 0.09);
+	shader.setFloat("pointLights[0].quadratic", 0.032);
+}
+
+void SetSpotLights(GameShader& shader) {
+	shader.setVec3("spotLight.position", camera.Position);
+	shader.setVec3("spotLight.direction", camera.Front);
+	shader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+	shader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	shader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	shader.setFloat("spotLight.constant", 1.0f);
+	shader.setFloat("spotLight.linear", 0.09);
+	shader.setFloat("spotLight.quadratic", 0.032);
+	shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(20.0f)));
+	shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(25.0f)));
 }
 
 static void Loading() {

@@ -7,7 +7,8 @@ void GameModel::Draw(const GameShader& shader) {
 }
 
 void GameModel::LoadModel() {
-	scene_ = importer_.ReadFile(path_, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	Assimp::Importer importer_;
+	scene_ = importer_.ReadFile(path_, ASSIMP_FLAGS);
 	if (!scene_ || scene_->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene_->mRootNode) {
 		throw GameException(__LINE__, __func__, "Error Assimp, Error:", importer_.GetErrorString());
 	}
@@ -79,14 +80,10 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 	}
 	
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	vector<GameTexture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"); 	//diffuse maps
+	vector<GameTexture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	vector<GameTexture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); 	//specular maps
+	vector<GameTexture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	vector<GameTexture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal"); 	//normal maps
-	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-	vector<GameTexture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");	//height maps
-	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 	if (scene_->mAnimations != nullptr) {
 		vector<VertexBoneData> Bones;
@@ -217,20 +214,11 @@ void GameModel::Move(mat4& model) {
 	model = glm::scale(model, scale_);
 }
 
-void Structure::Move(mat4& model) {
-	model = glm::translate(model, place_);
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
-	model = glm::scale(model, scale_);
-}
-
-void AnimatedModel::Move(mat4& model) {
-	model = glm::translate(model, place_);
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
-	model = glm::scale(model, scale_);
+void GameModel::SetShaderParameters(GameShader& shader) {
+	mat4 model;
+	Move(model);
+	shader.setMat4("model", model);
+	shader.setFloat("material.shininess", shininess_);
 }
 
 //The function below loads the bone information for one aiMesh object.

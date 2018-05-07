@@ -29,15 +29,19 @@ using glm::vec3;
 using glm::vec2;
 using glm::mat4;
 
+#define ASSIMP_FLAGS aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs
+
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
 class GameModel {
 public:
-	GameModel(bool gamma = false ) : gammaCorrection_(gamma) {	}
+	GameModel() = delete;
+	GameModel(float shininess, bool gamma = false ) : gammaCorrection_(gamma), shininess_(shininess) {	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
 
-	virtual void Move(mat4& model);
+	void SetShaderParameters(GameShader& shader);
+	void Move(mat4& model);
 	virtual void PrintModel();
 
 	string directory_;
@@ -46,6 +50,7 @@ public:
 	vec3 quat_;
 	vec3 scale_;
 	int type_;
+	float shininess_;
 
 private:
 	vector<GameTexture> textures_loaded_;
@@ -54,7 +59,6 @@ private:
 	bool gammaCorrection_;
 	aiMatrix4x4 GlobalInverseTransform_;
 	const aiScene* scene_;
-	Assimp::Importer importer_;
 
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh* ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex);
@@ -66,14 +70,19 @@ private:
 
 class Structure : public GameModel {
 public:
-	void Move(mat4& model) override;
+	Structure() = delete;
+	Structure(float shininess) : GameModel(shininess) { }
+	//void SetShaderParameters(GameShader& shader) override;
+	//void Move(mat4& model) override;
 	void PrintModel() override;
 	void Kill() {	}
 };
 
 class AnimatedModel : public GameModel {
 public:
-	void Move(mat4& model) override;
+	AnimatedModel(float shininess) : GameModel(shininess) { }
+	//void SetShaderParameters(GameShader& shader) override;
+	//void Move(mat4& model) override;
 	void PrintModel() override;
 	void Kill() {	}
 };

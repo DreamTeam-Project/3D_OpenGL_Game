@@ -68,6 +68,14 @@ void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix);
 int doNothing();
 
 extern GLFWwindow* game_window;
+static vector<string> faces{
+	("textures/skybox/nightsky_ft.tga"),
+	("textures/skybox/nightsky_bk.tga"),
+	("textures/skybox/nightsky_up.tga"),
+	("textures/skybox/nightsky_dn.tga"),
+	("textures/skybox/nightsky_rt.tga"),
+	("textures/skybox/nightsky_lf.tga")
+};
 const string LoadImage = "textures/please-stand-by.jpg";
 const string LoadFile = "Load.file";
 

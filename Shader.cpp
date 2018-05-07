@@ -151,7 +151,7 @@ void GameShader::setInt(const std::string &name, int value) const {
 	glUniform1i(glGetUniformLocation(program_c, name.c_str()), value);
 }
 
-void GameShader::setfloat(const std::string &name, float value) const {
+void GameShader::setFloat(const std::string &name, float value) const {
 	glUniform1f(glGetUniformLocation(program_c, name.c_str()), value);
 }
 

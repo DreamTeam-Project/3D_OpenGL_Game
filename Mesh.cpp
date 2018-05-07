@@ -14,12 +14,6 @@ void VertexBoneData::AddBoneData(uint BoneID, float Weight)	{
 	throw GameException(__LINE__, __func__, string("Error: to mush bones"));
 }
 
-void Vertex::addvec(const vec3& a) {
-	Position += a;
-	Normal += a;
-	TexCoords += glm::vec2(a.x, a.y);
-}
-
 Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures) {
 	Mesh* ret = new Mesh(vertices, indices, textures);
 	ret->SetupMesh();
@@ -42,19 +36,19 @@ void Mesh::Draw(const GameShader& shader) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		string number;
 		string name = textures_[i].type;
-		if (name == "texture_diffuse") {
-			number = std::to_string(diffuseNr++);
+		if (name == "diffuse") {
+			number = to_string(diffuseNr++);
 		}
-		else if (name == "texture_specular") {
-			number = std::to_string(specularNr++);
+		else if (name == "specular") {
+			number = to_string(specularNr++);
 		}
-		else if (name == "texture_normal") {
-			number = std::to_string(normalNr++);
+		else if (name == "normal") {
+			number = to_string(normalNr++);
 		}
-		else if (name == "texture_height") {
-			number = std::to_string(heightNr++);
+		else if (name == "height") {
+			number = to_string(heightNr++);
 		}
-		glUniform1i(glGetUniformLocation(shader.program_c, (name + number).c_str()), i);
+		glUniform1i(glGetUniformLocation(shader.program_c, (string("material.") + name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, textures_[i].id);
 	}
 	glBindVertexArray(VAO);
@@ -114,6 +108,12 @@ void Mesh::SetupMesh() {
 	glEnableVertexAttribArray(TEX_COORD);
 	glVertexAttribPointer(TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
+	glEnableVertexAttribArray(TANGENT);
+	glVertexAttribPointer(TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+	glEnableVertexAttribArray(BITANGENT);
+	glVertexAttribPointer(BITANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+
 	glBindVertexArray(0);
 }
 
@@ -141,6 +141,12 @@ void AnimatedMesh::SetupMesh() {
 
 	glEnableVertexAttribArray(TEX_COORD);
 	glVertexAttribPointer(TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+	glEnableVertexAttribArray(TANGENT);
+	glVertexAttribPointer(TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+	glEnableVertexAttribArray(BITANGENT);
+	glVertexAttribPointer(BITANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	//glEnableVertexAttribArray(BONE_ID);
 	//glVertexAttribIPointer(BONE_ID, 4, GL_INT, sizeof(VertexBoneData), (void*)0);
@@ -258,7 +264,7 @@ void AnimatedMesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, c
 }
 
 //This additional method finds the key rotation just before the animation time.
-//Если мы имеем N ключевых вращений, то результат может быть от 0 до N - 2
+//If we have N key rotations, then the result can be from 0 to N - 2
 uint AnimatedMesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim) {
 	if (pNodeAnim->mNumRotationKeys < 0) {
 		throw GameException(__LINE__, __func__, string("Error: mNumRotationKeys < 0"));

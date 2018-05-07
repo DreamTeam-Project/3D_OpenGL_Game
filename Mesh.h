@@ -7,6 +7,8 @@ enum Location {
 	POSITION = 0, 
 	NORMAL, 
 	TEX_COORD, 
+	TANGENT,
+	BITANGENT,
 	BONE_ID, 
 	BONE_WEIGHT
 };
@@ -29,6 +31,7 @@ enum Location {
 #include <assimp/matrix4x4.h>
 
 using std::vector;
+using glm::vec2;
 using std::map;
 using std::stringstream;
 
@@ -52,10 +55,11 @@ struct GameTexture {
 	string path;
 };
 struct Vertex {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-	void addvec(const vec3& a);
+	vec3 Position;
+	vec3 Normal;
+	vec2 TexCoords;
+	vec3 Tangent;
+	vec3 Bitangent;
 };
 struct MeshEntry {
 	MeshEntry()
@@ -78,11 +82,11 @@ public:
 	vector<unsigned int> indices_;
 	vector<GameTexture> textures_;
 
-	virtual void Draw(const GameShader& shader);
-	friend Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
 	virtual void SetupMesh();
+	virtual void Draw(const GameShader& shader);
 	Mesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
+
 protected:
 	unsigned int VBO, EBO, VAO;
 };
@@ -96,8 +100,9 @@ public:
 
 	void SetupMesh() override;
 	void Draw(const GameShader& shader) override;
-	friend Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, 
-		vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
+	AnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
+		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
+		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
 
 	uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
@@ -111,12 +116,12 @@ public:
 	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 
-	AnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
-		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
-		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
-
-private:
-	unsigned int BONE_VD;
+protected:
+	unsigned int BONE_VB;
 };
+
+Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
+Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures,
+	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
 
 #endif
