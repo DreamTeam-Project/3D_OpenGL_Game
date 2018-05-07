@@ -15,6 +15,8 @@
 #include "Shader.h"
 #include "System.h"
 
+#include "Physics.h"
+
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -33,19 +35,37 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 
 class GameModel {
 public:
-	GameModel(bool gamma = false ) : gammaCorrection_(gamma) {	}
+	GameModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, bool gamma = false ) : 
+	gammaCorrection_(gamma),
+	path_(path_2),
+	quat_(quat),
+	scale_(scale),
+	type_(type){
+		if (type == 1) {
+			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
+		if (type == 2) {
+			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
+		
+	}
+	~GameModel() {
+		delete rigid_body_;
+	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
+	
 
 	virtual void Move(mat4& model);
 	virtual void PrintModel();
 
 	string directory_;
 	string path_;
-	vec3 place_;
 	vec3 quat_;
 	vec3 scale_;
 	int type_;
+
+	phys_body* rigid_body_;
 
 private:
 	vector<GameTexture> textures_loaded_;
@@ -69,6 +89,9 @@ public:
 	void Move(mat4& model) override;
 	void PrintModel() override;
 	void Kill() {	}
+	Structure(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, bool gamma = false) :
+		GameModel(real_world_, type, place, quat, path_2, scale,mass, box,  gamma)
+	{	}
 };
 
 class AnimatedModel : public GameModel {
@@ -76,6 +99,9 @@ public:
 	void Move(mat4& model) override;
 	void PrintModel() override;
 	void Kill() {	}
+	AnimatedModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, bool gamma = false) :
+		GameModel(real_world_, type, place, quat, path_2, scale, mass,box, gamma)
+	{	}
 };
 
 #endif

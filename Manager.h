@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "System.h"
+#include "Physics.h"
 
 using std::vector;
 using std::string;
@@ -18,9 +19,16 @@ class GameManager {
 public:
 	void LoadInfoAboutLevels();
 	void LoadInfoAboutModels(size_t levelNumber);
+
+	phys_world real_world_;
+
 	size_t ChooseLevel() { return 0; }
 	bool BeOrNotToBe() { return false; }
 	vector<GameModel*> AllModels;
+
+	
+	GameManager();
+	//~GameManager();
 
 private:
 	struct Level {

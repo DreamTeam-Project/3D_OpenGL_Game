@@ -179,7 +179,7 @@ void GameModel::PrintModel() {
 	}
 	string str = string("type: ") + to_string(type_) + string(" - GameModel") + string("\n");
 	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(place_) + string("\n");
+	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
 	str += string("quat: ") + vec3_toString(quat_) + string("\n");
 	str += string("scale: ") + vec3_toString(scale_) + string("\n");
 	print(str);
@@ -191,7 +191,7 @@ void Structure::PrintModel() {
 	}
 	string str = string("type: ") + to_string(type_) + string(" - Structure") + string("\n");
 	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(place_) + string("\n");
+	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
 	str += string("quat: ") + vec3_toString(quat_) + string("\n");
 	str += string("scale: ") + vec3_toString(scale_) + string("\n");
 	print(str);
@@ -203,14 +203,15 @@ void AnimatedModel::PrintModel() {
 	}
 	string str = string("type: ") + to_string(type_) + string(" - Animation") + string("\n");
 	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(place_) + string("\n");
+	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
 	str += string("quat: ") + vec3_toString(quat_) + string("\n");
 	str += string("scale: ") + vec3_toString(scale_) + string("\n");
 	print(str);
 }
 
 void GameModel::Move(mat4& model) {
-	model = glm::translate(model, place_);
+	model = glm::translate(model, rigid_body_->get_pos());
+	rigid_body_->get_status();
 	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
@@ -218,7 +219,8 @@ void GameModel::Move(mat4& model) {
 }
 
 void Structure::Move(mat4& model) {
-	model = glm::translate(model, place_);
+	model = glm::translate(model, rigid_body_->get_pos());
+	rigid_body_->get_status();
 	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
@@ -226,7 +228,8 @@ void Structure::Move(mat4& model) {
 }
 
 void AnimatedModel::Move(mat4& model) {
-	model = glm::translate(model, place_);
+	model = glm::translate(model, rigid_body_->get_pos());
+	rigid_body_->get_status();
 	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
 	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));

@@ -79,7 +79,6 @@ public:
 	vector<GameTexture> textures_;
 
 	virtual void Draw(const GameShader& shader);
-	friend Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
 	virtual void SetupMesh();
 	Mesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
@@ -96,8 +95,6 @@ public:
 
 	void SetupMesh() override;
 	void Draw(const GameShader& shader) override;
-	friend Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, 
-		vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
 
 	uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
@@ -116,7 +113,11 @@ public:
 		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
 
 private:
-	unsigned int BONE_VD;
+	unsigned int BONE_VB;
 };
+
+Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
+Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures,
+	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
 
 #endif

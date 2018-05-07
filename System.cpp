@@ -117,6 +117,31 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	}
 }
 
+void getStringFromFile(ifstream& fin, double& ret) {
+	string buf = "";
+	fin >> buf;
+	if (buf != "<" || fin.eof()) {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+	fin >> buf;
+	if (buf != ">" && !fin.eof()) {
+		try {
+			ret = std::stod(buf);
+		}
+		catch (exception& e) {
+			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
+		}
+	}
+	if (buf == ">") {
+		ret = 0;
+		return;
+	}
+	fin >> buf;
+	if (buf != ">") {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+}
+
 void getStringFromFile(ifstream& fin, vec3& ret) {
 	string buf = "";
 	fin >> buf;

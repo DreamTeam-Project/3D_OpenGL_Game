@@ -39,10 +39,16 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 #if DEBUG_MANAGER
 	print(string("try to read: ") + path);
 #endif
+	int type;
+	vec3 place;
+	vec3 quat;
+	string path_2;
+	vec3 scale;
+	double mass;
+	vec3 box;
 	while (!fin.eof()) {
 		GameModel* NewModel = nullptr;
 		string strbuf = "";
-
 		getStringFromFile(fin, strbuf);
 		if (strbuf == "null") {
 			throw GameException(__LINE__, __func__, "error level.path");
@@ -54,54 +60,67 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 			throw GameException(__LINE__, __func__, "error level.path");
 		}
 
-		int type = 0;
 		getStringFromFile(fin, type);
 		if (strbuf == "null" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error level.path");
-		}
-		if (!NewModel) {
-			switch (type) {
-			case GAMEMODEL:
-				NewModel = new GameModel();
-				break;
-			case ANIMATION:
-				NewModel = new AnimatedModel();
-				break;
-			case STRUCTURE:
-				NewModel = new Structure();
-				break;
-			default:
-				NewModel = new GameModel();
-			}
-			NewModel->type_ = type;
-		}
-		else {
-			throw GameException(__LINE__, __func__, "Error wrong type of class");
 		}
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "path" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error type");
 		}
-		getStringFromFile(fin, NewModel->path_);
+		getStringFromFile(fin, path_2);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "place" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error place");
 		}
-		getStringFromFile(fin, NewModel->place_);
+		getStringFromFile(fin, place);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "quat" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error quat");
 		}
-		getStringFromFile(fin, NewModel->quat_);
+		getStringFromFile(fin, quat);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "scale" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error scale");
 		}
-		getStringFromFile(fin, NewModel->scale_);
+		getStringFromFile(fin, scale);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "mass" || strbuf == "end_of_file") {
+			throw GameException(__LINE__, __func__, "error mass");
+		}
+		getStringFromFile(fin, mass);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "box" || strbuf == "end_of_file") {
+			throw GameException(__LINE__, __func__, "error box");
+		}
+		getStringFromFile(fin, box);
+		if (!NewModel) {
+			switch (type) {
+			case GAMEMODEL:
+				NewModel = new GameModel(real_world_, type, place, quat, path_2, scale, mass, box);
+				break;
+			case ANIMATION:
+				NewModel = new AnimatedModel(real_world_, type, place, quat, path_2, scale, mass, box);
+				break;
+			case STRUCTURE:
+				NewModel = new Structure(real_world_, type, place, quat, path_2, scale, mass, box);
+				break;
+			default:
+				NewModel = new GameModel(real_world_, type, place, quat, path_2, scale, mass, box);
+			}
+		}
+		else {
+			throw GameException(__LINE__, __func__, "Error wrong type of class");
+	}
+		//real_world_ ,
+		//NewModel->rigid_body_();
+		//
 #if DEBUG_MANAGER
 		NewModel->PrintModel();
 #endif
@@ -121,3 +140,10 @@ void GameManager::LoadModels() {
 		it->LoadModel();
 	}
 }
+
+
+GameManager::GameManager() : real_world_(phys_world()) {}
+
+//GameManager::~GameManager() {
+//	real_world_.~phys_world();
+//}

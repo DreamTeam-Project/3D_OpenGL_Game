@@ -41,7 +41,7 @@ vector<string> faces{
 const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
+Camera camera(vec3(0.0f, 10.0f, 3.0f));
 GameManager Manager;
 
 GLfloat lastX = WIDTH / 2.0;
@@ -137,6 +137,7 @@ static void DrawInWindow() {
 	while (!glfwWindowShouldClose(game_window)) {
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
+		Manager.real_world_.do_step(deltaTime);
 		lastFrame = currentFrame;
 		processInput(game_window);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

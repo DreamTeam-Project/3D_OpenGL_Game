@@ -11,11 +11,12 @@
 #include <assimp\matrix4x4.h>
 
 #if _DEBUG
-#define DEBUG_GAME		0
+#define DEBUG_GAME		1
 #define DEBUG_MODEL		0
 #define DEBUG_MESH		0
 #define DEBUG_MANAGER	0
 #define DEBUG_SKINNING	0
+#define DEBUG_PHYSICS	1
 #endif
 
 #define SUCCESS 42
@@ -61,6 +62,7 @@ void print(const char* what);
 void print(const string& what);
 void getStringFromFile(ifstream& fin, string& ret);
 void getStringFromFile(ifstream& fin, int& ret);
+void getStringFromFile(ifstream& fin, double& ret);
 void getStringFromFile(ifstream& fin, vec3& ret);
 void InitIdentity(aiMatrix4x4& matrix);
 void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& matrix);

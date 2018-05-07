@@ -258,7 +258,7 @@ void AnimatedMesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, c
 }
 
 //This additional method finds the key rotation just before the animation time.
-//Если мы имеем N ключевых вращений, то результат может быть от 0 до N - 2
+//If we have N key rotations, then the result can be from 0 to N - 2
 uint AnimatedMesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim) {
 	if (pNodeAnim->mNumRotationKeys < 0) {
 		throw GameException(__LINE__, __func__, string("Error: mNumRotationKeys < 0"));
