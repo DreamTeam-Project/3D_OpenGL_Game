@@ -62,16 +62,16 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 		if (!NewModel) {
 			switch (type) {
 			case GAMEMODEL:
-				NewModel = new GameModel(32.0f);
+				NewModel = new GameModel(32.0f, true);
 				break;
 			case ANIMATION:
-				NewModel = new AnimatedModel(15.0f);
+				NewModel = new AnimatedModel(32.0f, true);
 				break;
 			case STRUCTURE:
-				NewModel = new Structure(1.0f);
+				NewModel = new Structure(32.0f, true);
 				break;
 			default:
-				NewModel = new GameModel(32.0f);
+				NewModel = new GameModel(32.0f, true);
 			}
 			NewModel->type_ = type;
 		}
@@ -89,7 +89,7 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 		if (strbuf != "place" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error place");
 		}
-		getStringFromFile(fin, NewModel->place_);
+		getStringFromFile(fin, NewModel->place_);;
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "quat" || strbuf == "end_of_file") {
@@ -117,7 +117,18 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 }
 
 void GameManager::LoadModels() {
-	for (auto it : AllModels) {
-		it->LoadModel();
+	bool ModelLoaded = false;
+	for (uint i = 0; i < AllModels.size(); i++) {
+		ModelLoaded = false;
+		for (auto& it : LoadedModels) {
+			if (it.path_ == AllModels[i]->path_ && it.type_ == AllModels[i]->type_) {
+				AllModels[i]->CopyModel(AllModels[it.id_]);
+				ModelLoaded = true;
+			}
+		}
+		if (!ModelLoaded) {
+			LoadedModels.push_back(LoadedModel(AllModels[i]->path_, AllModels[i]->type_, i));
+			AllModels[i]->LoadModel();
+		}
 	}
 }

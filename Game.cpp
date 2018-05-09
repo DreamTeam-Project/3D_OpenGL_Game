@@ -37,7 +37,7 @@ void processInput(GLFWwindow *window);
 const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
+Camera camera(vec3(0.0f, 40.0f, 3.0f));
 GameManager Manager;
 
 GLfloat lastX = WIDTH / 2.0;
@@ -122,12 +122,12 @@ static void DrawInWindow() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	GameShader SkyboxShader("Skybox.vs", "Skybox.frag");
-	GameShader Shader("Light.vs", "Light.frag");
+	GameShader SkyboxShader("Skybox.vs", "Skybox.fs");
+	GameShader Shader("Light.vs", "Light.fs");
 
 	Skybox box;
 	box.GenBuffer();
-	box.cubemapTexture = box.loadCubemap(faces);
+	box.cubemapTexture = box.loadCubemap(DarkStormy);
 
 	SkyboxShader.Use();
 	SkyboxShader.setInt("skybox", 0);
@@ -152,7 +152,7 @@ static void DrawInWindow() {
 		SetPointLights(Shader);
 		SetSpotLights(Shader);
 
-		for (auto it : Manager.AllModels) {
+		for (auto& it : Manager.AllModels) {
 			it->SetShaderParameters(Shader);
 			it->Draw(Shader);
 		}
@@ -166,7 +166,7 @@ static void DrawInWindow() {
 void SetGlobalLight(GameShader& shader) {
 	shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
 	shader.setVec3("dirLight.ambient", 0.0f, 0.0f, 0.0f);
-	shader.setVec3("dirLight.diffuse", 0.05f, 0.05f, 0.05f);
+	shader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
 	shader.setVec3("dirLight.specular", 0.2f, 0.2f, 0.2f);
 }
 
@@ -194,7 +194,7 @@ void SetSpotLights(GameShader& shader) {
 }
 
 static void Loading() {
-	GameShader LoaderShader("Load.vs", "Load.frag");
+	GameShader LoaderShader("Load.vs", "Load.fs");
 	GLfloat vertices[] = {
 		1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
 		1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,

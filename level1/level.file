@@ -1,37 +1,20 @@
-
-< type  >   < 0                                     >
-< path  >   < level1\cat\walk.dae               > 
-< place >   <  -10.0 -10.0 50.0                     >
-< quat  >   <  0.0 0.0 0.0                        > 
-< scale >   <  0.02 0.02 0.02                          >
-
-< type  >   < 1                                     >
-< path  >   < level1\cat\walk.dae               > 
-< place >   <  -12.0 -10.0 50.0                     >
-< quat  >   <  0.0 0.0 0.0                        > 
-< scale >   <  0.02 0.02 0.02                          >
-
-< type  >   < 2                                     >
-< path  >   < level1\cat\walk.dae               > 
-< place >   <  -8.0 -10.0 50.0                     >
-< quat  >   <  0.0 0.0 0.0                        > 
-< scale >   <  0.02 0.02 0.02                          >
-
 < type  >   < 1                                     >
 < path  >   < level1\lava\lava.obj                  > 
-< place >   <           0.0 -10.0 0.0               >
+< place >   <           0.0 30.0 0.0               >
 < quat  >   <  0.0 0.0 0.0                          > 
 < scale >   <  100.0 100.0 100.0                    >
 
 < type  >   < 1                                     >
 < path  >   < level1\Abandoned Church\3ds file.3DS  > 
-< place >   <   0.0 -10.0 0.0                       >
+< place >   <   50.0 30.0 50.0                       >
 < quat  >   <   270.0 0.0 0.0                       > 
 < scale >   <   1.0 1.0 1.0                         >
 
-< type  >   < 2                                     >
-< path  >   < level1\Enginer\MP_US_Engi.3DS         > 
-< place >   <         10.0 -10.0 50.0               >
-< quat  >   <  270.0 0.0 0.0                        > 
-< scale >   <  0.025 0.025 0.025                    >
+< type  >   < 1                                     >
+< path  >   < level1\Abandoned Church\3ds file.3DS  > 
+< place >   <   0.0 30.0 50.0                       >
+< quat  >   <   270.0 0.0 0.0                       > 
+< scale >   <   1.0 1.0 1.0                         >
+
+
 

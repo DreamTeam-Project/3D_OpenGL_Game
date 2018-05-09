@@ -36,11 +36,12 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 class GameModel {
 public:
 	GameModel() = delete;
-	GameModel(float shininess, bool gamma = false ) : gammaCorrection_(gamma), shininess_(shininess) {	}
+	explicit GameModel(float shininess = 32.0f, bool draw = true ) : draw_(draw), shininess_(shininess) {	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
+	void CopyModel(const GameModel* model);
 
-	void SetShaderParameters(GameShader& shader);
+	void SetShaderParameters(const GameShader& shader);
 	void Move(mat4& model);
 	virtual void PrintModel();
 
@@ -56,7 +57,7 @@ private:
 	vector<GameTexture> textures_loaded_;
 	vector<MeshEntry> Entries_;
 	vector<Mesh*> meshes_;
-	bool gammaCorrection_;
+	bool draw_;
 	aiMatrix4x4 GlobalInverseTransform_;
 	const aiScene* scene_;
 
@@ -71,7 +72,7 @@ private:
 class Structure : public GameModel {
 public:
 	Structure() = delete;
-	Structure(float shininess) : GameModel(shininess) { }
+	Structure(float shininess, bool draw = true) : GameModel(shininess, draw) { }
 	//void SetShaderParameters(GameShader& shader) override;
 	//void Move(mat4& model) override;
 	void PrintModel() override;
@@ -80,7 +81,7 @@ public:
 
 class AnimatedModel : public GameModel {
 public:
-	AnimatedModel(float shininess) : GameModel(shininess) { }
+	AnimatedModel(float shininess, bool draw = true) : GameModel(shininess, draw) { }
 	//void SetShaderParameters(GameShader& shader) override;
 	//void Move(mat4& model) override;
 	void PrintModel() override;

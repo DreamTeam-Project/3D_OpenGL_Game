@@ -68,13 +68,13 @@ void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix);
 int doNothing();
 
 extern GLFWwindow* game_window;
-static vector<string> faces{
-	("textures/skybox/nightsky_ft.tga"),
-	("textures/skybox/nightsky_bk.tga"),
-	("textures/skybox/nightsky_up.tga"),
-	("textures/skybox/nightsky_dn.tga"),
-	("textures/skybox/nightsky_rt.tga"),
-	("textures/skybox/nightsky_lf.tga")
+static vector<string> DarkStormy{
+	("textures/skybox/DarkStormy_ft.png"),
+	("textures/skybox/DarkStormy_bk.png"),
+	("textures/skybox/DarkStormy_up.png"),
+	("textures/skybox/DarkStormy_dn.png"),
+	("textures/skybox/DarkStormy_rt.png"),
+	("textures/skybox/DarkStormy_lf.png")
 };
 const string LoadImage = "textures/please-stand-by.jpg";
 const string LoadFile = "Load.file";

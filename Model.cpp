@@ -1,9 +1,16 @@
 #include "Model.h"
 
 void GameModel::Draw(const GameShader& shader) {
-	for (size_t i = 0; i < meshes_.size(); i++) {
+	for (uint i = 0; i < meshes_.size(); i++) {
 		meshes_[i]->Draw(shader);
 	}
+}
+
+void GameModel::CopyModel(const GameModel* model) {
+	Entries_ = model->Entries_;
+	meshes_ = model->meshes_;
+	GlobalInverseTransform_ = model->GlobalInverseTransform_;
+	scene_ = model->scene_;
 }
 
 void GameModel::LoadModel() {
@@ -34,7 +41,7 @@ void GameModel::ProcessNode(aiNode *node, const aiScene *scene) {
 		NumIndices += Entries_[i].NumIndices;
 	}
 
-	for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		aiMesh *mesh = scene->mMeshes[i];
 		meshes_.push_back(ProcessMesh(mesh, scene, i));
 	}
@@ -43,28 +50,18 @@ void GameModel::ProcessNode(aiNode *node, const aiScene *scene) {
 Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex) {
 	Mesh* ret = nullptr;
 	vector<Vertex> vertices;
-	vector<unsigned int> indices;
+	vector<uint> indices;
 	vector<GameTexture> textures;
 
 	indices.reserve(mesh->mNumFaces * 3);
 	vertices.reserve(mesh->mNumVertices);
 
-	for (size_t i = 0; i < mesh->mNumVertices; i++) {
+	for (uint i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
-		vec3 vector;
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
-		if (mesh->mTextureCoords[0]) {
-			glm::vec2 vec;
-			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
+		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		if (mesh->HasTextureCoords(0)) {
+			vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 		}
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
@@ -72,11 +69,10 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 		vertices.push_back(vertex);
 	}
 
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-		aiFace face = mesh->mFaces[i];
-		for (unsigned int j = 0; j < face.mNumIndices; j++) {
-			indices.push_back(face.mIndices[j]);
-		}
+	for (uint i = 0; i < mesh->mNumFaces; i++) {
+		indices.push_back(mesh->mFaces[i].mIndices[0]);
+		indices.push_back(mesh->mFaces[i].mIndices[1]);
+		indices.push_back(mesh->mFaces[i].mIndices[2]);
 	}
 	
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -104,11 +100,11 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 
 vector<GameTexture> GameModel::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName) {
 	vector<GameTexture> textures;
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
+	for (uint i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
 		bool skip = false;
-		for (unsigned int j = 0; j < textures_loaded_.size(); j++) {
+		for (uint j = 0; j < textures_loaded_.size(); j++) {
 			if (std::strcmp(textures_loaded_[j].path.data(), str.C_Str()) == 0) {
 				textures.push_back(textures_loaded_[j]);
 				skip = true;
@@ -127,14 +123,14 @@ vector<GameTexture> GameModel::LoadMaterialTextures(aiMaterial *mat, aiTextureTy
 	return textures;
 }
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma) {
+uint TextureFromFile(const char *path, const string &directory, bool gamma) {
 	string filename = string(path);
 	filename = directory + '\\' + filename;
 #if DEBUG_MODEL
 	print(string("directory: ") + directory);
 	print(string("filename: ") + filename);
 #endif
-	unsigned int textureID;
+	uint textureID;
 	glGenTextures(1, &textureID);
 
 	int width, height, nrComponents;
@@ -208,13 +204,13 @@ void AnimatedModel::PrintModel() {
 
 void GameModel::Move(mat4& model) {
 	model = glm::translate(model, place_);
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0, 0.0, 1.0));
+	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
 	model = glm::scale(model, scale_);
 }
 
-void GameModel::SetShaderParameters(GameShader& shader) {
+void GameModel::SetShaderParameters(const GameShader& shader) {
 	mat4 model;
 	Move(model);
 	shader.setMat4("model", model);

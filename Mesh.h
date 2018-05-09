@@ -50,7 +50,7 @@ struct BoneInfo {
 	}
 };
 struct GameTexture {
-	unsigned int id;
+	uint id;
 	string type;
 	string path;
 };
@@ -58,8 +58,6 @@ struct Vertex {
 	vec3 Position;
 	vec3 Normal;
 	vec2 TexCoords;
-	vec3 Tangent;
-	vec3 Bitangent;
 };
 struct MeshEntry {
 	MeshEntry()
@@ -70,25 +68,26 @@ struct MeshEntry {
 		MaterialIndex = INVALID_MATERIAL;
 	}
 
-	unsigned int NumIndices;
-	unsigned int BaseVertex;
-	unsigned int BaseIndex;
-	unsigned int MaterialIndex;
+	uint NumIndices;
+	uint BaseVertex;
+	uint BaseIndex;
+	uint MaterialIndex;
 };
 
 class Mesh {
 public:
 	vector<Vertex> vertices_;
-	vector<unsigned int> indices_;
+	vector<uint> indices_;
 	vector<GameTexture> textures_;
 
+	uint* ReturnVAO() { return &VAO; }
 	virtual void SetupMesh();
 	virtual void Draw(const GameShader& shader);
-	Mesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures)
+	explicit Mesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
 
 protected:
-	unsigned int VBO, EBO, VAO;
+	uint VBO, EBO, VAO;
 };
 
 class AnimatedMesh : public Mesh {
@@ -100,7 +99,7 @@ public:
 
 	void SetupMesh() override;
 	void Draw(const GameShader& shader) override;
-	AnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
+	AnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
 		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
 		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
 
@@ -117,11 +116,11 @@ public:
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 
 protected:
-	unsigned int BONE_VB;
+	uint BONE_VB;
 };
 
-Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
-Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures,
+Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures);
+Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures,
 	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
 
 #endif
