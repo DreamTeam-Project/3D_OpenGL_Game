@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "System.h"
+#include "Light.h"
 
 using std::vector;
 using std::string;
@@ -39,17 +40,18 @@ struct LoadedModel {
 
 class GameManager {
 public:
+	void RenderModels(const GameShader& shader);
 	void LoadInfoAboutLevels();
-	void LoadInfoAboutModels(size_t levelNumber);
-	size_t ChooseLevel() { return 0; }
+	void LoadInfoAboutModels(uint levelNumber);
+	uint ChooseLevel() { return 0; }
 	bool BeOrNotToBe() { return false; }
-	vector<GameModel*> AllModels;
-	vector<LoadedModel> LoadedModels;
 
 private:
-
 	void LoadModels();
-	Levels levels;
+	Levels levels;;
+	GameLight Light;
+	vector<GameModel*> AllModels;
+	vector<LoadedModel> LoadedModels;
 };
 
 #endif

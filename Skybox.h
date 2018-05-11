@@ -59,11 +59,12 @@ const float skyboxVertices[] = {
 
 class Skybox {
 public:
-	Skybox() {}
+	Skybox(float l = 0.7f) : light(l) {   }
 	~Skybox();
+	float light;
 	uint loadCubemap(const vector<string>& faces);
 	void GenBuffer();
-	void Bind(Camera& camera, GameShader& Skybox, const glm::mat4& projection);
+	void Bind(const Camera& camera, const GameShader& Skybox, const glm::mat4& projection);
 
 	uint cubemapTexture;
 private:

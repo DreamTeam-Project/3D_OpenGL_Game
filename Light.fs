@@ -45,7 +45,8 @@ struct SpotLight
     vec3 specular;       
 };
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 15
+#define NR_SPOT_LIGHTS 10
 
 in VS_OUT {
     vec3 FragPos;
@@ -53,10 +54,12 @@ in VS_OUT {
     vec2 TexCoords;
 } fs_in;
 
+uniform int numSpotLights;
+uniform int numPointLights;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform SpotLight spotLight;
+uniform SpotLight spotLights[NR_SPOT_LIGHTS];
 uniform Material material;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -71,11 +74,11 @@ void main()
     // phase 1: directional lighting
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
     // phase 2: point lights
-    //for(int i = 0; i < NR_POINT_LIGHTS; i++)
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < numPointLights; i++)
         result += CalcPointLight(pointLights[i], norm, fs_in.FragPos, viewDir);    
     // phase 3: spot light
-    result += CalcSpotLight(spotLight, norm, fs_in.FragPos, viewDir);
+	for(int i = 0; i < numSpotLights; i++)
+		result += CalcSpotLight(spotLights[i], norm, fs_in.FragPos, viewDir);
 
 	FragColor = vec4(result, 1.0);
 }

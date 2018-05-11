@@ -26,10 +26,6 @@ static void StartWindow();
 static void DrawInWindow();
 static void Loading();
 
-void SetSpotLights(GameShader& shader);
-void SetGlobalLight(GameShader& shader);
-void SetPointLights(GameShader& shader);
-
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
@@ -37,7 +33,7 @@ void processInput(GLFWwindow *window);
 const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 40.0f, 3.0f));
+Camera camera(vec3(0.0f, 0.0f, 0.0f));
 GameManager Manager;
 
 GLfloat lastX = WIDTH / 2.0;
@@ -125,10 +121,9 @@ static void DrawInWindow() {
 	GameShader SkyboxShader("Skybox.vs", "Skybox.fs");
 	GameShader Shader("Light.vs", "Light.fs");
 
-	Skybox box;
+	Skybox box(0.2f);
 	box.GenBuffer();
 	box.cubemapTexture = box.loadCubemap(DarkStormy);
-
 	SkyboxShader.Use();
 	SkyboxShader.setInt("skybox", 0);
 
@@ -148,49 +143,12 @@ static void DrawInWindow() {
 		Shader.setMat4("view", view);
 		Shader.setVec3("viewPos", camera.Position);
 
-		SetGlobalLight(Shader);
-		SetPointLights(Shader);
-		SetSpotLights(Shader);
-
-		for (auto& it : Manager.AllModels) {
-			it->SetShaderParameters(Shader);
-			it->Draw(Shader);
-		}
+		Manager.RenderModels(Shader);
 
 		box.Bind(camera, SkyboxShader, projection);
 		glfwSwapBuffers(game_window);
 		glfwPollEvents();
 	}
-}
-
-void SetGlobalLight(GameShader& shader) {
-	shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	shader.setVec3("dirLight.ambient", 0.0f, 0.0f, 0.0f);
-	shader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
-	shader.setVec3("dirLight.specular", 0.2f, 0.2f, 0.2f);
-}
-
-void SetPointLights(GameShader& shader) {
-	shader.setVec3("pointLights[0].position", vec3(10, 10, 10));
-	shader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-	shader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-	shader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-	shader.setFloat("pointLights[0].constant", 1.0f);
-	shader.setFloat("pointLights[0].linear", 0.09);
-	shader.setFloat("pointLights[0].quadratic", 0.032);
-}
-
-void SetSpotLights(GameShader& shader) {
-	shader.setVec3("spotLight.position", camera.Position);
-	shader.setVec3("spotLight.direction", camera.Front);
-	shader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-	shader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	shader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	shader.setFloat("spotLight.constant", 1.0f);
-	shader.setFloat("spotLight.linear", 0.09);
-	shader.setFloat("spotLight.quadratic", 0.032);
-	shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(20.0f)));
-	shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(25.0f)));
 }
 
 static void Loading() {

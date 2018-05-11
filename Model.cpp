@@ -6,12 +6,21 @@ void GameModel::Draw(const GameShader& shader) {
 	}
 }
 
+void GameModel::ClearLoaded() {
+	textures_loaded_.clear();
+}
+
 void GameModel::CopyModel(const GameModel* model) {
 	Entries_ = model->Entries_;
 	meshes_ = model->meshes_;
 	GlobalInverseTransform_ = model->GlobalInverseTransform_;
 	scene_ = model->scene_;
 }
+
+GameModel::GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw) :
+	place_(place), quat_(quat), scale_(scale), draw_(draw), scene_(model->scene_),
+	Entries_(model->Entries_), meshes_(model->meshes_), GlobalInverseTransform_(model->GlobalInverseTransform_)
+	{   }
 
 void GameModel::LoadModel() {
 	Assimp::Importer importer_;
@@ -123,7 +132,7 @@ vector<GameTexture> GameModel::LoadMaterialTextures(aiMaterial *mat, aiTextureTy
 	return textures;
 }
 
-uint TextureFromFile(const char *path, const string &directory, bool gamma) {
+uint TextureFromFile(const char *path, const string &directory) {
 	string filename = string(path);
 	filename = directory + '\\' + filename;
 #if DEBUG_MODEL

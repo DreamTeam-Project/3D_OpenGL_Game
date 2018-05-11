@@ -21,7 +21,7 @@ public:
 	GLuint program_c;
 	GameShader(const char* vertexPath, const char* fragmentPath);
 	GameShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
-	void Use();
+	void Use() const;
 	// utility uniform functions
 	void setBool(const std::string &name, bool value) const;
 	void setInt(const std::string &name, int value) const;

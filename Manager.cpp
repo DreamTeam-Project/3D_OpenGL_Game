@@ -29,7 +29,7 @@ void GameManager::LoadInfoAboutLevels() {
 #endif
 }
 
-void GameManager::LoadInfoAboutModels(size_t levelNumber) {
+void GameManager::LoadInfoAboutModels(uint levelNumber) {
 	string path = levels.levels_.at(levelNumber).pathLoader_;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
@@ -68,8 +68,11 @@ void GameManager::LoadInfoAboutModels(size_t levelNumber) {
 				NewModel = new AnimatedModel(32.0f, true);
 				break;
 			case STRUCTURE:
-				NewModel = new Structure(32.0f, true);
+				NewModel = new Structure(16.0f, true);
 				break;
+			case STREETLAMP:
+				NewModel = new StreetLamp(32.0f, true, true);
+				//Light.PointLights.push_back(PointLight(NewModel, ))
 			default:
 				NewModel = new GameModel(32.0f, true);
 			}
@@ -129,6 +132,19 @@ void GameManager::LoadModels() {
 		if (!ModelLoaded) {
 			LoadedModels.push_back(LoadedModel(AllModels[i]->path_, AllModels[i]->type_, i));
 			AllModels[i]->LoadModel();
+		}
+	}
+	for (auto& it : AllModels) {
+		it->ClearLoaded();
+	}
+}
+
+void GameManager::RenderModels(const GameShader& shader) {
+	Light.SetLight(shader);
+	for (auto& it : AllModels) {
+		if (it->draw_) {
+			it->SetShaderParameters(shader);
+			it->Draw(shader);
 		}
 	}
 }

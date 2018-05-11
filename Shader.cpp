@@ -139,7 +139,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 
 }
 
-void GameShader::Use() { 
+void GameShader::Use() const { 
 	glUseProgram(this->program_c); 
 }
 

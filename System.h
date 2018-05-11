@@ -33,7 +33,7 @@ using std::ifstream;
 using std::to_string;
 
 enum GameEnumClass {
-	GAMEMODEL,	STRUCTURE,	ANIMATION
+	GAMEMODEL, STRUCTURE, ANIMATION, STREETLAMP
 };
 
 class GameException : public exception
@@ -69,12 +69,12 @@ int doNothing();
 
 extern GLFWwindow* game_window;
 static vector<string> DarkStormy{
-	("textures/skybox/DarkStormy_ft.png"),
-	("textures/skybox/DarkStormy_bk.png"),
+	("textures/skybox/DarkStormy_lf.png"),
+	("textures/skybox/DarkStormy_rt.png"),
 	("textures/skybox/DarkStormy_up.png"),
 	("textures/skybox/DarkStormy_dn.png"),
-	("textures/skybox/DarkStormy_rt.png"),
-	("textures/skybox/DarkStormy_lf.png")
+	("textures/skybox/DarkStormy_ft.png"),
+	("textures/skybox/DarkStormy_bk.png")
 };
 const string LoadImage = "textures/please-stand-by.jpg";
 const string LoadFile = "Load.file";

@@ -41,10 +41,11 @@ void Skybox::GenBuffer() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void Skybox::Bind(Camera& camera, GameShader& Shader, const glm::mat4& projection) {
+void Skybox::Bind(const Camera& camera, const GameShader& Shader, const glm::mat4& projection) {
 	glDepthFunc(GL_LEQUAL);
 	Shader.Use();
 	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+	Shader.setFloat("light", light);
 	Shader.setMat4("view", view);
 	Shader.setMat4("projection", projection);
 	glBindVertexArray(skyboxVAO);
