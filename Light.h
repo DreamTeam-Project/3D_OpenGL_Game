@@ -3,6 +3,8 @@
 
 #define GLEW_STATIC
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <vector>
 #include <string>
 
@@ -13,49 +15,49 @@ using std::string;
 using std::vector;
 
 struct GlobalLight {
-	GlobalLight(const vec3& dir = vec3(-0.2f, -1.0f, -0.3f),const vec3& amb = vec3(0.0f, 0.0f, 0.0f), 
-		const vec3& diff = vec3(0.05f, 0.05f, 0.05f), const vec3& spec = vec3(0.1f, 0.1f, 0.1f)) :
-		direction(dir), ambient(amb), diffuse(diff), specular(spec) {  }
-	vec3 direction;
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+	GlobalLight(const vec3& dir = direction, const vec3& amb = ambient, 
+		const vec3& diff = diffuse, const vec3& spec = specular) :
+		direction_(dir), ambient_(amb), diffuse_(diff), specular_(spec) {  }
+	vec3 direction_;
+	vec3 ambient_;
+	vec3 diffuse_;
+	vec3 specular_;
 };
 
 struct PointLight {
 	PointLight() = delete;
 	PointLight(GameModel* mod, const vec3& pos, const vec3& diff, const vec3& amb,
 		const vec3& spec, float con, float lin, float quad) : 
-	model(mod), position(pos), ambient(amb), diffuse(diff), 
-		specular(spec), constant(con), quadratic(quad) {  }
+	model(mod), position_(pos), ambient_(amb), diffuse_(diff), 
+		specular_(spec), constant_(con), quadratic_(quad) {  }
 	GameModel* model;
-	vec3 position;
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
-	float constant;
-	float linear;
-	float quadratic;
+	vec3 position_;
+	vec3 ambient_;
+	vec3 diffuse_;
+	vec3 specular_;
+	float constant_;
+	float linear_;
+	float quadratic_;
 };
 
 struct SpotLight {
 	SpotLight() = delete;
 	SpotLight(GameModel* mod, const vec3& pos, const vec3& diff, const vec3& amb,
 		const vec3& dir, const vec3& spec, float con, float lin, float quad, float cut, float out) :
-		model(mod), position(pos), direction(dir), ambient(amb), diffuse(diff), specular(spec), 
-		constant(con), quadratic(quad), cutOff(glm::cos(glm::radians(cut))), outerCutOff(glm::cos(glm::radians(out))) 
+		model(mod), position_(pos), direction_(dir), ambient_(amb), diffuse_(diff), specular_(spec), 
+		constant_(con), quadratic_(quad), cutOff_(glm::cos(glm::radians(cut))), outerCutOff_(glm::cos(glm::radians(out))) 
 	{  }
 	GameModel* model;
-	vec3 position;
-	vec3 direction;
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
-	float constant;
-	float linear;
-	float quadratic;
-	float cutOff;
-	float outerCutOff;
+	vec3 position_;
+	vec3 direction_;
+	vec3 ambient_;
+	vec3 diffuse_;
+	vec3 specular_;
+	float constant_;
+	float linear_;
+	float quadratic_;
+	float cutOff_;
+	float outerCutOff_;
 };
 
 class GameLight {

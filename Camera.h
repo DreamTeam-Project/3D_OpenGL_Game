@@ -23,14 +23,13 @@ const GLfloat ZOOM = 45.0f;
 
 using glm::vec3;
 
-class Camera
-{
+class Camera {
 public:
-	glm::vec3 Position;
-	glm::vec3 Front;
-	glm::vec3 Up;
-	glm::vec3 Right;
-	glm::vec3 WorldUp;
+	vec3 Position;
+	vec3 Front;
+	vec3 Up;
+	vec3 Right;
+	vec3 WorldUp;
 
 	GLfloat Yaw;
 	GLfloat Pitch;

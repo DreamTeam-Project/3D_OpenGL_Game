@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "System.h"
 #include "Light.h"
+#include "Text.h"
 
 using std::vector;
 using std::string;
@@ -48,7 +49,7 @@ public:
 
 private:
 	void LoadModels();
-	Levels levels;;
+	Levels levels;
 	GameLight Light;
 	vector<GameModel*> AllModels;
 	vector<LoadedModel> LoadedModels;

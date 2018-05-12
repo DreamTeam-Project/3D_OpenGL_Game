@@ -16,6 +16,7 @@
 #define DEBUG_MESH		0
 #define DEBUG_MANAGER	0
 #define DEBUG_SKINNING	0
+#define DEBUG_FONTS		1
 #endif
 
 #define SUCCESS 42
@@ -54,6 +55,7 @@ private:
 	string whatStr_;
 };
 
+inline void CheckError();
 string vec3_toString(const vec3& a);
 bool IsItNumber(const string& word);
 void SetZero(aiMatrix4x4* matrix);
@@ -78,5 +80,13 @@ static vector<string> DarkStormy{
 };
 const string LoadImage = "textures/please-stand-by.jpg";
 const string LoadFile = "Load.file";
+const string FontFile = "textures/2.ttf";
+const uint HeightFont = 48u;
+const uint WidthFont = 24u;
+const GLuint WIDTH = 1024, HEIGHT = 600;
+const vec3 direction(-0.2f, -1.0f, -0.3f);
+const vec3 diffuse(0.05f, 0.05f, 0.05f);
+const vec3 specular(0.1f, 0.1f, 0.1f);
+const vec3 ambient(1.0f, 1.0f, 1.0f);
 
 #endif

@@ -15,6 +15,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "Text.h"
 #include "Manager.h"
 
 using std::string;
@@ -30,7 +31,6 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow *window);
 
-const GLuint WIDTH = 1024, HEIGHT = 600;
 GLFWwindow* game_window = nullptr;
 
 Camera camera(vec3(0.0f, 0.0f, 0.0f));
@@ -117,28 +117,36 @@ static void DrawInWindow() {
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameShader SkyboxShader("Skybox.vs", "Skybox.fs");
 	GameShader Shader("Light.vs", "Light.fs");
 
-	Skybox box(0.2f);
+	Skybox box(0.9f);
 	box.GenBuffer();
 	box.cubemapTexture = box.loadCubemap(DarkStormy);
 	SkyboxShader.Use();
 	SkyboxShader.setInt("skybox", 0);
+
+	GameShader textShader("Text.vs", "Text.fs");
+	textShader.Use();
+	textShader.setMat4("projection", glm::ortho(0.0f, (float)HEIGHT, 0.0f, (float)WIDTH));
+	textShader.setInt("text", 0);
+	GameText text(textShader);
+	text.LoadFonts();
 
 	while (!glfwWindowShouldClose(game_window)) {
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		processInput(game_window);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		Shader.Use();
 
+		Shader.Use();
 		mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
 		mat4 view = camera.GetViewMatrix();
-
 		Shader.setMat4("projection", projection);
 		Shader.setMat4("view", view);
 		Shader.setVec3("viewPos", camera.Position);
@@ -146,6 +154,7 @@ static void DrawInWindow() {
 		Manager.RenderModels(Shader);
 
 		box.Bind(camera, SkyboxShader, projection);
+		text.RenderText(textShader, "T h e f i v e    b o x i n g w i z a r d s    j u m p   q u i c k l y ! ", 10, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
 		glfwSwapBuffers(game_window);
 		glfwPollEvents();
 	}
