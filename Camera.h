@@ -23,14 +23,13 @@ const GLfloat ZOOM = 45.0f;
 
 using glm::vec3;
 
-class Camera
-{
+class Camera {
 public:
-	glm::vec3 Position;
-	glm::vec3 Front;
-	glm::vec3 Up;
-	glm::vec3 Right;
-	glm::vec3 WorldUp;
+	vec3 Position;
+	vec3 Front;
+	vec3 Up;
+	vec3 Right;
+	vec3 WorldUp;
 
 	GLfloat Yaw;
 	GLfloat Pitch;
@@ -41,7 +40,7 @@ public:
 
 	Camera(vec3 position = vec3(0.0f, 0.0f, 0.0f), vec3 up = vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH);
 	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch);
-	glm::mat4 GetViewMatrix();
+	glm::mat4 GetViewMatrix() const;
 	void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime);
 	void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true);
 	void ProcessMouseScroll(GLfloat yoffset);

@@ -1,5 +1,36 @@
 #include "System.h"
 
+void CheckError(uint line, const char* func) {
+	GLenum errorCode;
+	while ((errorCode = glGetError()) != GL_NO_ERROR) {
+		string error;
+		switch (errorCode) {
+			case GL_INVALID_ENUM:                  
+				error = "INVALID_ENUM"; 
+				break;
+			case GL_INVALID_VALUE:                 
+				error = "INVALID_VALUE"; 
+				break;
+			case GL_INVALID_OPERATION:             
+				error = "INVALID_OPERATION"; 
+				break;
+			case GL_STACK_OVERFLOW:                
+				error = "STACK_OVERFLOW"; 
+				break;
+			case GL_STACK_UNDERFLOW:               
+				error = "STACK_UNDERFLOW"; 
+				break;
+			case GL_OUT_OF_MEMORY:                 
+				error = "OUT_OF_MEMORY"; 
+				break;
+			default:
+				error = "DEFAULT_ERROR";
+		}
+		throw GameException(line, func, error);
+	}
+	print("no error gl");
+}
+
 void SetZero(aiMatrix4x4* matrix) {
 	memset(matrix, 0, sizeof(*matrix));
 }

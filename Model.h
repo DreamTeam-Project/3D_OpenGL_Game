@@ -29,14 +29,20 @@ using glm::vec3;
 using glm::vec2;
 using glm::mat4;
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
+#define ASSIMP_FLAGS aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs
+uint TextureFromFile(const char *path, const string &directory);
 
 class GameModel {
 public:
-	GameModel(bool gamma = false ) : gammaCorrection_(gamma) {	}
+	GameModel() = delete;
+	explicit GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw = false);
+	explicit GameModel(float shininess = 32.0f, bool draw = true ) : draw_(draw), shininess_(shininess) {	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
+	void CopyModel(const GameModel* model);
+	void ClearLoaded();
 
+	void SetShaderParameters(const GameShader& shader);
 	virtual void Move(mat4& model);
 	virtual void PrintModel();
 
@@ -46,15 +52,15 @@ public:
 	vec3 quat_;
 	vec3 scale_;
 	int type_;
+	float shininess_;
+	bool draw_;
 
 private:
 	vector<GameTexture> textures_loaded_;
 	vector<MeshEntry> Entries_;
 	vector<Mesh*> meshes_;
-	bool gammaCorrection_;
 	aiMatrix4x4 GlobalInverseTransform_;
 	const aiScene* scene_;
-	Assimp::Importer importer_;
 
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh* ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex);
@@ -66,16 +72,26 @@ private:
 
 class Structure : public GameModel {
 public:
-	void Move(mat4& model) override;
+	Structure() = delete;
+	Structure(float shininess, bool draw = true) : GameModel(shininess, draw) { }
+	//void Move(mat4& model) override;
 	void PrintModel() override;
-	void Kill() {	}
+private:
+	mat4 model;
+};
+
+class StreetLamp : public Structure {
+public:
+	StreetLamp() = delete;
+	StreetLamp(float shininess, bool draw = true, bool on = true) : Structure(shininess, draw), light(on) { }
+private:
+	bool light;
 };
 
 class AnimatedModel : public GameModel {
 public:
-	void Move(mat4& model) override;
+	AnimatedModel(float shininess, bool draw = true) : GameModel(shininess, draw) { }
 	void PrintModel() override;
-	void Kill() {	}
 };
 
 #endif

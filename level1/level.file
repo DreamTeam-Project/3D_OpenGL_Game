@@ -1,9 +1,8 @@
-
-< type  >   < 2                                     >
-< path  >   < level1\cat\walk.dae               > 
-< place >   <  0.0 0.0 0.0                     >
-< quat  >   <  0.0 0.0 0.0                        > 
-< scale >   <  1.0 1.0 1.0                          >
+< type  >   < 1                                     >
+< path  >   < level1\lava\lava.obj                  > 
+< place >   <           0.0 -10.0 0.0               >
+< quat  >   <  0.0 0.0 0.0                          > 
+< scale >   <  100.0 100.0 100.0                    >
 
 
 

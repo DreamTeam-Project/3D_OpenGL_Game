@@ -33,7 +33,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(vertex, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __func__, "SHADER::VERTEX::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "Error: vertex shader compilation failed", infoLog);
 	}
 	//Fragment Program
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -43,7 +43,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetShaderInfoLog(fragment, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __func__, "SHADER::FRAGMENT::COMPILATION_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "Error: fragment shader compilation failed", infoLog);
 	}
 	// Shader Program
 	this->program_c = glCreateProgram();
@@ -54,7 +54,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		GLchar infoLog[INFOLOG_SIZE];
 		glGetProgramInfoLog(this->program_c, INFOLOG_SIZE, NULL, infoLog);
-		throw GameException(__LINE__, __func__, "SHADER::PROGRAM::LINKING_FAILED", infoLog);
+		throw GameException(__LINE__, __func__, "Error: shader program linking failed", infoLog);
 	}
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
@@ -139,7 +139,7 @@ GameShader::GameShader(const char* vertexPath, const char* fragmentPath, const c
 
 }
 
-void GameShader::Use() { 
+void GameShader::Use() const { 
 	glUseProgram(this->program_c); 
 }
 
@@ -151,7 +151,7 @@ void GameShader::setInt(const std::string &name, int value) const {
 	glUniform1i(glGetUniformLocation(program_c, name.c_str()), value);
 }
 
-void GameShader::setfloat(const std::string &name, float value) const {
+void GameShader::setFloat(const std::string &name, float value) const {
 	glUniform1f(glGetUniformLocation(program_c, name.c_str()), value);
 }
 

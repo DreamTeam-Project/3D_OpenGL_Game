@@ -10,38 +10,53 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "System.h"
+#include "Light.h"
+#include "Text.h"
+#include "Skybox.h"
+#include "Text.h"
+#include "Image.h"
 
 using std::vector;
 using std::string;
 
+struct Level {
+	string name_;
+	string pathLoader_;
+	Level(string name = "default", string path = "default") : name_(name), pathLoader_(path) { }
+};
+struct LoadedModel {
+	LoadedModel(const string& path, int type, uint id)
+		: path_(path), id_(id), type_(type) { }
+	string path_;
+	int type_;
+	uint id_;
+};
+
 class GameManager {
 public:
-	void LoadInfoAboutLevels();
-	void LoadInfoAboutModels(size_t levelNumber);
-	size_t ChooseLevel() { return 0; }
-	bool BeOrNotToBe() { return false; }
-	vector<GameModel*> AllModels;
+	GameManager();
+	bool GameMenu(GLFWwindow *window, const Image& Loading);
+	void EndLevel();
+	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
+	bool play;
 
 private:
-	struct Level {
-		string name_;
-		string pathLoader_;
-		Level(string name = "default", string path = "default") : name_(name), pathLoader_(path) { }
-	};
-	struct Levels {
-		vector<Level> levels_;
-		void push_back(Level one) {
-			if (one.name_ != "null" && one.pathLoader_ != "null") {
-				levels_.push_back(one);
-			}
-			else {
-				throw GameException(__LINE__, __func__, "error push back level");
-			}
-		}
-	};
-
+	void RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
+	void LoadInfoAboutLevels();
+	void LoadInfoAboutModels(uint levelNumber);
+	int ChooseLevel() { return 0; }
+	int ChooseLevel(GLFWwindow* window);
+	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
 	void LoadModels();
-	Levels levels;
+
+	Skybox box;
+	GameText text;
+	GameLight Light;
+	GameShader Shader;
+	vector<Level> Levels;
+	vector<SysStrings> SysText;
+	vector<GameModel*> AllModels;
+	vector<LoadedModel> LoadedModels;
 };
 
 #endif
