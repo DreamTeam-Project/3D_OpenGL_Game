@@ -55,6 +55,17 @@ public:
 		}
 
 =======
+		path_(path_2),
+		quat_(quat),
+		scale_(scale),
+		type_(type) 
+	{
+		if (type == 1) {
+			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
+		if (type == 2) {
+			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
 
 >>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 	}
@@ -68,6 +79,8 @@ public:
 	virtual void PrintModel();
 
 <<<<<<< HEAD
+	~GameModel() {
+		delete rigid_body_;
 =======
 	~GameModel() {
 		delete rigid_body_;
