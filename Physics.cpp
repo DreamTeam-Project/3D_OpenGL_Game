@@ -5,7 +5,8 @@ void phys_body::set_velosity(btVector3& vel) {
 }
 vector<phys_body*> collided;
 
-phys_body::phys_body(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) {
+phys_body::phys_body(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass, int type):
+type_(type) {
 	btCollisionShape* colShape = new btBoxShape(col_shape);
 	world.collisionShapes.push_back(colShape);
 	/// Create Dynamic Objects
@@ -91,21 +92,22 @@ bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int
 	const btCollisionObject* col_obj2 = obj2->getCollisionObject();
 	phys_body* body_2 = (phys_body*)col_obj2->getUserPointer();
 	body_2->hit();
-	//((bulletObject*)obj1->getUserPointer())->hit=true;
 	return false;
 }
 
 char phys_body::get_status() {
-	return ALIFE;
+	return EXIST;
 }
 
 void phys_body::collidedwith() {
+
 	return;
 }
 
 void Character::collidedwith() {
 	printf("Collide\n");
 	health-=100;
+	body->setLinearVelocity(btVector3(0.0, 10.0, 0.0));
 }
 void phys_world::do_step(btScalar time) {
 	dynamicsWorld->stepSimulation(time);
@@ -135,4 +137,16 @@ char Character::get_status() {
 	}
 	printf("deadddd\n");
 	return DEAD;
+}
+
+void Character::jump() {
+	body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
+}
+
+int Character::getHealth() {
+	return health;
+}
+
+void Character::moving(glm::vec3& didection) {
+
 }
