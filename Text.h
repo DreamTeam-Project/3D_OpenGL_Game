@@ -32,7 +32,7 @@ struct SysStrings {
 	vec3 color_;
 };
 
-struct Character {
+struct Char {
 	uint TextureID;
 	ivec2 Size;
 	ivec2 Bearing;
@@ -50,7 +50,7 @@ public:
 
 private:
 	GameShader Shader;
-	map<char, Character> Characters;
+	map<char, Char> Characters;
 	uint VAO, VBO;
 };
 

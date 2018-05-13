@@ -187,6 +187,31 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 }
 
+void getStringFromFile(ifstream& fin, double& ret) {
+	string buf = "";
+	fin >> buf;
+	if (buf != "<" || fin.eof()) {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+	fin >> buf;
+	if (buf != ">" && !fin.eof()) {
+		try {
+			ret = std::stod(buf);
+		}
+		catch (exception& e) {
+			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
+		}
+	}
+	if (buf == ">") {
+		ret = 0;
+		return;
+	}
+	fin >> buf;
+	if (buf != ">") {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+}
+
 void InitIdentity(aiMatrix4x4& matrix) {
 	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
 	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = 0.0f;

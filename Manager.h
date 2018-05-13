@@ -16,6 +16,8 @@
 #include "Text.h"
 #include "Image.h"
 
+#include "Physics.h"
+
 using std::vector;
 using std::string;
 
@@ -39,6 +41,10 @@ public:
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
 	bool play;
+
+	phys_world real_world_;
+
+	phys_body camera_;
 
 private:
 	void RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
