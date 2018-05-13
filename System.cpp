@@ -187,7 +187,6 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 }
 
-<<<<<<< HEAD
 void getStringFromFile(ifstream& fin, double& ret) {
 	string buf = "";
 	fin >> buf;
@@ -211,31 +210,6 @@ void getStringFromFile(ifstream& fin, double& ret) {
 	if (buf != ">") {
 		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
-=======
-void getStringFromFile(ifstream& fin, double& ret) {
-	string buf = "";
-	fin >> buf;
-	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
-	}
-	fin >> buf;
-	if (buf != ">" && !fin.eof()) {
-		try {
-			ret = std::stod(buf);
-		}
-		catch (exception& e) {
-			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
-		}
-	}
-	if (buf == ">") {
-		ret = 0;
-		return;
-	}
-	fin >> buf;
-	if (buf != ">") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
-	}
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 }
 
 void InitIdentity(aiMatrix4x4& matrix) {

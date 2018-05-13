@@ -41,7 +41,6 @@ public:
 	explicit GameModel( phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
 		draw_(draw),
 		shininess_(shininess),
-<<<<<<< HEAD
 		path_(path_2),
 		quat_(quat),
 		scale_(scale),
@@ -54,20 +53,6 @@ public:
 			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 		}
 
-=======
-		path_(path_2),
-		quat_(quat),
-		scale_(scale),
-		type_(type) 
-	{
-		if (type == 1) {
-			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-		}
-		if (type == 2) {
-			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-		}
-
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
@@ -78,13 +63,8 @@ public:
 	virtual void Move(mat4& model);
 	virtual void PrintModel();
 
-<<<<<<< HEAD
 	~GameModel() {
 		delete rigid_body_;
-=======
-	~GameModel() {
-		delete rigid_body_;
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 	}
 
 

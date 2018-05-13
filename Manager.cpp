@@ -1,11 +1,6 @@
 #include "Manager.h"
 
-<<<<<<< HEAD
 GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false), real_world_(phys_world()) {
-=======
-GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false),
-real_world_(phys_world()){
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 	LoadInfoAboutLevels();
 }
 
@@ -48,7 +43,6 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 #if DEBUG_MANAGER
 	print(string("try to read: ") + path);
 #endif
-<<<<<<< HEAD
 	int type;
 	vec3 place;
 	vec3 quat;
@@ -109,73 +103,10 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 		if (strbuf != "box" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error box");
 		}
-=======
-	int type;
-	vec3 place;
-	vec3 quat;
-	string path;
-	vec3 scale;
-	double mass;
-	vec3 box;
-	while (!fin.eof()) {
-		GameModel* NewModel = nullptr;
-		string strbuf = "";
-		getStringFromFile(fin, strbuf);
-		if (strbuf == "null") {
-			throw GameException(__LINE__, __func__, "error level.path");
-		}
-		if (strbuf == "end_of_file") {
-			break;
-		}
-		if (strbuf != "type") {
-			throw GameException(__LINE__, __func__, "error level.path");
-		}
-
-		getStringFromFile(fin, type);
-		if (strbuf == "null" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error level.path");
-		}
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "path" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error type");
-		}
-		getStringFromFile(fin, path);
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "place" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error place");
-		}
-		getStringFromFile(fin, place);
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "quat" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error quat");
-		}
-		getStringFromFile(fin, quat);
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "scale" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error scale");
-		}
-		getStringFromFile(fin, scale);
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "mass" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error mass");
-		}
-		getStringFromFile(fin, mass);
-
-		getStringFromFile(fin, strbuf);
-		if (strbuf != "box" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error box");
-		}
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 		getStringFromFile(fin, box);
 		if (!NewModel) {
 			switch (type) {
 			case GAMEMODEL:
-<<<<<<< HEAD
 				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
 				break;
 			case ANIMATION:
@@ -189,21 +120,6 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 				//Light.PointLights.push_back(PointLight(NewModel, ))
 			default:
 				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
-=======
-				NewModel = new GameModel( real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
-				break;
-			case ANIMATION:
-				NewModel = new AnimatedModel( real_world_, type, place, quat, path, scale, mass, box,32.0f, true );
-				break;
-			case STRUCTURE:
-				NewModel = new Structure( real_world_, type, place, quat, path, scale, mass, box, 16.0f, true);
-				break;
-			case STREETLAMP:
-				NewModel = new StreetLamp( real_world_, type, place, quat, path, scale, mass, box, 32.0f, true, true);
-				//Light.PointLights.push_back(PointLight(NewModel, ))
-			default:
-				NewModel = new GameModel( real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 			}
 			NewModel->type_ = type;
 		}

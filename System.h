@@ -17,12 +17,8 @@
 #define DEBUG_MANAGER	0
 #define DEBUG_SKINNING	0
 #define DEBUG_FONTS		0
-<<<<<<< HEAD
 #define DEBUG_PHYSICS	0
 #define DEBUG_MENU		0
-=======
-#define DEBUG_PHYSICS	1
->>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 #endif
 
 #define SUCCESS 42
