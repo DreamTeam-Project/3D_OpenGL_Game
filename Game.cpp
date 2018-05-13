@@ -22,7 +22,6 @@ using std::exception;
 using glm::vec3;
 using std::vector;
 
-//static void Loading();
 static void StartWindow();
 static void DrawInWindow();
 
@@ -115,7 +114,6 @@ static void DrawInWindow() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	GameText test;
 	GameManager Manager;
 	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
 
@@ -131,7 +129,6 @@ static void DrawInWindow() {
 			mat4 view = camera.GetViewMatrix();
 
 			Manager.RenderWorld(projection, view, camera);
-			test.RenderText("test", 50.0f, 50.0f, 1);
 
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();

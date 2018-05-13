@@ -158,8 +158,8 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 }
 
 bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
-	int levelNumber = ChooseLevel();
-	//int levelNumber = ChooseLevel(window);
+	//int levelNumber = ChooseLevel();
+	int levelNumber = ChooseLevel(window);
 	if (levelNumber == -1) {
 		return false;
 	}
@@ -175,6 +175,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
 	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 4, 1.0f, vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
