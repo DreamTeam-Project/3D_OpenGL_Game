@@ -7,6 +7,8 @@ enum Location {
 	POSITION = 0, 
 	NORMAL, 
 	TEX_COORD, 
+	TANGENT,
+	BITANGENT,
 	BONE_ID, 
 	BONE_WEIGHT
 };
@@ -29,6 +31,7 @@ enum Location {
 #include <assimp/matrix4x4.h>
 
 using std::vector;
+using glm::vec2;
 using std::map;
 using std::stringstream;
 
@@ -47,15 +50,14 @@ struct BoneInfo {
 	}
 };
 struct GameTexture {
-	unsigned int id;
+	uint id;
 	string type;
 	string path;
 };
 struct Vertex {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-	void addvec(const vec3& a);
+	vec3 Position;
+	vec3 Normal;
+	vec2 TexCoords;
 };
 struct MeshEntry {
 	MeshEntry()
@@ -66,24 +68,26 @@ struct MeshEntry {
 		MaterialIndex = INVALID_MATERIAL;
 	}
 
-	unsigned int NumIndices;
-	unsigned int BaseVertex;
-	unsigned int BaseIndex;
-	unsigned int MaterialIndex;
+	uint NumIndices;
+	uint BaseVertex;
+	uint BaseIndex;
+	uint MaterialIndex;
 };
 
 class Mesh {
 public:
 	vector<Vertex> vertices_;
-	vector<unsigned int> indices_;
+	vector<uint> indices_;
 	vector<GameTexture> textures_;
 
-	virtual void Draw(const GameShader& shader);
 	virtual void SetupMesh();
-	Mesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures)
+	virtual void Draw(const GameShader& shader);
+	explicit Mesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
+	~Mesh();
+
 protected:
-	unsigned int VBO, EBO, VAO;
+	uint VBO, EBO, VAO;
 };
 
 class AnimatedMesh : public Mesh {
@@ -95,6 +99,9 @@ public:
 
 	void SetupMesh() override;
 	void Draw(const GameShader& shader) override;
+	AnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
+		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
+		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
 
 	uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
@@ -108,16 +115,12 @@ public:
 	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 
-	AnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
-		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
-		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
-
-private:
-	unsigned int BONE_VB;
+protected:
+	uint BONE_VB;
 };
 
-Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures);
-Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures,
+Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures);
+Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures,
 	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
 
 #endif

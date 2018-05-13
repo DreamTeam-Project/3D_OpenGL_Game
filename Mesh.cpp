@@ -14,19 +14,13 @@ void VertexBoneData::AddBoneData(uint BoneID, float Weight)	{
 	throw GameException(__LINE__, __func__, string("Error: to mush bones"));
 }
 
-void Vertex::addvec(const vec3& a) {
-	Position += a;
-	Normal += a;
-	TexCoords += glm::vec2(a.x, a.y);
-}
-
-Mesh* CreateMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures) {
+Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures) {
 	Mesh* ret = new Mesh(vertices, indices, textures);
 	ret->SetupMesh();
 	return ret;
 }
 
-Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices, vector<GameTexture>& textures,
+Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures,
 	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping) {
 	Mesh* ret = new AnimatedMesh(vertices, indices, textures, BonesInfo, Bones, NumBones, BoneMapping);
 	ret->SetupMesh();
@@ -34,27 +28,19 @@ Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<unsigned int>& indices
 }
 
 void Mesh::Draw(const GameShader& shader) {
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
-	for (unsigned int i = 0; i < textures_.size(); i++) {
+	uint diffuseNr = 1;
+	uint specularNr = 1;
+	for (uint i = 0; i < textures_.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		string number;
 		string name = textures_[i].type;
-		if (name == "texture_diffuse") {
-			number = std::to_string(diffuseNr++);
+		if (name == "diffuse") {
+			number = to_string(diffuseNr++);
 		}
-		else if (name == "texture_specular") {
-			number = std::to_string(specularNr++);
+		else if (name == "specular") {
+			number = to_string(specularNr++);
 		}
-		else if (name == "texture_normal") {
-			number = std::to_string(normalNr++);
-		}
-		else if (name == "texture_height") {
-			number = std::to_string(heightNr++);
-		}
-		glUniform1i(glGetUniformLocation(shader.program_c, (name + number).c_str()), i);
+		glUniform1i(glGetUniformLocation(shader.program_c, (string("material.") + name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, textures_[i].id);
 	}
 	glBindVertexArray(VAO);
@@ -63,12 +49,16 @@ void Mesh::Draw(const GameShader& shader) {
 	glActiveTexture(GL_TEXTURE0);
 }
 
+Mesh::~Mesh() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+}
+
 void AnimatedMesh::Draw(const GameShader& shader) {
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
-	for (unsigned int i = 0; i < textures_.size(); i++) {
+	uint diffuseNr = 1;
+	uint specularNr = 1;
+	for (uint i = 0; i < textures_.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		string number;
 		string name = textures_[i].type;
@@ -77,12 +67,6 @@ void AnimatedMesh::Draw(const GameShader& shader) {
 		}
 		else if (name == "texture_specular") {
 			number = std::to_string(specularNr++);
-		}
-		else if (name == "texture_normal") {
-			number = std::to_string(normalNr++);
-		}
-		else if (name == "texture_height") {
-			number = std::to_string(heightNr++);
 		}
 		glUniform1i(glGetUniformLocation(shader.program_c, (name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, textures_[i].id);
@@ -103,7 +87,7 @@ void Mesh::SetupMesh() {
 	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), &vertices_[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), &indices_[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(uint), &indices_[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(POSITION);
 	glVertexAttribPointer(POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -128,7 +112,7 @@ void AnimatedMesh::SetupMesh() {
 	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), &vertices_[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), &indices_[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(uint), &indices_[0], GL_STATIC_DRAW);
 
 	//glBindBuffer(GL_ARRAY_BUFFER, BONE_VB);
 	//glBufferData(GL_ARRAY_BUFFER, Bones_.size() * sizeof(VertexBoneData), &Bones_[0], GL_STATIC_DRAW);

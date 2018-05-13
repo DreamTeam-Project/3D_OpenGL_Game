@@ -1,5 +1,36 @@
 #include "System.h"
 
+void CheckError(uint line, const char* func) {
+	GLenum errorCode;
+	while ((errorCode = glGetError()) != GL_NO_ERROR) {
+		string error;
+		switch (errorCode) {
+			case GL_INVALID_ENUM:                  
+				error = "INVALID_ENUM"; 
+				break;
+			case GL_INVALID_VALUE:                 
+				error = "INVALID_VALUE"; 
+				break;
+			case GL_INVALID_OPERATION:             
+				error = "INVALID_OPERATION"; 
+				break;
+			case GL_STACK_OVERFLOW:                
+				error = "STACK_OVERFLOW"; 
+				break;
+			case GL_STACK_UNDERFLOW:               
+				error = "STACK_UNDERFLOW"; 
+				break;
+			case GL_OUT_OF_MEMORY:                 
+				error = "OUT_OF_MEMORY"; 
+				break;
+			default:
+				error = "DEFAULT_ERROR";
+		}
+		throw GameException(line, func, error);
+	}
+	print("no error gl");
+}
+
 void SetZero(aiMatrix4x4* matrix) {
 	memset(matrix, 0, sizeof(*matrix));
 }
@@ -117,31 +148,6 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	}
 }
 
-void getStringFromFile(ifstream& fin, double& ret) {
-	string buf = "";
-	fin >> buf;
-	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
-	}
-	fin >> buf;
-	if (buf != ">" && !fin.eof()) {
-		try {
-			ret = std::stod(buf);
-		}
-		catch (exception& e) {
-			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
-		}
-	}
-	if (buf == ">") {
-		ret = 0;
-		return;
-	}
-	fin >> buf;
-	if (buf != ">") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
-	}
-}
-
 void getStringFromFile(ifstream& fin, vec3& ret) {
 	string buf = "";
 	fin >> buf;
@@ -173,6 +179,31 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 	else {
 		ret.z = 0;
+		return;
+	}
+	fin >> buf;
+	if (buf != ">") {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+}
+
+void getStringFromFile(ifstream& fin, double& ret) {
+	string buf = "";
+	fin >> buf;
+	if (buf != "<" || fin.eof()) {
+		throw GameException(__LINE__, __func__, "error format \">\" ");
+	}
+	fin >> buf;
+	if (buf != ">" && !fin.eof()) {
+		try {
+			ret = std::stod(buf);
+		}
+		catch (exception& e) {
+			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
+		}
+	}
+	if (buf == ">") {
+		ret = 0;
 		return;
 	}
 	fin >> buf;
