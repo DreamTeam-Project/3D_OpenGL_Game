@@ -19,6 +19,7 @@
 #define DEBUG_FONTS		0
 #define DEBUG_PHYSICS	0
 #define DEBUG_MENU		0
+#define DEBUG_PHYSICS	1
 #endif
 
 #define SUCCESS 42

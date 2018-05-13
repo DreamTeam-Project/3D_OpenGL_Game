@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #ifndef MANAGER_H
 #define MANAGER_H
 
@@ -65,4 +66,7 @@ private:
 	vector<LoadedModel> LoadedModels;
 };
 
+=======
+
+>>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 #endif

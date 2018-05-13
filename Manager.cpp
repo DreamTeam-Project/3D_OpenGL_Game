@@ -1,6 +1,9 @@
 #include "Manager.h"
 
+<<<<<<< HEAD
 GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false), real_world_(phys_world()) {
+=======
+>>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 	LoadInfoAboutLevels();
 }
 
@@ -43,6 +46,7 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 #if DEBUG_MANAGER
 	print(string("try to read: ") + path);
 #endif
+<<<<<<< HEAD
 	int type;
 	vec3 place;
 	vec3 quat;
@@ -103,10 +107,13 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 		if (strbuf != "box" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error box");
 		}
+=======
+>>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 		getStringFromFile(fin, box);
 		if (!NewModel) {
 			switch (type) {
 			case GAMEMODEL:
+<<<<<<< HEAD
 				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
 				break;
 			case ANIMATION:
@@ -120,6 +127,8 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 				//Light.PointLights.push_back(PointLight(NewModel, ))
 			default:
 				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+=======
+>>>>>>> 37cc3c4c7be7c585ca74790fd9c7fd961e34cab2
 			}
 			NewModel->type_ = type;
 		}
