@@ -1,9 +1,26 @@
 #include "Skybox.h"
 
-uint Skybox::loadCubemap(const vector<string>& faces) {
-	uint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+Skybox::Skybox(float light) : light_(light), Shader("Skybox.vs", "Skybox.fs") {
+	Shader.Use();
+	Shader.setInt("skybox", 0);
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+Skybox::Skybox(const vector<string>& faces, float light) : Skybox(light) {
+	loadCubemap(faces);
+}
+
+void Skybox::loadCubemap(const vector<string>& faces) {
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
 	int width, height, nrChannels;
 	for (uint i = 0; i < faces.size(); i++) {
@@ -14,7 +31,7 @@ uint Skybox::loadCubemap(const vector<string>& faces) {
 		}
 		else {
 			stbi_image_free(data);
-			throw GameException(__LINE__, __FILE__, string("ERROR::LOAD::FAILED::PATH::"), faces[i]);
+			throw GameException(__LINE__, __FILE__, string("Error: load failed, path:"), faces[i]);
 		}
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -22,35 +39,24 @@ uint Skybox::loadCubemap(const vector<string>& faces) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Skybox::~Skybox() {
-	glDeleteVertexArrays(1, &skyboxVAO);
-	glDeleteBuffers(1, &skyboxVAO);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 }
 
-void Skybox::GenBuffer() {
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-}
-
-void Skybox::Bind(const Camera& camera, const GameShader& Shader, const glm::mat4& projection) {
+void Skybox::RenderBox(const Camera& camera, const mat4& projection) {
 	glDepthFunc(GL_LEQUAL);
 	Shader.Use();
-	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-	Shader.setFloat("light", light);
+	mat4 view = mat4(glm::mat3(camera.GetViewMatrix()));
+	Shader.setFloat("light", light_);
 	Shader.setMat4("view", view);
 	Shader.setMat4("projection", projection);
-	glBindVertexArray(skyboxVAO);
+	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);

@@ -1,6 +1,6 @@
 #include "System.h"
 
-inline void CheckError(uint line, const char* file) {
+void CheckError(uint line, const char* func) {
 	GLenum errorCode;
 	while ((errorCode = glGetError()) != GL_NO_ERROR) {
 		string error;
@@ -26,8 +26,9 @@ inline void CheckError(uint line, const char* file) {
 			default:
 				error = "DEFAULT_ERROR";
 		}
-		throw GameException(line, file, error);
+		throw GameException(line, func, error);
 	}
+	print("no error gl");
 }
 
 void SetZero(aiMatrix4x4* matrix) {

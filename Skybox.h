@@ -12,6 +12,7 @@
 #include "Camera.h"
 
 using std::string;
+using glm::mat4;
 
 const float skyboxVertices[] = {         
 	-1.0f,  1.0f, -1.0f,
@@ -59,17 +60,19 @@ const float skyboxVertices[] = {
 
 class Skybox {
 public:
-	Skybox(float l = 0.7f) : light(l) {   }
+	Skybox(const vector<string>& faces, float light = 0.7f);
 	~Skybox();
-	float light;
-	uint loadCubemap(const vector<string>& faces);
-	void GenBuffer();
-	void Bind(const Camera& camera, const GameShader& Skybox, const glm::mat4& projection);
+	
+	void RenderBox(const Camera& camera, const mat4& projection);
 
-	uint cubemapTexture;
 private:
-	uint skyboxVAO, skyboxVBO;
-	GLuint textureObj;
+	void loadCubemap(const vector<string>& faces);
+	Skybox(float light);
+
+	GameShader Shader;
+	uint VAO, VBO;
+	float light_;
+	uint texture;
 };
 
 #endif

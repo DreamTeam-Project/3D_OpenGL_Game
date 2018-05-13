@@ -14,27 +14,25 @@
 #include "System.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "Skybox.h"
-#include "Text.h"
 #include "Manager.h"
+#include "Image.h"
 
 using std::string;
 using std::exception;
 using glm::vec3;
 using std::vector;
 
+//static void Loading();
 static void StartWindow();
 static void DrawInWindow();
-static void Loading();
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-void processInput(GLFWwindow *window);
+void ProcessInputInGame(GLFWwindow *window);
 
 GLFWwindow* game_window = nullptr;
 
 Camera camera(vec3(0.0f, 0.0f, 0.0f));
-GameManager Manager;
 
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -98,15 +96,9 @@ static void StartWindow() {
 		throw GameException(__LINE__, __func__, "Error: Failed to initialize GLEW");
 	}
 
-	bool play = true;
-	while (play) {
-		Manager.LoadInfoAboutLevels();
-		size_t levelNumber = Manager.ChooseLevel();
-		Loading();
-		Manager.LoadInfoAboutModels(levelNumber);
-		DrawInWindow();
-		play = Manager.BeOrNotToBe();
-	}
+	DrawInWindow();
+
+
 	glfwTerminate();
 }
 
@@ -114,112 +106,40 @@ static void DrawInWindow() {
 #if DEBUG_GAME
 	print("\ngo to DrawWindow");
 #endif	
+	Image Loading(LoadImage);
+	Loading.RenderImage(true);
+
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	GameShader SkyboxShader("Skybox.vs", "Skybox.fs");
-	GameShader Shader("Light.vs", "Light.fs");
+	GameText test;
+	GameManager Manager;
+	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
 
-	Skybox box(0.9f);
-	box.GenBuffer();
-	box.cubemapTexture = box.loadCubemap(DarkStormy);
-	SkyboxShader.Use();
-	SkyboxShader.setInt("skybox", 0);
+		while (!glfwWindowShouldClose(game_window) && Manager.play) {
+			GLfloat currentFrame = glfwGetTime();
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+			ProcessInputInGame(game_window);
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	GameShader textShader("Text.vs", "Text.fs");
-	textShader.Use();
-	textShader.setMat4("projection", glm::ortho(0.0f, (float)HEIGHT, 0.0f, (float)WIDTH));
-	textShader.setInt("text", 0);
-	GameText text(textShader);
-	text.LoadFonts();
+			mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
+			mat4 view = camera.GetViewMatrix();
 
-	while (!glfwWindowShouldClose(game_window)) {
-		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-		processInput(game_window);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Manager.RenderWorld(projection, view, camera);
+			test.RenderText("test", 50.0f, 50.0f, 1);
 
-		Shader.Use();
-		mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
-		mat4 view = camera.GetViewMatrix();
-		Shader.setMat4("projection", projection);
-		Shader.setMat4("view", view);
-		Shader.setVec3("viewPos", camera.Position);
+			glfwSwapBuffers(game_window);
+			glfwPollEvents();
+		}
 
-		Manager.RenderModels(Shader);
-
-		box.Bind(camera, SkyboxShader, projection);
-		text.RenderText(textShader, "T h e f i v e    b o x i n g w i z a r d s    j u m p   q u i c k l y ! ", 10, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
-		glfwSwapBuffers(game_window);
-		glfwPollEvents();
+		Loading.RenderImage(true);
+		Manager.EndLevel();
 	}
-}
-
-static void Loading() {
-	GameShader LoaderShader("Load.vs", "Load.fs");
-	GLfloat vertices[] = {
-		1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-		-1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
-	};
-	GLuint indices[] = { 
-		0, 1, 3,
-		1, 2, 3 
-	};
-	GLuint VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	glBindVertexArray(0); 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height, nrChannels;
-	unsigned char *image = stbi_load(LoadImage.c_str(), &width, &height, &nrChannels, 0);
-	if (image) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		stbi_image_free(image);
-	}
-	else {
-		stbi_image_free(image);
-		throw GameException(__LINE__, __func__, string("Error load: path: ") + LoadImage.c_str(),
-			string("Why: ") + string(stbi_failure_reason()));
-	}
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glfwPollEvents();
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	LoaderShader.Use();
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-	glfwSwapBuffers(game_window);
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 }
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -242,7 +162,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void processInput(GLFWwindow *window) {
+void ProcessInputInGame(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}

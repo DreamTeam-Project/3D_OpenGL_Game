@@ -80,11 +80,11 @@ public:
 	vector<uint> indices_;
 	vector<GameTexture> textures_;
 
-	uint* ReturnVAO() { return &VAO; }
 	virtual void SetupMesh();
 	virtual void Draw(const GameShader& shader);
 	explicit Mesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
+	~Mesh();
 
 protected:
 	uint VBO, EBO, VAO;

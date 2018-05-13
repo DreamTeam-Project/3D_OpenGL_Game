@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
+#include <vector>
 #include <map>
 #include <ft2build.h>
 #include "Shader.h"
@@ -19,6 +20,17 @@ using glm::ivec2;
 using glm::vec3;
 using std::map;
 using std::string;
+using std::vector;
+
+struct SysStrings {
+	SysStrings(const string& text, float x, float y, float scale, const vec3& color = vec3(1.0f)) :
+		text_(text), x_(x), y_(y), scale_(scale), color_(color) {  }
+	string text_;
+	float x_;
+	float y_;
+	float scale_;
+	vec3 color_;
+};
 
 struct Character {
 	uint TextureID;
@@ -29,11 +41,15 @@ struct Character {
 
 class GameText {
 public:
-	GameText(const GameShader& shader, uint height = HEIGHT, uint width = WIDTH);
-	void LoadFonts(const string& path = FontFile, uint height = HeightFont, uint width = WidthFont);
-	void RenderText(const GameShader& shader, const string& text, float x, float y, float scale, const vec3& color = vec3(1.0f));
+	GameText(uint height = HEIGHT, uint width = WIDTH);
+	GameText(const string& path, uint height = HEIGHT, uint width = WIDTH);
+	~GameText();
+	void LoadFonts(const string& path, uint height = HeightFont, uint width = WidthFont);
+	void RenderText(const string& text, float x, float y, float scale, const vec3& color = vec3(1.0f));
+	void RenderText(const vector<SysStrings>& text);
+
 private:
-	//GameShader Shader;
+	GameShader Shader;
 	map<char, Character> Characters;
 	uint VAO, VBO;
 };

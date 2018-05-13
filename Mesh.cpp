@@ -49,6 +49,12 @@ void Mesh::Draw(const GameShader& shader) {
 	glActiveTexture(GL_TEXTURE0);
 }
 
+Mesh::~Mesh() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+}
+
 void AnimatedMesh::Draw(const GameShader& shader) {
 	uint diffuseNr = 1;
 	uint specularNr = 1;

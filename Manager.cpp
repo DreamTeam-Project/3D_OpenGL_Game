@@ -1,5 +1,9 @@
 #include "Manager.h"
 
+GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false) {
+	LoadInfoAboutLevels();
+}
+
 void GameManager::LoadInfoAboutLevels() {
 	std::ifstream fin(LoadFile);
 	if (!fin.is_open()) {
@@ -19,9 +23,9 @@ void GameManager::LoadInfoAboutLevels() {
 		if (path_buf == "end_of_file" || name_buf == "null") {
 			break;
 		}
-		levels.push_back(Level(name_buf, path_buf));
+		Levels.push_back(Level(name_buf, path_buf));
 	}
-	if (levels.levels_.size() == 0) {
+	if (Levels.size() == 0) {
 		throw GameException(__LINE__, __func__, "LoadFile.file is empty");
 	}
 #if DEBUG_MANAGER
@@ -30,7 +34,7 @@ void GameManager::LoadInfoAboutLevels() {
 }
 
 void GameManager::LoadInfoAboutModels(uint levelNumber) {
-	string path = levels.levels_.at(levelNumber).pathLoader_;
+	string path = Levels.at(levelNumber).pathLoader_;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
 		throw GameException(__LINE__, __func__, "error open file level.file");
@@ -139,12 +143,85 @@ void GameManager::LoadModels() {
 	}
 }
 
-void GameManager::RenderModels(const GameShader& shader) {
-	Light.SetLight(shader);
+void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time) {
+	Shader.Use();
+	Light.SetLight(Shader);
+	Shader.setMat4("projection", projection);
+	Shader.setMat4("view", view);
+	Shader.setVec3("viewPos", camera.Position);
 	for (auto& it : AllModels) {
 		if (it->draw_) {
-			it->SetShaderParameters(shader);
-			it->Draw(shader);
+			it->SetShaderParameters(Shader);
+			it->Draw(Shader);
 		}
 	}
+}
+
+bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
+	int levelNumber = ChooseLevel();
+	//int levelNumber = ChooseLevel(window);
+	if (levelNumber == -1) {
+		return false;
+	}
+	else {
+		Loading.RenderImage(true);
+		LoadInfoAboutModels(levelNumber);
+		play = true;
+		return true;
+	}
+}
+
+void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
+	RenderModels(projection, view, camera, time);
+	box.RenderBox(camera, projection);
+	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
+}
+
+void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+	for (uint key = GLFW_KEY_1; key <= GLFW_KEY_9; key++) {
+		if (glfwGetKey(window, key) == GLFW_PRESS) {
+			key_pressed = key - GLFW_KEY_0;
+			return;
+		}
+	}
+}
+
+void GameManager::EndLevel() {
+	SysText.clear();
+	AllModels.clear();
+	LoadedModels.clear();
+}
+
+int GameManager::ChooseLevel(GLFWwindow* window) {
+	uint key = 0;
+	Image Menu(MenuImage);
+	SysText.clear();
+	for (uint i = 0; i < Levels.size(); i++) {
+		SysText.push_back(SysStrings(to_string(i) + ":", 50.0f, 2.0f, 1.0f));
+		SysText.push_back(SysStrings(Levels[i].name_, 60.0f * i, 10.0f, 1.0f));
+	}
+
+	while (!glfwWindowShouldClose(game_window)) {
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		ProcessInputInMenu(game_window, key);
+
+		Menu.RenderImage();
+
+		if (0 < key && key <= Levels.size()) {
+			return key - 1;
+		}
+		else {
+			text.RenderText("Error button!", (float)WIDTH / 2, (float)HEIGHT / 2, 1.0f);
+		}
+		text.RenderText(SysText);
+		
+		glfwSwapBuffers(game_window);
+		glfwPollEvents();
+	}
+	SysText.clear();
+	return -1;
 }

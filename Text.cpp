@@ -1,6 +1,9 @@
 #include "Text.h"
 
-GameText::GameText(const GameShader& shader, uint height, uint width) : Shader("Text.vs", "Text.fs") {
+GameText::GameText(uint height, uint width) : Shader("Text.vs", "Text.fs") {
+	Shader.Use();
+	Shader.setMat4("projection", glm::ortho(0.0f, (float)HEIGHT, 0.0f, (float)WIDTH));
+	Shader.setInt("text", 0);
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glBindVertexArray(VAO);
@@ -40,7 +43,6 @@ void GameText::LoadFonts(const string& path, uint height, uint width) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
 		Character character = {
 			texture,
 			ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -49,20 +51,16 @@ void GameText::LoadFonts(const string& path, uint height, uint width) {
 		};
 		Characters.insert(std::pair<char, Character>(c, character));
 	}
-	/*GLenum err = glGetError();
-	print(to_string(err));*/
 	glBindTexture(GL_TEXTURE_2D, 0);
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 }
 
-void GameText::RenderText(const GameShader& shader, const string& text, float x, float y, float scale, const vec3& color) {
-	shader.Use();
-	shader.setVec3("textColor", color);
+void GameText::RenderText(const string& text, float x, float y, float scale, const vec3& color) {
+	Shader.Use();
+	Shader.setVec3("textColor", color);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(VAO);
-	/*GLenum err = glGetError();
-	print(to_string(err));*/
 	for (auto& c : text) {
 		Character ch = Characters[c];
 		float xpos = x + ch.Bearing.x * scale;
@@ -85,8 +83,21 @@ void GameText::RenderText(const GameShader& shader, const string& text, float x,
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		x += (ch.Advance >> 6) * scale;
 	}
-	/*GLenum err2 = glGetError();
-	print(to_string(err2));*/
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GameText::RenderText(const vector<SysStrings>& text) {
+	for (auto& it : text) {
+		RenderText(it.text_, it.x_, it.y_, it.scale_, it.color_);
+	}
+}
+
+GameText::GameText(const string& path, uint height, uint width) : GameText(height, width) {
+	LoadFonts(path);
+}
+
+GameText::~GameText() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 }
