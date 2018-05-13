@@ -1,6 +1,6 @@
 #include "Manager.h"
 
-GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false) {
+GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false), real_world_(phys_world()) {
 	LoadInfoAboutLevels();
 }
 
@@ -17,11 +17,11 @@ void GameManager::LoadInfoAboutLevels() {
 	while (!fin.eof()) {
 		getStringFromFile(fin, name_buf);
 		if (name_buf == "end_of_file" || name_buf == "null") {
-			throw GameException(__LINE__, __func__, "error format Load.file");
+			break;
 		}
 		getStringFromFile(fin, path_buf);
 		if (path_buf == "end_of_file" || name_buf == "null") {
-			break;
+			throw GameException(__LINE__, __func__, "error format Load.file");
 		}
 		Levels.push_back(Level(name_buf, path_buf));
 	}
@@ -34,8 +34,8 @@ void GameManager::LoadInfoAboutLevels() {
 }
 
 void GameManager::LoadInfoAboutModels(uint levelNumber) {
-	string path = Levels.at(levelNumber).pathLoader_;
-	std::ifstream fin(path);
+	string path_tmp = Levels.at(levelNumber).pathLoader_;
+	std::ifstream fin(path_tmp);
 	if (!fin.is_open()) {
 		throw GameException(__LINE__, __func__, "error open file level.file");
 	}
@@ -43,10 +43,16 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 #if DEBUG_MANAGER
 	print(string("try to read: ") + path);
 #endif
+	int type;
+	vec3 place;
+	vec3 quat;
+	string path;
+	vec3 scale;
+	double mass;
+	vec3 box;
 	while (!fin.eof()) {
 		GameModel* NewModel = nullptr;
 		string strbuf = "";
-
 		getStringFromFile(fin, strbuf);
 		if (strbuf == "null") {
 			throw GameException(__LINE__, __func__, "error level.path");
@@ -58,57 +64,68 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 			throw GameException(__LINE__, __func__, "error level.path");
 		}
 
-		int type = 0;
 		getStringFromFile(fin, type);
 		if (strbuf == "null" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error level.path");
-		}
-		if (!NewModel) {
-			switch (type) {
-			case GAMEMODEL:
-				NewModel = new GameModel(32.0f, true);
-				break;
-			case ANIMATION:
-				NewModel = new AnimatedModel(32.0f, true);
-				break;
-			case STRUCTURE:
-				NewModel = new Structure(16.0f, true);
-				break;
-			case STREETLAMP:
-				NewModel = new StreetLamp(32.0f, true, true);
-				//Light.PointLights.push_back(PointLight(NewModel, ))
-			default:
-				NewModel = new GameModel(32.0f, true);
-			}
-			NewModel->type_ = type;
-		}
-		else {
-			throw GameException(__LINE__, __func__, "Error wrong type of class");
 		}
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "path" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error type");
 		}
-		getStringFromFile(fin, NewModel->path_);
+		getStringFromFile(fin, path);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "place" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error place");
 		}
-		getStringFromFile(fin, NewModel->place_);;
+		getStringFromFile(fin, place);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "quat" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error quat");
 		}
-		getStringFromFile(fin, NewModel->quat_);
+		getStringFromFile(fin, quat);
 
 		getStringFromFile(fin, strbuf);
 		if (strbuf != "scale" || strbuf == "end_of_file") {
 			throw GameException(__LINE__, __func__, "error scale");
 		}
-		getStringFromFile(fin, NewModel->scale_);
+		getStringFromFile(fin, scale);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "mass" || strbuf == "end_of_file") {
+			throw GameException(__LINE__, __func__, "error mass");
+		}
+		getStringFromFile(fin, mass);
+
+		getStringFromFile(fin, strbuf);
+		if (strbuf != "box" || strbuf == "end_of_file") {
+			throw GameException(__LINE__, __func__, "error box");
+		}
+		getStringFromFile(fin, box);
+		if (!NewModel) {
+			switch (type) {
+			case GAMEMODEL:
+				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+				break;
+			case ANIMATION:
+				NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+				break;
+			case STRUCTURE:
+				NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box, 16.0f, true);
+				break;
+			case STREETLAMP:
+				NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true, true);
+				//Light.PointLights.push_back(PointLight(NewModel, ))
+			default:
+				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+			}
+			NewModel->type_ = type;
+		}
+		else {
+			throw GameException(__LINE__, __func__, "Error wrong type of class");
+		}
 #if DEBUG_MANAGER
 		NewModel->PrintModel();
 #endif
@@ -158,8 +175,11 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 }
 
 bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
-	//int levelNumber = ChooseLevel();
+#if DEBUG_MENU
+	int levelNumber = ChooseLevel();
+#else
 	int levelNumber = ChooseLevel(window);
+#endif
 	if (levelNumber == -1) {
 		return false;
 	}
@@ -172,21 +192,27 @@ bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
 }
 
 void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
+	real_world_.do_step(time);
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
 	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
-	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 4, 1.0f, vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
-	for (uint key = GLFW_KEY_1; key <= GLFW_KEY_9; key++) {
-		if (glfwGetKey(window, key) == GLFW_PRESS) {
-			key_pressed = key - GLFW_KEY_0;
-			return;
-		}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		key_pressed = 1;
+		return;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		key_pressed = 3;
+		return;
+	}
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+		key_pressed = 2;
+		return;
 	}
 }
 
@@ -198,31 +224,68 @@ void GameManager::EndLevel() {
 
 int GameManager::ChooseLevel(GLFWwindow* window) {
 	uint key = 0;
+	uint chosen = 1;
+	GLdouble deltaTime, currentFrame, lastFrame = 0.0;
+	GLdouble accumulator = 0.0;
 	Image Menu(MenuImage);
 	SysText.clear();
+
+	SysText.push_back(SysStrings("Wastelands of the USSR", (float)HEIGHT / 4.5f, (float)WIDTH / 7 * 6, 0.85f, vec3(0.5f)));
 	for (uint i = 0; i < Levels.size(); i++) {
-		SysText.push_back(SysStrings(to_string(i) + ":", 50.0f, 2.0f, 1.0f));
-		SysText.push_back(SysStrings(Levels[i].name_, 60.0f * i, 10.0f, 1.0f));
+		SysText.push_back(SysStrings(Levels[i].name_, (float)HEIGHT / 6, (float)WIDTH / 14 * (11 - (i + 1)), 0.7f, vec3(0.5f)));
 	}
 
+	SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+
 	while (!glfwWindowShouldClose(game_window)) {
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		accumulator += deltaTime;
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ProcessInputInMenu(game_window, key);
 
-		Menu.RenderImage();
+		if (accumulator > 0.5) {
+			accumulator = 0;
+			if (key == 3) {
+				if (chosen < Levels.size()) {
+					SysText[chosen].color_ = vec3(0.5f);
+					chosen++;
+					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+				}
+				else {
+					SysText[chosen].color_ = vec3(0.5f);
+					chosen = 1;
+					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+				}
+			}
+			else if (key == 1) {
+				if (chosen > 1) {
+					SysText[chosen].color_ = vec3(0.5f);
+					chosen--;
+					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+				}
+				else {
+					SysText[chosen].color_ = vec3(0.5f);
+					chosen = Levels.size();
+					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+				}
+			}
+			else if (key == 2) {
+				return chosen - 1;
+			}
+			key = 0;
+		}
 
-		if (0 < key && key <= Levels.size()) {
-			return key - 1;
-		}
-		else {
-			text.RenderText("Error button!", (float)WIDTH / 2, (float)HEIGHT / 2, 1.0f);
-		}
+		Menu.RenderImage();
 		text.RenderText(SysText);
-		
+
 		glfwSwapBuffers(game_window);
 		glfwPollEvents();
 	}
+
 	SysText.clear();
 	return -1;
 }

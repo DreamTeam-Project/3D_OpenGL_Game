@@ -1,6 +1,6 @@
 #include "Text.h"
 
-GameText::GameText(uint height, uint width) : Shader("Text.vs", "Text.fs") {
+GameText::GameText() : Shader("Text.vs", "Text.fs") {
 	Shader.Use();
 	Shader.setMat4("projection", glm::ortho(0.0f, (float)HEIGHT, 0.0f, (float)WIDTH));
 	Shader.setInt("text", 0);
@@ -43,13 +43,13 @@ void GameText::LoadFonts(const string& path, uint height, uint width) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		Character character = {
+		Char character = {
 			texture,
 			ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 			face->glyph->advance.x
 		};
-		Characters.insert(std::pair<char, Character>(c, character));
+		Characters.insert(std::pair<char, Char>(c, character));
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	FT_Done_Face(face);
@@ -62,7 +62,7 @@ void GameText::RenderText(const string& text, float x, float y, float scale, con
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(VAO);
 	for (auto& c : text) {
-		Character ch = Characters[c];
+		Char ch = Characters[c];
 		float xpos = x + ch.Bearing.x * scale;
 		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 		float w = ch.Size.x * scale;
@@ -93,7 +93,7 @@ void GameText::RenderText(const vector<SysStrings>& text) {
 	}
 }
 
-GameText::GameText(const string& path, uint height, uint width) : GameText(height, width) {
+GameText::GameText(const string& path, uint height, uint width) : GameText() {
 	LoadFonts(path);
 }
 

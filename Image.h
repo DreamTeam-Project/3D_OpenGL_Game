@@ -26,13 +26,13 @@ const GLfloat vertices[] = {
 
 class Image {
 public:
-	Image();
 	Image(const string& path);
 	~Image();
 	void RenderImage(bool swap = false) const;
-	void LoadImage(const string& path);
 
 private:
+	Image();
+	void LoadImage(const string& path);
 	GameShader Shader;
 	uint VAO, VBO, EBO;
 	uint texture;

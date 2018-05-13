@@ -22,6 +22,8 @@
 #include <map>
 #include <vector>
 
+#include "Physics.h"
+
 using std::map;
 using std::vector;
 using std::string;
@@ -36,7 +38,22 @@ class GameModel {
 public:
 	GameModel() = delete;
 	explicit GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw = false);
-	explicit GameModel(float shininess = 32.0f, bool draw = true ) : draw_(draw), shininess_(shininess) {	}
+	explicit GameModel( phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
+		draw_(draw),
+		shininess_(shininess),
+		path_(path_2),
+		quat_(quat),
+		scale_(scale),
+		type_(type) 
+	{
+		if (type == 1) {
+			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
+		if (type == 2) {
+			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		}
+
+	}
 	void Draw(const GameShader& shader);
 	void LoadModel();
 	void CopyModel(const GameModel* model);
@@ -46,14 +63,20 @@ public:
 	virtual void Move(mat4& model);
 	virtual void PrintModel();
 
+	~GameModel() {
+		delete rigid_body_;
+	}
+
+
 	string directory_;
 	string path_;
-	vec3 place_;
 	vec3 quat_;
 	vec3 scale_;
 	int type_;
 	float shininess_;
 	bool draw_;
+
+	phys_body* rigid_body_;
 
 private:
 	vector<GameTexture> textures_loaded_;
@@ -73,7 +96,8 @@ private:
 class Structure : public GameModel {
 public:
 	Structure() = delete;
-	Structure(float shininess, bool draw = true) : GameModel(shininess, draw) { }
+	Structure(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) :
+		GameModel(real_world_, type,  place, quat, path_2, scale, mass,  box, shininess, draw) { }
 	//void Move(mat4& model) override;
 	void PrintModel() override;
 private:
@@ -83,14 +107,18 @@ private:
 class StreetLamp : public Structure {
 public:
 	StreetLamp() = delete;
-	StreetLamp(float shininess, bool draw = true, bool on = true) : Structure(shininess, draw), light(on) { }
+	StreetLamp(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true, bool on = true) :
+		Structure( real_world_, type, place, quat,  path_2,  scale,  mass, box, shininess, draw),
+		light(on)
+	{ }
 private:
 	bool light;
 };
 
 class AnimatedModel : public GameModel {
 public:
-	AnimatedModel(float shininess, bool draw = true) : GameModel(shininess, draw) { }
+	AnimatedModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) : 
+		GameModel( real_world_,  type,  place,  quat, path_2, scale, mass, box,shininess, draw) { }
 	void PrintModel() override;
 };
 

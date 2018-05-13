@@ -32,7 +32,7 @@ struct SysStrings {
 	vec3 color_;
 };
 
-struct Character {
+struct Char {
 	uint TextureID;
 	ivec2 Size;
 	ivec2 Bearing;
@@ -41,16 +41,17 @@ struct Character {
 
 class GameText {
 public:
-	GameText(uint height = HEIGHT, uint width = WIDTH);
 	GameText(const string& path, uint height = HEIGHT, uint width = WIDTH);
 	~GameText();
-	void LoadFonts(const string& path, uint height = HeightFont, uint width = WidthFont);
 	void RenderText(const string& text, float x, float y, float scale, const vec3& color = vec3(1.0f));
 	void RenderText(const vector<SysStrings>& text);
 
 private:
+	void LoadFonts(const string& path, uint height = HeightFont, uint width = WidthFont);
+	GameText();
+
 	GameShader Shader;
-	map<char, Character> Characters;
+	map<char, Char> Characters;
 	uint VAO, VBO;
 };
 

@@ -31,8 +31,10 @@ Image::~Image() {
 void Image::RenderImage(bool swap) const {
 	glDisable(GL_DEPTH_TEST);
 	Shader.Use();
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	if (swap) {
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

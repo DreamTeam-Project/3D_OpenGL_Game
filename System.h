@@ -17,6 +17,8 @@
 #define DEBUG_MANAGER	0
 #define DEBUG_SKINNING	0
 #define DEBUG_FONTS		0
+#define DEBUG_PHYSICS	0
+#define DEBUG_MENU		0
 #endif
 
 #define SUCCESS 42
@@ -61,6 +63,7 @@ bool IsItNumber(const string& word);
 void SetZero(aiMatrix4x4* matrix);
 void print(const char* what);
 void print(const string& what);
+void getStringFromFile(ifstream& fin, double& ret);
 void getStringFromFile(ifstream& fin, string& ret);
 void getStringFromFile(ifstream& fin, int& ret);
 void getStringFromFile(ifstream& fin, vec3& ret);
@@ -70,7 +73,7 @@ void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix);
 int doNothing();
 
 extern GLFWwindow* game_window;
-static vector<string> DarkStormy{
+static vector<string> DarkStormy {
 	("textures/skybox/DarkStormy_lf.png"),
 	("textures/skybox/DarkStormy_rt.png"),
 	("textures/skybox/DarkStormy_up.png"),
@@ -82,7 +85,7 @@ const string LoadImage = "textures/LoadImage.jpg";
 const string MenuImage = "textures/MenuImage.jpg";
 const string FontFile = "textures/font.ttf";
 const string LoadFile = "Load.file";
-const uint HeightFont = 24u;
+const uint HeightFont = 48u;
 const uint WidthFont = 0u;
 const float lightSky = 0.9f;
 const GLuint WIDTH = 1024, HEIGHT = 600;

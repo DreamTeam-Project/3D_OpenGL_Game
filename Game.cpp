@@ -21,7 +21,6 @@ using std::string;
 using std::exception;
 using glm::vec3;
 using std::vector;
-
 static void StartWindow();
 static void DrawInWindow();
 
@@ -31,7 +30,7 @@ void ProcessInputInGame(GLFWwindow *window);
 
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 0.0f, 0.0f));
+Camera camera(vec3(0.0f, 10.0f, 0.0f));
 
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -128,8 +127,8 @@ static void DrawInWindow() {
 			mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 400.0f);
 			mat4 view = camera.GetViewMatrix();
 
-			Manager.RenderWorld(projection, view, camera);
-
+			Manager.RenderWorld(projection, view, camera, deltaTime);
+			
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
 		}
