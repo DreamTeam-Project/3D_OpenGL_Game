@@ -7,8 +7,6 @@ enum Location {
 	POSITION = 0, 
 	NORMAL, 
 	TEX_COORD, 
-	TANGENT,
-	BITANGENT,
 	BONE_ID, 
 	BONE_WEIGHT
 };
@@ -113,9 +111,6 @@ public:
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms, aiAnimation* pAnimation,
 		const aiScene* scene, aiMatrix4x4& GlobalInverseTransform);
-
-protected:
-	uint BONE_VB;
 };
 
 Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures);

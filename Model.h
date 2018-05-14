@@ -30,7 +30,7 @@ using glm::vec3;
 using glm::vec2;
 using glm::mat4;
 
-#define ASSIMP_FLAGS aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs
+#define ASSIMP_FLAGS aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_LimitBoneWeights
 uint TextureFromFile(const char *path, const string &directory);
 mat4 AssimpMatToGlm(const aiMatrix4x4& m);
 

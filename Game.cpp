@@ -15,7 +15,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Manager.h"
-//#include "Image.h"
+#include "Image.h"
 
 using std::string;
 using std::exception;
@@ -105,8 +105,8 @@ static void DrawInWindow() {
 #if DEBUG_GAME
 	print("\ngo to DrawWindow");
 #endif	
-	//Image Loading(LoadImage);
-	//Loading.RenderImage(true);
+	Image Loading(LoadImage);
+	Loading.RenderImage(true);
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
@@ -115,7 +115,7 @@ static void DrawInWindow() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameManager Manager;
-	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window/*, Loading*/)) {
+	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
 
 		while (!glfwWindowShouldClose(game_window) && Manager.play) {
 			GLfloat currentFrame = glfwGetTime();
@@ -134,7 +134,7 @@ static void DrawInWindow() {
 			glfwPollEvents();
 		}
 
-		//Loading.RenderImage(true);
+		Loading.RenderImage(true);
 		Manager.EndLevel();
 	}
 }

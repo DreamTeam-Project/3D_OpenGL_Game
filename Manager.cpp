@@ -1,7 +1,7 @@
 #include "Manager.h"
 
 GameManager::GameManager() : 
-	/*text(FontFile),*/ /*box(DarkStormy, lightSky),*/ Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
+	/*text(FontFile),*/ box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
 	play(false)/*, real_world_(phys_world())*/ {
 	LoadInfoAboutLevels();
 }
@@ -137,7 +137,7 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 			AniModels.push_back(NewModel);
 		}
 	}
-	if (Models.size() == 0 && AniModels.size()) {
+	if (Models.size() == 0 && AniModels.size() == 0) {
 		throw GameException(__LINE__, __func__, "level.file is empty");
 	}
 	LoadModels(Models);
@@ -181,7 +181,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	}
 }
 
-bool GameManager::GameMenu(GLFWwindow* window/*, const Image& Loading*/) {
+bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
 #if DEBUG_MENU
 	int levelNumber = ChooseLevel();
 #else
@@ -191,7 +191,7 @@ bool GameManager::GameMenu(GLFWwindow* window/*, const Image& Loading*/) {
 		return false;
 	}
 	else {
-		//Loading.RenderImage(true);
+		Loading.RenderImage(true);
 		LoadInfoAboutModels(levelNumber);
 		play = true;
 		return true;
@@ -202,7 +202,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	//real_world_.do_step(time);
 	RenderModels(projection, view, camera, Shader, Models);
 	RenderModels(projection, view, camera, AniShader, AniModels);
-	//box.RenderBox(camera, projection);
+	box.RenderBox(camera, projection);
 	/*text.RenderText(SysText);*/
 }
 

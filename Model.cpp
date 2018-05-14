@@ -87,8 +87,10 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		}
-		vertex.IDs[0] = 0; vertex.IDs[1] = 0; vertex.IDs[2] = 0; vertex.IDs[3] = 0;
-		vertex.Weights[0] = 0.0f; vertex.Weights[1] = 0.0f; vertex.Weights[2] = 0.0f; vertex.Weights[3] = 0.0f;
+		for (int u = 0; u < NUM_BONES_PER_VEREX; u++) {
+			vertex.Weights[u] = 0.0f;
+			vertex.IDs[u] = 0u;
+		}
 		vertices.push_back(vertex);
 	}
 
@@ -236,7 +238,7 @@ void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<Vertex>& B
 		}
 
 		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
-			uint VertexID = Entries_[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
+			uint VertexID = pMesh->mBones[i]->mWeights[j].mVertexId;
 			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
 			Bones[VertexID].AddBoneData(BoneIndex, Weight);
 		}
