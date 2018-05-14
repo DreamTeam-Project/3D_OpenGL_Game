@@ -181,7 +181,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	}
 }
 
-bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
+bool GameManager::GameMenu(GLFWwindow* window/*, const Image& Loading*/) {
 #if DEBUG_MENU
 	int levelNumber = ChooseLevel();
 #else
@@ -191,7 +191,7 @@ bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
 		return false;
 	}
 	else {
-		Loading.RenderImage(true);
+		//Loading.RenderImage(true);
 		LoadInfoAboutModels(levelNumber);
 		play = true;
 		return true;

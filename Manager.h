@@ -13,7 +13,7 @@
 #include "Light.h"
 //#include "Text.h"
 #include "Skybox.h"
-#include "Image.h"
+//#include "Image.h"
 //#include "Physics.h"
 
 using std::vector;
@@ -35,7 +35,7 @@ struct LoadedModel {
 class GameManager {
 public:
 	GameManager();
-	bool GameMenu(GLFWwindow *window, const Image& Loading);
+	bool GameMenu(GLFWwindow *window/*, const Image& Loading*/);
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
 	bool play;
