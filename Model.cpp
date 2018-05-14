@@ -88,6 +88,8 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		}
+		vertex.IDs[0] = 0; vertex.IDs[1] = 0; vertex.IDs[2] = 0; vertex.IDs[3] = 0;
+		vertex.Weights[0] = 0.0f; vertex.Weights[1] = 0.0f; vertex.Weights[2] = 0.0f; vertex.Weights[3] = 0.0f;
 		vertices.push_back(vertex);
 	}
 
@@ -106,6 +108,7 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 	if (scene_->mAnimations != nullptr) {
 		vector<BoneInfo> BonesInfo;
 		map<string, uint> BoneMapping;
+		BoneMapping.clear();
 		uint NumBones = 0;
 		LoadBones(MeshIndex, mesh, vertices, BonesInfo, BoneMapping, NumBones);
 

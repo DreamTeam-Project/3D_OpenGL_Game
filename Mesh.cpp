@@ -287,7 +287,7 @@ uint AnimatedMesh::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim
 	return 0;
 }
 
-const aiNodeAnim* AnimatedMesh::FindNodeAnim(const aiAnimation* pAnimation, const string NodeName) {
+const aiNodeAnim* AnimatedMesh::FindNodeAnim(const aiAnimation* pAnimation, const string& NodeName) {
 	for (uint i = 0; i < pAnimation->mNumChannels; i++) {
 		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
 

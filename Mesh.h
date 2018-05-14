@@ -105,7 +105,7 @@ public:
 	uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
-	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
+	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string& NodeName);
 	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform,
 		aiAnimation* pAnimation, aiMatrix4x4& GlobalInverseTransform);
