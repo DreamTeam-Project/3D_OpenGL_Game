@@ -1,7 +1,7 @@
 #include "Manager.h"
 
 GameManager::GameManager() : 
-	/*text(FontFile),*/ box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
+	/*text(FontFile),*/ /*box(DarkStormy, lightSky),*/ Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
 	play(false)/*, real_world_(phys_world())*/ {
 	LoadInfoAboutLevels();
 }
@@ -202,7 +202,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	//real_world_.do_step(time);
 	RenderModels(projection, view, camera, Shader, Models);
 	RenderModels(projection, view, camera, AniShader, AniModels);
-	box.RenderBox(camera, projection);
+	//box.RenderBox(camera, projection);
 	/*text.RenderText(SysText);*/
 }
 

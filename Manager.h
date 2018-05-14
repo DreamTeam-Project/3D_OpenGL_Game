@@ -11,8 +11,9 @@
 #include "Shader.h"
 #include "System.h"
 #include "Light.h"
+#include "Camera.h"
 //#include "Text.h"
-#include "Skybox.h"
+//#include "Skybox.h"
 //#include "Image.h"
 //#include "Physics.h"
 
@@ -52,7 +53,7 @@ private:
 	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
 	void LoadModels(const vector<GameModel*>& model);
 
-	Skybox box;
+	//Skybox box;
 	//GameText text;
 	GameLight Light;
 	GameShader Shader;
