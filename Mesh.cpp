@@ -2,7 +2,7 @@
 
 //This helper function finds free slots in the VertexBoneData structure and places inside
 //the id and bone weight.
-void VertexBoneData::AddBoneData(uint BoneID, float Weight)	{
+void Vertex::AddBoneData(uint BoneID, float Weight)	{
 	uint length = sizeof(IDs) / sizeof(IDs[0]);
 	for (uint i = 0; i < length; i++) {
 		if (Weights[i] == 0.0) {
@@ -21,8 +21,8 @@ Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTex
 }
 
 Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures,
-	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping) {
-	Mesh* ret = new AnimatedMesh(vertices, indices, textures, BonesInfo, Bones, NumBones, BoneMapping);
+	vector<BoneInfo>& BonesInfo, uint& NumBones, map<string, uint>& BoneMapping) {
+	Mesh* ret = new AnimatedMesh(vertices, indices, textures, BonesInfo, NumBones, BoneMapping);
 	ret->SetupMesh();
 	return ret;
 }
@@ -105,7 +105,7 @@ void AnimatedMesh::SetupMesh() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
-	//glGenBuffers(1, &BONE_VB);
+	glGenBuffers(1, &BONE_VB);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -113,9 +113,6 @@ void AnimatedMesh::SetupMesh() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(uint), &indices_[0], GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, BONE_VB);
-	//glBufferData(GL_ARRAY_BUFFER, Bones_.size() * sizeof(VertexBoneData), &Bones_[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(POSITION);
 	glVertexAttribPointer(POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -126,11 +123,11 @@ void AnimatedMesh::SetupMesh() {
 	glEnableVertexAttribArray(TEX_COORD);
 	glVertexAttribPointer(TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
-	//glEnableVertexAttribArray(BONE_ID);
-	//glVertexAttribIPointer(BONE_ID, 4, GL_INT, sizeof(VertexBoneData), (void*)0);
+	glEnableVertexAttribArray(BONE_ID);
+	glVertexAttribIPointer(BONE_ID, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, IDs));
 
-	//glEnableVertexAttribArray(BONE_WEIGHT);
-	//glVertexAttribPointer(BONE_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*)offsetof(VertexBoneData, Weights));
+	glEnableVertexAttribArray(BONE_WEIGHT);
+	glVertexAttribPointer(BONE_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Weights));
 
 	glBindVertexArray(0);
 }
@@ -305,7 +302,7 @@ const aiNodeAnim* AnimatedMesh::FindNodeAnim(const aiAnimation* pAnimation, cons
 //which we need to update. We will find the relative time within the animation loop and processing the hierarchy sheets.
 //The result is an array of transformations that return to the place of the call
 void AnimatedMesh::BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms,
-	aiAnimation* pAnimation, aiScene* scene, aiMatrix4x4& GlobalInverseTransform) {
+	aiAnimation* pAnimation, const aiScene* scene, aiMatrix4x4& GlobalInverseTransform) {
 	aiMatrix4x4 Identity;
 	InitIdentity(Identity);
 	float TicksPerSecond = pAnimation->mTicksPerSecond != 0 ? pAnimation->mTicksPerSecond : 25.0f;

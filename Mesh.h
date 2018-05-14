@@ -36,11 +36,6 @@ using std::map;
 using std::stringstream;
 
 #define INVALID_MATERIAL 0xFFFFFFFF
-struct VertexBoneData {
-	uint IDs[NUM_BONES_PER_VEREX];
-	float Weights[NUM_BONES_PER_VEREX];
-	void AddBoneData(uint BoneID, float Weight);
-};
 struct BoneInfo {
 	aiMatrix4x4 BoneOffset;
 	aiMatrix4x4 FinalTransformation;
@@ -58,6 +53,9 @@ struct Vertex {
 	vec3 Position;
 	vec3 Normal;
 	vec2 TexCoords;
+	uint IDs[NUM_BONES_PER_VEREX];
+	float Weights[NUM_BONES_PER_VEREX];
+	void AddBoneData(uint BoneID, float Weight);
 };
 struct MeshEntry {
 	MeshEntry()
@@ -85,6 +83,8 @@ public:
 	explicit Mesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures)
 		: vertices_(vertices), indices_(indices), textures_(textures) { }
 	~Mesh();
+	virtual void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms, aiAnimation* pAnimation,
+		const aiScene* scene, aiMatrix4x4& GlobalInverseTransform) { }
 
 protected:
 	uint VBO, EBO, VAO;
@@ -93,15 +93,14 @@ protected:
 class AnimatedMesh : public Mesh {
 public: 
 	vector<BoneInfo> BoneInfo_;
-	vector<VertexBoneData> Bones_;
 	uint NumBones_;
 	map<string, uint> BoneMapping_;
 
 	void SetupMesh() override;
 	void Draw(const GameShader& shader) override;
-	AnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo,
-		vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping)
-		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), Bones_(Bones), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
+	AnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures, vector<BoneInfo>& BonesInfo, 
+		uint& NumBones, map<string, uint>& BoneMapping)
+		: Mesh(vertices, indices, textures), BoneInfo_(BonesInfo), NumBones_(NumBones), BoneMapping_(BoneMapping) { }
 
 	uint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
@@ -110,10 +109,10 @@ public:
 	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform,
 		aiAnimation* pAnimation, aiMatrix4x4& GlobalInverseTransform);
-	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms, aiAnimation* pAnimation,
-		aiScene* scene, aiMatrix4x4& GlobalInverseTransform);
 	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms, aiAnimation* pAnimation,
+		const aiScene* scene, aiMatrix4x4& GlobalInverseTransform);
 
 protected:
 	uint BONE_VB;
@@ -121,6 +120,6 @@ protected:
 
 Mesh* CreateMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures);
 Mesh* CreateAnimatedMesh(vector<Vertex>& vertices, vector<uint>& indices, vector<GameTexture>& textures,
-	vector<BoneInfo>& BonesInfo, vector<VertexBoneData>& Bones, uint& NumBones, map<string, uint>& BoneMapping);
+	vector<BoneInfo>& BonesInfo, uint& NumBones, map<string, uint>& BoneMapping);
 
 #endif

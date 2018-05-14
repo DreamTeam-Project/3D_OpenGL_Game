@@ -18,7 +18,7 @@
 #define DEBUG_SKINNING	0
 #define DEBUG_FONTS		0
 #define DEBUG_PHYSICS	0
-#define DEBUG_MENU		0
+#define DEBUG_MENU		1
 #endif
 
 #define SUCCESS 42
@@ -28,6 +28,7 @@ typedef unsigned int uint;
 
 using std::vector;
 using glm::vec3;
+using glm::mat4;
 using std::string;
 using std::exception;
 using std::ios_base;

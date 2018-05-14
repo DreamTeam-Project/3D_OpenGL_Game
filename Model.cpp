@@ -6,6 +6,19 @@ void GameModel::Draw(const GameShader& shader) {
 	}
 }
 
+void AnimatedModel::Draw(const GameShader& shader) {
+	float time = 0;
+	vector<aiMatrix4x4> transform;
+	meshes_[0]->BoneTransform(time, transform, scene_->mAnimations[0], scene_, GlobalInverseTransform_);
+	for (uint i = 0; i < transform.size(); i++) {
+		shader.setMat4(string("gBones[") + to_string(i) + "]", AssimpMatToGlm(transform[i]));
+	}
+
+	for (uint i = 0; i < meshes_.size(); i++) {
+		meshes_[i]->Draw(shader);
+	}
+}
+
 void GameModel::ClearLoaded() {
 	textures_loaded_.clear();
 }
@@ -91,14 +104,12 @@ Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex)
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
 	if (scene_->mAnimations != nullptr) {
-		vector<VertexBoneData> Bones;
 		vector<BoneInfo> BonesInfo;
 		map<string, uint> BoneMapping;
 		uint NumBones = 0;
-		Bones.resize(mesh->mNumVertices);
-		LoadBones(MeshIndex, mesh, Bones, BonesInfo, BoneMapping, NumBones);
+		LoadBones(MeshIndex, mesh, vertices, BonesInfo, BoneMapping, NumBones);
 
-		ret = CreateAnimatedMesh(vertices, indices, textures, BonesInfo, Bones, NumBones, BoneMapping);
+		ret = CreateAnimatedMesh(vertices, indices, textures, BonesInfo, NumBones, BoneMapping);
 	}
 	else {
 		ret = CreateMesh(vertices, indices, textures);
@@ -175,6 +186,15 @@ uint TextureFromFile(const char *path, const string &directory) {
 	return textureID;
 }
 
+mat4 AssimpMatToGlm(const aiMatrix4x4& m) {
+	mat4 rootTransform(
+		m[0][1], m[0][2], m[0][3], m[0][4],
+		m[1][1], m[1][2], m[1][3], m[1][4],
+		m[2][1], m[2][2], m[2][3], m[2][4],
+		m[3][1], m[3][2], m[3][3], m[3][4]);
+	return rootTransform;
+}
+
 void GameModel::PrintModel() {
 	if (type_ != GAMEMODEL) {
 		print(string("Wrong Class!"));
@@ -229,7 +249,7 @@ void GameModel::SetShaderParameters(const GameShader& shader) {
 //The function below loads the bone information for one aiMesh object.
 //In addition to filling the VertexBoneData structure, this function also updates the links between the name of the bone and
 //ID number (the index is determined at startup) and writes the displacement matrix to a vector depending on the bone id.
-void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones,
+void GameModel::LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<Vertex>& Bones,
 	vector<BoneInfo>& BonesInfo, map<string, uint>& BoneMapping, uint& NumBones) {
 	for (uint i = 0; i < pMesh->mNumBones; i++) {
 		uint BoneIndex = 0;

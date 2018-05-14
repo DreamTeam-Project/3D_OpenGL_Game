@@ -43,25 +43,26 @@ public:
 	bool play;
 
 	phys_world real_world_;
-
 	phys_body camera_;
 
 private:
-	void RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
+	void RenderModels(const mat4& projection, const mat4& view, const Camera& camera, const GameShader& shader, const vector<GameModel*> model);
 	void LoadInfoAboutLevels();
 	void LoadInfoAboutModels(uint levelNumber);
 	int ChooseLevel() { return 0; }
 	int ChooseLevel(GLFWwindow* window);
 	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
-	void LoadModels();
+	void LoadModels(const vector<GameModel*>& model);
 
 	Skybox box;
 	GameText text;
 	GameLight Light;
 	GameShader Shader;
+	GameShader AniShader;
 	vector<Level> Levels;
 	vector<SysStrings> SysText;
-	vector<GameModel*> AllModels;
+	vector<GameModel*> Models;
+	vector<GameModel*> AniModels;
 	vector<LoadedModel> LoadedModels;
 };
 

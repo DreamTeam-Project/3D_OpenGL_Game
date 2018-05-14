@@ -33,6 +33,7 @@ using glm::mat4;
 
 #define ASSIMP_FLAGS aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs
 uint TextureFromFile(const char *path, const string &directory);
+mat4 AssimpMatToGlm(const aiMatrix4x4& m);
 
 class GameModel {
 public:
@@ -54,7 +55,7 @@ public:
 		}
 
 	}
-	void Draw(const GameShader& shader);
+	virtual void Draw(const GameShader& shader);
 	void LoadModel();
 	void CopyModel(const GameModel* model);
 	void ClearLoaded();
@@ -78,7 +79,7 @@ public:
 
 	phys_body* rigid_body_;
 
-private:
+protected:
 	vector<GameTexture> textures_loaded_;
 	vector<MeshEntry> Entries_;
 	vector<Mesh*> meshes_;
@@ -89,7 +90,7 @@ private:
 	Mesh* ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex);
 	vector<GameTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName);
 
-	void LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones,
+	void LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<Vertex>& Bones,
 		vector<BoneInfo>& BonesInfo, map<string, uint>& BoneMapping, uint& NumBones);
 };
 
@@ -120,6 +121,7 @@ public:
 	AnimatedModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) : 
 		GameModel( real_world_,  type,  place,  quat, path_2, scale, mass, box,shininess, draw) { }
 	void PrintModel() override;
+	void Draw(const GameShader& shader);
 };
 
 #endif

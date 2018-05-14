@@ -1,6 +1,8 @@
 #include "Manager.h"
 
-GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false), real_world_(phys_world()) {
+GameManager::GameManager() : 
+	text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
+	play(false), real_world_(phys_world()) {
 	LoadInfoAboutLevels();
 }
 
@@ -117,11 +119,10 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 				break;
 			case STREETLAMP:
 				NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true, true);
-				//Light.PointLights.push_back(PointLight(NewModel, ))
+				break;
 			default:
 				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
 			}
-			NewModel->type_ = type;
 		}
 		else {
 			throw GameException(__LINE__, __func__, "Error wrong type of class");
@@ -129,47 +130,53 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 #if DEBUG_MANAGER
 		NewModel->PrintModel();
 #endif
-		AllModels.push_back(NewModel);
+		if (NewModel->type_ != ANIMATION) {
+			Models.push_back(NewModel);
+		}
+		else {
+			AniModels.push_back(NewModel);
+		}
 	}
-	if (AllModels.size() == 0) {
+	if (Models.size() == 0 && AniModels.size()) {
 		throw GameException(__LINE__, __func__, "level.file is empty");
 	}
-	LoadModels();
+	LoadModels(Models);
+	LoadModels(AniModels);
 #if DEBUG_MANAGER
 	print("success");
 #endif
 }
 
-void GameManager::LoadModels() {
+void GameManager::LoadModels(const vector<GameModel*>& model) {
 	bool ModelLoaded = false;
-	for (uint i = 0; i < AllModels.size(); i++) {
+	for (uint i = 0; i < model.size(); i++) {
 		ModelLoaded = false;
 		for (auto& it : LoadedModels) {
-			if (it.path_ == AllModels[i]->path_ && it.type_ == AllModels[i]->type_) {
-				AllModels[i]->CopyModel(AllModels[it.id_]);
+			if (it.path_ == model[i]->path_ && it.type_ == model[i]->type_) {
+				model[i]->CopyModel(model[it.id_]);
 				ModelLoaded = true;
 			}
 		}
 		if (!ModelLoaded) {
-			LoadedModels.push_back(LoadedModel(AllModels[i]->path_, AllModels[i]->type_, i));
-			AllModels[i]->LoadModel();
+			LoadedModels.push_back(LoadedModel(model[i]->path_, model[i]->type_, i));
+			model[i]->LoadModel();
 		}
 	}
-	for (auto& it : AllModels) {
+	for (auto& it : model) {
 		it->ClearLoaded();
 	}
 }
 
-void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time) {
-	Shader.Use();
-	Light.SetLight(Shader);
-	Shader.setMat4("projection", projection);
-	Shader.setMat4("view", view);
-	Shader.setVec3("viewPos", camera.Position);
-	for (auto& it : AllModels) {
+void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, const GameShader& shader, const vector<GameModel*> model) {
+	shader.Use();
+	Light.SetLight(shader);
+	shader.setMat4("projection", projection);
+	shader.setMat4("view", view);
+	shader.setVec3("viewPos", camera.Position);
+	for (auto& it : model) {
 		if (it->draw_) {
-			it->SetShaderParameters(Shader);
-			it->Draw(Shader);
+			it->SetShaderParameters(shader);
+			it->Draw(shader);
 		}
 	}
 }
@@ -192,10 +199,11 @@ bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
 }
 
 void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
-	real_world_.do_step(time);
-	RenderModels(projection, view, camera, time);
+	//real_world_.do_step(time);
+	RenderModels(projection, view, camera, Shader, Models);
+	RenderModels(projection, view, camera, AniShader, AniModels);
 	box.RenderBox(camera, projection);
-	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(SysText);
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
@@ -218,7 +226,8 @@ void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
 
 void GameManager::EndLevel() {
 	SysText.clear();
-	AllModels.clear();
+	Models.clear();
+	AniModels.clear();
 	LoadedModels.clear();
 }
 
