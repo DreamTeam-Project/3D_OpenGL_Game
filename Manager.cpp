@@ -1,8 +1,8 @@
 #include "Manager.h"
 
 GameManager::GameManager() : 
-	text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
-	play(false), real_world_(phys_world()) {
+	/*text(FontFile),*/ box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), AniShader("Skinning.vs", "Light.fs"),
+	play(false)/*, real_world_(phys_world())*/ {
 	LoadInfoAboutLevels();
 }
 
@@ -109,19 +109,19 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 		if (!NewModel) {
 			switch (type) {
 			case GAMEMODEL:
-				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+				NewModel = new GameModel(/*real_world_, */type, place, quat, path, scale, mass, box, 32.0f, true);
 				break;
 			case ANIMATION:
-				NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+				NewModel = new AnimatedModel(/*real_world_, */type, place, quat, path, scale, mass, box, 32.0f, true);
 				break;
 			case STRUCTURE:
-				NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box, 16.0f, true);
+				NewModel = new Structure(/*real_world_, */type, place, quat, path, scale, mass, box, 16.0f, true);
 				break;
 			case STREETLAMP:
-				NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true, true);
+				NewModel = new StreetLamp(/*real_world_, */type, place, quat, path, scale, mass, box, 32.0f, true, true);
 				break;
 			default:
-				NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box, 32.0f, true);
+				NewModel = new GameModel(/*real_world_, */type, place, quat, path, scale, mass, box, 32.0f, true);
 			}
 		}
 		else {
@@ -167,7 +167,7 @@ void GameManager::LoadModels(const vector<GameModel*>& model) {
 	}
 }
 
-void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, const GameShader& shader, const vector<GameModel*> model) {
+void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, const GameShader& shader, const vector<GameModel*>& model) {
 	shader.Use();
 	Light.SetLight(shader);
 	shader.setMat4("projection", projection);
@@ -203,7 +203,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	RenderModels(projection, view, camera, Shader, Models);
 	RenderModels(projection, view, camera, AniShader, AniModels);
 	box.RenderBox(camera, projection);
-	text.RenderText(SysText);
+	/*text.RenderText(SysText);*/
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
@@ -225,76 +225,76 @@ void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
 }
 
 void GameManager::EndLevel() {
-	SysText.clear();
+	/*SysText.clear();*/
 	Models.clear();
 	AniModels.clear();
 	LoadedModels.clear();
 }
 
-int GameManager::ChooseLevel(GLFWwindow* window) {
-	uint key = 0;
-	uint chosen = 1;
-	GLdouble deltaTime, currentFrame, lastFrame = 0.0;
-	GLdouble accumulator = 0.0;
-	Image Menu(MenuImage);
-	SysText.clear();
-
-	SysText.push_back(SysStrings("Wastelands of the USSR", (float)HEIGHT / 4.5f, (float)WIDTH / 7 * 6, 0.85f, vec3(0.5f)));
-	for (uint i = 0; i < Levels.size(); i++) {
-		SysText.push_back(SysStrings(Levels[i].name_, (float)HEIGHT / 6, (float)WIDTH / 14 * (11 - (i + 1)), 0.7f, vec3(0.5f)));
-	}
-
-	SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
-
-	while (!glfwWindowShouldClose(game_window)) {
-		currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-
-		accumulator += deltaTime;
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ProcessInputInMenu(game_window, key);
-
-		if (accumulator > 0.5) {
-			accumulator = 0;
-			if (key == 3) {
-				if (chosen < Levels.size()) {
-					SysText[chosen].color_ = vec3(0.5f);
-					chosen++;
-					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
-				}
-				else {
-					SysText[chosen].color_ = vec3(0.5f);
-					chosen = 1;
-					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
-				}
-			}
-			else if (key == 1) {
-				if (chosen > 1) {
-					SysText[chosen].color_ = vec3(0.5f);
-					chosen--;
-					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
-				}
-				else {
-					SysText[chosen].color_ = vec3(0.5f);
-					chosen = Levels.size();
-					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
-				}
-			}
-			else if (key == 2) {
-				return chosen - 1;
-			}
-			key = 0;
-		}
-
-		Menu.RenderImage();
-		text.RenderText(SysText);
-
-		glfwSwapBuffers(game_window);
-		glfwPollEvents();
-	}
-
-	SysText.clear();
-	return -1;
-}
+//int GameManager::ChooseLevel(GLFWwindow* window) {
+//	uint key = 0;
+//	uint chosen = 1;
+//	GLdouble deltaTime, currentFrame, lastFrame = 0.0;
+//	GLdouble accumulator = 0.0;
+//	Image Menu(MenuImage);
+//	SysText.clear();
+//
+//	SysText.push_back(SysStrings("Wastelands of the USSR", (float)HEIGHT / 4.5f, (float)WIDTH / 7 * 6, 0.85f, vec3(0.5f)));
+//	for (uint i = 0; i < Levels.size(); i++) {
+//		SysText.push_back(SysStrings(Levels[i].name_, (float)HEIGHT / 6, (float)WIDTH / 14 * (11 - (i + 1)), 0.7f, vec3(0.5f)));
+//	}
+//
+//	SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+//
+//	while (!glfwWindowShouldClose(game_window)) {
+//		currentFrame = glfwGetTime();
+//		deltaTime = currentFrame - lastFrame;
+//		lastFrame = currentFrame;
+//
+//		accumulator += deltaTime;
+//		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//		ProcessInputInMenu(game_window, key);
+//
+//		if (accumulator > 0.5) {
+//			accumulator = 0;
+//			if (key == 3) {
+//				if (chosen < Levels.size()) {
+//					SysText[chosen].color_ = vec3(0.5f);
+//					chosen++;
+//					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+//				}
+//				else {
+//					SysText[chosen].color_ = vec3(0.5f);
+//					chosen = 1;
+//					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+//				}
+//			}
+//			else if (key == 1) {
+//				if (chosen > 1) {
+//					SysText[chosen].color_ = vec3(0.5f);
+//					chosen--;
+//					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+//				}
+//				else {
+//					SysText[chosen].color_ = vec3(0.5f);
+//					chosen = Levels.size();
+//					SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
+//				}
+//			}
+//			else if (key == 2) {
+//				return chosen - 1;
+//			}
+//			key = 0;
+//		}
+//
+//		Menu.RenderImage();
+//		text.RenderText(SysText);
+//
+//		glfwSwapBuffers(game_window);
+//		glfwPollEvents();
+//	}
+//
+//	SysText.clear();
+//	return -1;
+//}

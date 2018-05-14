@@ -4,7 +4,7 @@ void GameLight::SetPointLights(const GameShader& shader) {
 	string buf;
 	for (uint i = 0; i < PointLights.size(); i++) {
 		buf = string("pointLights[") + to_string(i) + string("].");
-		shader.setVec3(buf + "position", PointLights[i].position_ + PointLights[i].model->rigid_body_->get_pos());
+		shader.setVec3(buf + "position", PointLights[i].position_ + PointLights[i].model->place_/*rigid_body_->get_pos()*/);
 		shader.setVec3(buf + "ambient", PointLights[i].ambient_);
 		shader.setVec3(buf + "diffuse", PointLights[i].diffuse_);
 		shader.setVec3(buf + "specular", PointLights[i].specular_);
@@ -18,7 +18,7 @@ void GameLight::SetSpotLights(const GameShader& shader) {
 	string buf;
 	for (uint i = 0; i < SpotLights.size(); i++) {
 		buf = string("spotLights[") + to_string(i) + string("].");
-		shader.setVec3(buf + "position", SpotLights[i].position_ + SpotLights[i].model->rigid_body_->get_pos());
+		shader.setVec3(buf + "position", SpotLights[i].position_ + SpotLights[i].model->place_/*rigid_body_->get_pos()*/);
 		shader.setVec3(buf + "direction", SpotLights[i].direction_/* * SpotLights[i].model->quat_*/);
 		shader.setVec3(buf + "ambient", SpotLights[i].ambient_);
 		shader.setVec3(buf + "diffuse", SpotLights[i].diffuse_);

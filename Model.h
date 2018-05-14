@@ -14,6 +14,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "System.h"
+//#include "Physics.h"
 
 #include <string>
 #include <fstream>
@@ -21,8 +22,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-
-#include "Physics.h"
 
 using std::map;
 using std::vector;
@@ -39,20 +38,21 @@ class GameModel {
 public:
 	GameModel() = delete;
 	explicit GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw = false);
-	explicit GameModel( phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
+	explicit GameModel(/* phys_world& real_world_, */int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
 		draw_(draw),
+		place_(place),
 		shininess_(shininess),
 		path_(path_2),
 		quat_(quat),
 		scale_(scale),
 		type_(type) 
 	{
-		if (type == 1) {
+		/*if (type == 1) {
 			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 		}
 		if (type == 2) {
 			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-		}
+		}*/
 
 	}
 	virtual void Draw(const GameShader& shader);
@@ -62,22 +62,22 @@ public:
 
 	void SetShaderParameters(const GameShader& shader);
 	virtual void Move(mat4& model);
-	virtual void PrintModel();
 
 	~GameModel() {
-		delete rigid_body_;
+		//delete rigid_body_;
 	}
 
 
 	string directory_;
 	string path_;
+	vec3 place_;
 	vec3 quat_;
 	vec3 scale_;
 	int type_;
 	float shininess_;
 	bool draw_;
 
-	phys_body* rigid_body_;
+	//phys_body* rigid_body_;
 
 protected:
 	vector<GameTexture> textures_loaded_;
@@ -85,6 +85,7 @@ protected:
 	vector<Mesh*> meshes_;
 	aiMatrix4x4 GlobalInverseTransform_;
 	const aiScene* scene_;
+	Assimp::Importer importer_;
 
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh* ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex);
@@ -97,10 +98,9 @@ protected:
 class Structure : public GameModel {
 public:
 	Structure() = delete;
-	Structure(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) :
-		GameModel(real_world_, type,  place, quat, path_2, scale, mass,  box, shininess, draw) { }
-	//void Move(mat4& model) override;
-	void PrintModel() override;
+	Structure(/*phys_world& real_world_, */int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) :
+		GameModel(/*real_world_, */type,  place, quat, path_2, scale, mass,  box, shininess, draw) { }
+	//void Move(mat4& model) override final;
 private:
 	mat4 model;
 };
@@ -108,8 +108,8 @@ private:
 class StreetLamp : public Structure {
 public:
 	StreetLamp() = delete;
-	StreetLamp(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true, bool on = true) :
-		Structure( real_world_, type, place, quat,  path_2,  scale,  mass, box, shininess, draw),
+	StreetLamp(/*phys_world& real_world_, */int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true, bool on = true) :
+		Structure(/* real_world_, */type, place, quat,  path_2,  scale,  mass, box, shininess, draw),
 		light(on)
 	{ }
 private:
@@ -118,9 +118,8 @@ private:
 
 class AnimatedModel : public GameModel {
 public:
-	AnimatedModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) : 
-		GameModel( real_world_,  type,  place,  quat, path_2, scale, mass, box,shininess, draw) { }
-	void PrintModel() override;
+	AnimatedModel(/*phys_world& real_world_, */int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) : 
+		GameModel(/* real_world_,  */type,  place,  quat, path_2, scale, mass, box,shininess, draw) { }
 	void Draw(const GameShader& shader);
 };
 

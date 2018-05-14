@@ -7,14 +7,14 @@ void GameModel::Draw(const GameShader& shader) {
 }
 
 void AnimatedModel::Draw(const GameShader& shader) {
-	float time = 0;
+	float time = 0.1f;
 	vector<aiMatrix4x4> transform;
-	meshes_[0]->BoneTransform(time, transform, scene_->mAnimations[0], scene_, GlobalInverseTransform_);
-	for (uint i = 0; i < transform.size(); i++) {
-		shader.setMat4(string("gBones[") + to_string(i) + "]", AssimpMatToGlm(transform[i]));
-	}
-
+	
 	for (uint i = 0; i < meshes_.size(); i++) {
+		meshes_[i]->BoneTransform(time, transform, scene_->mAnimations[0], scene_, GlobalInverseTransform_);
+		for (uint i = 0; i < transform.size(); i++) {
+			shader.setMat4(string("gBones[") + to_string(i) + "]", AssimpMatToGlm(transform[i]));
+		}
 		meshes_[i]->Draw(shader);
 	}
 }
@@ -36,7 +36,6 @@ GameModel::GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, 
 	{   }
 
 void GameModel::LoadModel() {
-	Assimp::Importer importer_;
 	scene_ = importer_.ReadFile(path_, ASSIMP_FLAGS);
 	if (!scene_ || scene_->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene_->mRootNode) {
 		throw GameException(__LINE__, __func__, "Error Assimp, Error:", importer_.GetErrorString());
@@ -198,44 +197,8 @@ mat4 AssimpMatToGlm(const aiMatrix4x4& m) {
 	return rootTransform;
 }
 
-void GameModel::PrintModel() {
-	if (type_ != GAMEMODEL) {
-		print(string("Wrong Class!"));
-	}
-	string str = string("type: ") + to_string(type_) + string(" - GameModel") + string("\n");
-	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
-	str += string("quat: ") + vec3_toString(quat_) + string("\n");
-	str += string("scale: ") + vec3_toString(scale_) + string("\n");
-	print(str);
-}
-
-void Structure::PrintModel() {
-	if (type_ != STRUCTURE) {
-		print(string("Wrong Class!"));
-	}
-	string str = string("type: ") + to_string(type_) + string(" - Structure") + string("\n");
-	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
-	str += string("quat: ") + vec3_toString(quat_) + string("\n");
-	str += string("scale: ") + vec3_toString(scale_) + string("\n");
-	print(str);
-}
-
-void AnimatedModel::PrintModel() {
-	if (type_ != ANIMATION) {
-		print(string("Wrong Class!"));
-	}
-	string str = string("type: ") + to_string(type_) + string(" - Animation") + string("\n");
-	str += string("path: ") + path_ + string("\n");
-	str += string("place: ") + vec3_toString(rigid_body_->get_pos()) + string("\n");
-	str += string("quat: ") + vec3_toString(quat_) + string("\n");
-	str += string("scale: ") + vec3_toString(scale_) + string("\n");
-	print(str);
-}
-
 void GameModel::Move(mat4& model) {
-	model = glm::translate(model, rigid_body_->get_pos());
+	model = glm::translate(model, place_/*rigid_body_->get_pos()*/);
 	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));

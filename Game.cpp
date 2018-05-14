@@ -21,6 +21,7 @@ using std::string;
 using std::exception;
 using glm::vec3;
 using std::vector;
+
 static void StartWindow();
 static void DrawInWindow();
 
