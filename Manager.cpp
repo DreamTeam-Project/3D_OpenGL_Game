@@ -35,23 +35,23 @@ void GameManager::LoadInfoAboutLevels() {
 }
 
 void GameManager::MadeModels(const Init& init) {
-	for (uint i = 0; i < init.size_phys; i++) {
+	for (int i = 0; i < init.size_phys; i++) {
 		GameModel* NewModel = nullptr;
 		switch (init.type) {
 		case GAMEMODEL:
-			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box, 32.0f, true);
+			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
 			break;
 		case ANIMATION:
-			NewModel = new AnimatedModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box, 32.0f, true);
+			NewModel = new AnimatedModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
 			break;
 		case STRUCTURE:
-			NewModel = new Structure(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box, 16.0f, true);
+			NewModel = new Structure(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 16.0f, true);
 			break;
 		case STREETLAMP:
-			NewModel = new StreetLamp(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box, 32.0f, true, true);
+			NewModel = new StreetLamp(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true, true);
 			//Light.PointLights.push_back(PointLight(NewModel, ))
 		default:
-			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box, 32.0f, true);
+			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
 		}
 		Models.push_back(NewModel);
 	}
@@ -81,19 +81,29 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 
 		ReadFromFile(fin, "path", buf.path);
 		ReadFromFile(fin, "mass", buf.mass);
-		ReadFromFile(fin, "box", buf.box);
 		ReadFromFile(fin, "num", buf.size_phys);
+
 		if (buf.size_phys <= 0) {
 			throw GameException(__LINE__, __func__, "error level.path");
 		}
 		buf.place.resize(buf.size_phys);
 		buf.scale.resize(buf.size_phys);
 		buf.quat.resize(buf.size_phys);
-		for (uint i = 0; i < buf.size_phys; i++) {
+		for (int i = 0; i < buf.size_phys; i++) {
 			ReadFromFile(fin, "place", buf.place[i]);
 			ReadFromFile(fin, "quat", buf.quat[i]);
 			ReadFromFile(fin, "scale", buf.scale[i]);
 		}
+
+		ReadFromFile(fin, "num", buf.size_box);
+		if (buf.size_box <= 0) {
+			throw GameException(__LINE__, __func__, "error level.path");
+		}
+		buf.box.resize(buf.size_box);
+		for (int i = 0; i < buf.size_box; i++) {
+			ReadFromFile(fin, "box", buf.box[i]);
+		}
+
 		ReadFromFile(fin, "num", buf.size_sound);
 		if (buf.size_sound < 0) {
 			throw GameException(__LINE__, __func__, "error level.path");
@@ -101,7 +111,7 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 		buf.sound.resize(buf.size_sound);
 		buf.type_1.resize(buf.size_sound);
 		buf.type_2.resize(buf.size_sound);
-		for (uint i = 0; i < buf.size_sound; i++) {
+		for (int i = 0; i < buf.size_sound; i++) {
 			ReadFromFile(fin, "sound", buf.sound[i]);
 			ReadFromFile(fin, "yes", buf.type_1[i]);
 			ReadFromFile(fin, "no", buf.type_2[i]);

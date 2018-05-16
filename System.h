@@ -38,21 +38,6 @@ using std::to_string;
 enum GameEnumClass {
 	GAMEMODEL, STRUCTURE, ANIMATION, STREETLAMP
 };
-struct Init {
-	int type;
-	double mass;
-	string path;
-	vec3 box;
-	int size_phys;
-	vector<vec3> place;
-	vector<vec3> quat;
-	vector<vec3> scale;
-	//music
-	int size_sound;
-	vector<string> sound;
-	vector<int> type_1;
-	vector<int> type_2;
-};
 class GameException : public exception {
 public:
 	GameException() = delete;

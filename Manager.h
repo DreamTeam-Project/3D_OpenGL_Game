@@ -20,7 +20,7 @@
 using std::vector;
 using std::string;
 
-struct Level {
+struct Level final {
 	string name_;
 	string pathLoader_;
 	Level(string name = "default", string path = "default") : name_(name), pathLoader_(path) { }
@@ -31,6 +31,24 @@ struct LoadedModel final {
 	string path_;
 	int type_;
 	uint id_;
+};
+struct Init final {
+	int type;
+	double mass;
+	string path;
+
+	int size_phys;
+	vector<vec3> place;
+	vector<vec3> quat;
+	vector<vec3> scale;
+
+	int size_box;
+	vector<vec3> box;
+
+	int size_sound;
+	vector<string> sound;
+	vector<int> type_1;
+	vector<int> type_2;
 };
 
 class GameManager {
