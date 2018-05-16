@@ -10,11 +10,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/anim.h>
-
-#include "Mesh.h"
-#include "Shader.h"
-#include "System.h"
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -22,6 +17,8 @@
 #include <map>
 #include <vector>
 
+#include "Mesh.h"
+#include "Shader.h"
 #include "Physics.h"
 
 using std::map;
@@ -37,23 +34,9 @@ uint TextureFromFile(const char *path, const string &directory);
 class GameModel {
 public:
 	GameModel() = delete;
-	explicit GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw = false);
-	explicit GameModel( phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
-		draw_(draw),
-		shininess_(shininess),
-		path_(path_2),
-		quat_(quat),
-		scale_(scale),
-		type_(type) 
-	{
-		if (type == 1) {
-			rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-		}
-		if (type == 2) {
-			rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-		}
-
-	}
+	explicit GameModel(const GameModel* model, const vec3& place, const vec3& quat, const vec3& scale, bool draw = false);
+	explicit GameModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path, 
+		const vec3& scale, const double& mass, const vec3& box, float shininess = 32.0f, bool draw = true);
 	void Draw(const GameShader& shader);
 	void LoadModel();
 	void CopyModel(const GameModel* model);
@@ -61,12 +44,10 @@ public:
 
 	void SetShaderParameters(const GameShader& shader);
 	virtual void Move(mat4& model);
-	virtual void PrintModel();
 
 	~GameModel() {
 		delete rigid_body_;
 	}
-
 
 	string directory_;
 	string path_;
@@ -80,35 +61,30 @@ public:
 
 private:
 	vector<GameTexture> textures_loaded_;
-	vector<MeshEntry> Entries_;
 	vector<Mesh*> meshes_;
-	aiMatrix4x4 GlobalInverseTransform_;
 	const aiScene* scene_;
 
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh* ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex);
 	vector<GameTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName);
-
-	void LoadBones(uint MeshIndex, const aiMesh* pMesh, vector<VertexBoneData>& Bones,
-		vector<BoneInfo>& BonesInfo, map<string, uint>& BoneMapping, uint& NumBones);
 };
 
 class Structure : public GameModel {
 public:
 	Structure() = delete;
-	Structure(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) :
-		GameModel(real_world_, type,  place, quat, path_2, scale, mass,  box, shininess, draw) { }
-	//void Move(mat4& model) override;
-	void PrintModel() override;
+	Structure(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true);
+	void Move(mat4& model) override;
 private:
-	mat4 model;
+	mat4 model_;
 };
 
 class StreetLamp : public Structure {
 public:
 	StreetLamp() = delete;
-	StreetLamp(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true, bool on = true) :
-		Structure( real_world_, type, place, quat,  path_2,  scale,  mass, box, shininess, draw),
+	StreetLamp(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path, 
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true, bool on = true) :
+		Structure( real_world_, type, place, quat,  path,  scale,  mass, box, shininess, draw),
 		light(on)
 	{ }
 private:
@@ -117,9 +93,9 @@ private:
 
 class AnimatedModel : public GameModel {
 public:
-	AnimatedModel(phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess, bool draw = true) : 
-		GameModel( real_world_,  type,  place,  quat, path_2, scale, mass, box,shininess, draw) { }
-	void PrintModel() override;
+	AnimatedModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : 
+		GameModel( real_world_,  type,  place,  quat, path, scale, mass, box,shininess, draw) { }
 };
 
 #endif

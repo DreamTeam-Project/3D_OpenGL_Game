@@ -21,6 +21,7 @@ using std::string;
 using std::exception;
 using glm::vec3;
 using std::vector;
+
 static void StartWindow();
 static void DrawInWindow();
 
@@ -42,9 +43,6 @@ GLfloat lastFrame = 0.0f;
 
 int main() {
 	try {
-#if DEBUG_GAME
-		print("go to main");
-#endif
 		StartWindow();
 #if DEBUG_GAME
 		system("pause");
@@ -57,15 +55,12 @@ int main() {
 	catch (...) {
 		print("Error default\n");
 	}
-#if _DEBUG
+#if TERMINAL
 	system("pause");
 #endif
 }
 
 static void StartWindow() {
-#if DEBUG_GAME 
-	print("go to StartWindow");
-#endif
 	if (!glfwInit()) {
 		throw GameException(__LINE__, __func__, "Error: initialization GLFW");
 	}
@@ -96,17 +91,10 @@ static void StartWindow() {
 
 	DrawInWindow();
 
-
 	glfwTerminate();
 }
 
 static void DrawInWindow() {
-#if DEBUG_GAME
-	print("\ngo to DrawWindow");
-#endif	
-	Image Loading(LoadImage);
-	Loading.RenderImage(true);
-
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -114,7 +102,7 @@ static void DrawInWindow() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameManager Manager;
-	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
+	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window)) {
 
 		while (!glfwWindowShouldClose(game_window) && Manager.play) {
 			GLfloat currentFrame = glfwGetTime();
@@ -132,8 +120,6 @@ static void DrawInWindow() {
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
 		}
-
-		Loading.RenderImage(true);
 		Manager.EndLevel();
 	}
 }

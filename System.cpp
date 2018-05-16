@@ -56,7 +56,7 @@ int doNothing() {
 }
 
 void print(const char* what) {
-	if (_DEBUG) {
+	if (TERMINAL) {
 		printf("%s\n", what);
 	}
 	else {
@@ -73,7 +73,7 @@ void print(const char* what) {
 }
 
 void print(const string& what) {
-	if (_DEBUG) {
+	if (TERMINAL) {
 		printf("%s\n", what.c_str());
 	}
 	else {
@@ -87,6 +87,41 @@ void print(const string& what) {
 		fout << what << std::endl;
 		fout.close();
 	}
+}
+
+void ReadFromFile(ifstream& fin, const string& what, string& ret) {
+	getStringFromFile(fin, ret);
+	if (ret != what || ret == "end_of_file") {
+		throw GameException(__LINE__, __func__, "error type");
+	}
+	getStringFromFile(fin, ret);
+}
+
+void ReadFromFile(ifstream& fin, const string& what, int& ret) {
+	string buf;
+	getStringFromFile(fin, buf);
+	if (buf != what || buf == "end_of_file") {
+		throw GameException(__LINE__, __func__, "error type");
+	}
+	getStringFromFile(fin, ret);
+}
+
+void ReadFromFile(ifstream& fin, const string& what, double& ret) {
+	string buf;
+	getStringFromFile(fin, buf);
+	if (buf != what || buf == "end_of_file") {
+		throw GameException(__LINE__, __func__, "error type");
+	}
+	getStringFromFile(fin, ret);
+}
+
+void ReadFromFile(ifstream& fin, const string& what, vec3& ret) {
+	string buf;
+	getStringFromFile(fin, buf);
+	if (buf != what || buf == "end_of_file") {
+		throw GameException(__LINE__, __func__, "error type");
+	}
+	getStringFromFile(fin, ret);
 }
 
 void getStringFromFile(ifstream& fin, string& ret) {
@@ -210,25 +245,4 @@ void getStringFromFile(ifstream& fin, double& ret) {
 	if (buf != ">") {
 		throw GameException(__LINE__, __func__, "error format \">\" ");
 	}
-}
-
-void InitIdentity(aiMatrix4x4& matrix) {
-	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
-	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = 0.0f;
-	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;	matrix.c3 = 1.0f;	matrix.c4 = 0.0f;
-	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;	matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
-}
-
-void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& matrix) {
-	matrix.a1 = ScaleX;	matrix.a2 = 0.0f;   matrix.a3 = 0.0f;	matrix.a4 = 0.0f;
-	matrix.b1 = 0.0f;	matrix.b2 = ScaleY; matrix.b3 = 0.0f;	matrix.b4 = 0.0f;
-	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;   matrix.c3 = ScaleZ;	matrix.c4 = 0.0f;
-	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;   matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
-}
-
-void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix) {
-	matrix.a1 = 1.0f;	matrix.a2 = 0.0f;	matrix.a3 = 0.0f;	matrix.a4 = x;
-	matrix.b1 = 0.0f;	matrix.b2 = 1.0f;	matrix.b3 = 0.0f;	matrix.b4 = y;
-	matrix.c1 = 0.0f;	matrix.c2 = 0.0f;	matrix.c3 = 1.0f;	matrix.c4 = z;
-	matrix.d1 = 0.0f;	matrix.d2 = 0.0f;	matrix.d3 = 0.0f;	matrix.d4 = 1.0f;
 }

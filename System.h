@@ -10,7 +10,8 @@
 #include <vector>
 #include <assimp\matrix4x4.h>
 
-#if _DEBUG
+#define TERMINAL 0
+#if TERMINAL
 #define DEBUG_GAME		0
 #define DEBUG_MODEL		0
 #define DEBUG_MESH		0
@@ -22,7 +23,6 @@
 #endif
 
 #define SUCCESS 42
-#define NUM_BONES_PER_VEREX 4
 
 typedef unsigned int uint;
 
@@ -38,9 +38,22 @@ using std::to_string;
 enum GameEnumClass {
 	GAMEMODEL, STRUCTURE, ANIMATION, STREETLAMP
 };
-
-class GameException : public exception
-{
+struct Init {
+	int type;
+	double mass;
+	string path;
+	vec3 box;
+	int size_phys;
+	vector<vec3> place;
+	vector<vec3> quat;
+	vector<vec3> scale;
+	//music
+	int size_sound;
+	vector<string> sound;
+	vector<int> type_1;
+	vector<int> type_2;
+};
+class GameException : public exception {
 public:
 	GameException() = delete;
 	GameException(string &&whatStr) noexcept : whatStr_(std::move(whatStr)) { }
@@ -63,14 +76,15 @@ bool IsItNumber(const string& word);
 void SetZero(aiMatrix4x4* matrix);
 void print(const char* what);
 void print(const string& what);
+int doNothing();
 void getStringFromFile(ifstream& fin, double& ret);
 void getStringFromFile(ifstream& fin, string& ret);
 void getStringFromFile(ifstream& fin, int& ret);
 void getStringFromFile(ifstream& fin, vec3& ret);
-void InitIdentity(aiMatrix4x4& matrix);
-void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ, aiMatrix4x4& matrix);
-void InitTranslationTransform(float x, float y, float z, aiMatrix4x4& matrix);
-int doNothing();
+void ReadFromFile(ifstream& fin, const string& what, string& ret);
+void ReadFromFile(ifstream& fin, const string& what, int& ret);
+void ReadFromFile(ifstream& fin, const string& what, double& ret);
+void ReadFromFile(ifstream& fin, const string& what, vec3& ret);
 
 extern GLFWwindow* game_window;
 static vector<string> DarkStormy {
@@ -81,6 +95,7 @@ static vector<string> DarkStormy {
 	("textures/skybox/DarkStormy_ft.png"),
 	("textures/skybox/DarkStormy_bk.png")
 };
+const string GameName = "Wastelands of the USSR";
 const string LoadImage = "textures/LoadImage.jpg";
 const string MenuImage = "textures/MenuImage.jpg";
 const string FontFile = "textures/font.ttf";

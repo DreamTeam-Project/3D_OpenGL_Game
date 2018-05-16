@@ -22,6 +22,11 @@ Image::Image(const string& path) : Image() {
 	LoadImage(path);
 }
 
+Image::Image(const string& path, bool swap) : Image() {
+	LoadImage(path);
+	RenderImage(swap);
+}
+
 Image::~Image() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);

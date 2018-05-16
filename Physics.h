@@ -20,9 +20,10 @@ enum Physicalobj {
 };
 
 enum Status{
-EXIST,
-ALIFE,
-DEAD};
+	EXIST,
+	ALIFE,
+	DEAD
+};
 
 class phys_world {
 public:

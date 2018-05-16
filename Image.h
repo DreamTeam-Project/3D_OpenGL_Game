@@ -27,6 +27,7 @@ const GLfloat vertices[] = {
 class Image {
 public:
 	Image(const string& path);
+	Image(const string& path, bool swap);
 	~Image();
 	void RenderImage(bool swap = false) const;
 
