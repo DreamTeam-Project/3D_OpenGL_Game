@@ -78,6 +78,7 @@ public:
 	bool GameMenu(GLFWwindow *window);
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
+	void GetCopy(GameModel* model, phys_body* phmodel);
 	bool play;
 
 	phys_world real_world_;

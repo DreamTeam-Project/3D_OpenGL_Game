@@ -30,7 +30,6 @@ GameModel::GameModel(phys_world& real_world_, const int& type, const vec3& place
 	if (type == 2) {
 		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 	}
-
 }
 
 void GameModel::Draw(const GameShader& shader) {
@@ -42,6 +41,16 @@ void GameModel::Draw(const GameShader& shader) {
 void GameModel::ClearLoaded() {
 	textures_loaded_.clear();
 }
+
+GameModel::GameModel(phys_body* psmodel, GameModel* grmodel, bool draw = false) :
+	draw_(draw),
+	shininess_(grmodel->shininess_),
+	path_(grmodel->path_),
+	quat_(grmodel->quat_),
+	scale_(grmodel->scale_),
+	type_(grmodel->type_),
+	rigid_body_(psmodel)
+{	 }
 
 void GameModel::CopyModel(const GameModel* model) {;
 	meshes_ = model->meshes_;

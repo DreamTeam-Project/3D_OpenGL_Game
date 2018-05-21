@@ -36,6 +36,7 @@ class GameModel {
 public:
 	GameModel() = delete;
 	explicit GameModel(const GameModel* model, const vec3& place, const vec3& quat, const vec3& scale, bool draw = false);
+	GameModel(phys_body* psmodel, GameModel* grmodel, bool draw = false);
 	explicit GameModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path, 
 		const vec3& scale, const double& mass, const vec3& box, float shininess = 32.0f, bool draw = true);
 	void Draw(const GameShader& shader);

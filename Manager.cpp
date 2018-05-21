@@ -51,6 +51,11 @@ void GameManager::MadeModels(Unit* init) {
 	}
 }
 
+void GameManager::GetCopy(GameModel* grmodel, phys_body* phmodel) {
+	GameModel* tmp = new GameModel(phmodel, grmodel, true);
+	Models.push_back(tmp);
+}
+
 void GameManager::MadeModels(const int& type, const vec3& place, const vec3& quat, const string& path, 
 	const vec3& scale, const double& mass, const vector<vec3>& box, const vector<string>& sounds) 
 {
@@ -61,17 +66,12 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case ANIMATION:
 		NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, -3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		//Light.PointLights.push_back(PointLight(NewModel, vec3(3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, 3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		//Light.PointLights.push_back(PointLight(NewModel, vec3(-3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
 		break;
 	case STRUCTURE:
 		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
 		break;
 	case STREETLAMP:
 		NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true, true);
-		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 20.0f, 0.0f), vec3(1), vec3(1), vec3(1), 1.0f, 0.22f, 0.20f));
 	default:
 		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 	}
