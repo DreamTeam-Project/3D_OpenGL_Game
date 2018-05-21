@@ -1,3 +1,4 @@
+
 #ifndef PHYSICS_H
 #define PHYSICS_H
 #define GLEW_STATIC
@@ -25,6 +26,7 @@
 class phys_body;
 extern phys_body* persona;
 extern vector<phys_body*> to_create;
+extern vector<phys_body*> bullets;
 
 vector<phys_body*> get_creation();
 
@@ -69,6 +71,10 @@ public:
 	virtual int get_damage() {
 		return 0;
 	}
+	glm::vec3 set_angle_vel(btVector3 vel) {
+		body->setAngularVelocity(vel);
+	}
+
 	btRigidBody* getRigidBody() {
 		return body;
 	}
@@ -84,6 +90,8 @@ public:
 };
 
 class Bullet;
+
+phys_body* find_free_bullet(phys_world& real_world);
 
 class Character: public phys_body {
 public:
@@ -146,7 +154,9 @@ public:
 	Bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, bullet),
 		status(true)
-	{}
+	{
+		bullets.push_back(this);
+	}
 };
 
 class Box_bullet : public phys_body {

@@ -3,6 +3,8 @@ extern Camera camera;
 
 static int timer = 0;
 vector<phys_body*> to_create;
+vector<phys_body*> bullets;
+
 phys_body* persona;
 vector<phys_body*> get_creation() {
 	return to_create;
@@ -175,11 +177,24 @@ int Character::getHealth() {
 	return health;
 }
 
+phys_body* find_free_bullet(phys_world& real_world, btVector3 pos) {
+	/*int i = bullets.size();
+	while (i > 0) {
+		if (bullets[i]->get_status() == 0)
+			return bullets[i - 1];
+	}*/
+	Bullet* tmp = new Bullet(real_world, pos+ btVector3(1,1,1), btVector3(1, 1, 1), btScalar(1));
+	return tmp;
+}
+
+
 phys_body* Character::aim(phys_world& real_world) {
 	if (bullets > 0) {
 		bullets--;
-		Bullet* tmp = new Bullet(real_world, this->body->getCenterOfMassPosition() +
-			btVector3(3, 3, 3), btVector3(1, 1, 1), btScalar(1));
+		phys_body* tmp =  find_free_bullet(real_world, body->getCenterOfMassPosition());
+		//tmp->body->setCenterOfMassTransform
+
+			//remove() btRigidBody from dynamicsWorld, update its transform(from MotionState) from Ogre Position(_getDerivedPosition) and Orientation(), add() modified btRigidBody to dynamicsWorld() and activate()
 		tmp->set_velosity(100 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
 		return tmp;
 	}
