@@ -6,7 +6,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <irrKlang.h>
 
+#include "Sound.h"
 #include "Model.h"
 #include "Mesh.h"
 #include "Shader.h"
@@ -70,6 +72,9 @@ struct Union final {
 class GameManager {
 public:
 	GameManager();
+	~GameManager() {
+		music->drop();
+	}
 	bool GameMenu(GLFWwindow *window);
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
@@ -77,6 +82,7 @@ public:
 
 	phys_world real_world_;
 	phys_body camera_;
+	irrklang::ISoundEngine* engine3d;
 
 private:
 	void LoadSound(ifstream& fin);
@@ -85,7 +91,7 @@ private:
 	void MadeModels(Unit* init);
 	void MadeModels(Unit* init, const vec3& place, const vec3& quat);
 	void MadeModels(const int& type, const vec3& place, const vec3& quat, const string& path,
-		const vec3& scale, const double& mass, const vector<vec3>& box);
+		const vec3& scale, const double& mass, const vector<vec3>& box, const vector<string>& sounds);
 	void MadeModels(Union* init);
 	void MadeModels(Union* init, const vec3& place, const vec3& quat);
 	void LoadModels();
@@ -96,16 +102,18 @@ private:
 	int ChooseLevel(GLFWwindow* window);
 	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
 
+	irrklang::ISound* music;
 	Image Loading;
 	Skybox box;
 	GameText text;
 	GameLight Light;
 	GameShader Shader;
+	irrklang::ISoundSource* menuSound;
 	vector<Level> Levels;
 	vector<SysStrings> SysText;
 	vector<GameModel*> Models;
 	vector<LoadedModel> LoadedModels;
-	map<string, void*> LoadedSounds;
+	map<string, irrklang::ISoundSource*> LoadedSounds;
 };
 
 #endif

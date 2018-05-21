@@ -1,7 +1,12 @@
 #include "Manager.h"
 
 GameManager::GameManager() : 
-	Loading(LoadImage, true), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false), real_world_(phys_world()) {
+	Loading(LoadImage, true), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), 
+	play(false), real_world_(phys_world())
+{
+	engine3d = irrklang::createIrrKlangDevice();
+	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
+	music = engine3d->play3D(menuSound, irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
 	LoadInfoAboutLevels();
 }
 
@@ -36,18 +41,18 @@ void GameManager::LoadInfoAboutLevels() {
 
 void GameManager::MadeModels(Unit* init, const vec3& place, const vec3& quat) {
 	for (int i = 0; i < init->size_phys; i++) {
-		MadeModels(init->type, place + init->place[i], quat + init->quat[i], init->path, init->scale[i], init->mass, init->box);
+		MadeModels(init->type, place + init->place[i], quat + init->quat[i], init->path, init->scale[i], init->mass, init->box, init->sound);
 	}
 }
 
 void GameManager::MadeModels(Unit* init) {
 	for (int i = 0; i < init->size_phys; i++) {
-		MadeModels(init->type, init->place[i], init->quat[i], init->path, init->scale[i], init->mass, init->box);
+		MadeModels(init->type, init->place[i], init->quat[i], init->path, init->scale[i], init->mass, init->box, init->sound);
 	}
 }
 
 void GameManager::MadeModels(const int& type, const vec3& place, const vec3& quat, const string& path, 
-	const vec3& scale, const double& mass, const vector<vec3>& box) 
+	const vec3& scale, const double& mass, const vector<vec3>& box, const vector<string>& sounds) 
 {
 	GameModel* NewModel = nullptr;
 	switch (type) {
@@ -55,11 +60,11 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 		break;
 	case ANIMATION:
-		NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
-		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, -3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		Light.PointLights.push_back(PointLight(NewModel, vec3(3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, 3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
-		Light.PointLights.push_back(PointLight(NewModel, vec3(-3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
+		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, -3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		//Light.PointLights.push_back(PointLight(NewModel, vec3(3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, 3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		//Light.PointLights.push_back(PointLight(NewModel, vec3(-3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
 		break;
 	case STRUCTURE:
 		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
@@ -97,6 +102,8 @@ void GameManager::MadeModels(Union* init, const vec3& place, const vec3& quat) {
 
 void GameManager::LoadSound(ifstream& fin) {
 	string buf;
+	int type;
+	irrklang::ISoundSource* tmp = nullptr;
 	getStringFromFile(fin, buf);
 	if (buf == "null" || buf == "end_of_file" || buf != "sound") {
 		throw GameException(__LINE__, __func__, "Error: level.path - sound module is bad");
@@ -111,7 +118,18 @@ void GameManager::LoadSound(ifstream& fin) {
 			flag = false;
 			break;
 		}
-		void* tmp = nullptr;
+		getStringFromFile(fin, type);
+		switch (type) {
+		case 0: 
+			tmp = engine3d->addSoundSourceFromFile(buf.c_str(), irrklang::ESM_NO_STREAMING, true);
+			break;
+		case 1:
+			tmp = engine3d->addSoundSourceFromFile(buf.c_str(), irrklang::ESM_STREAMING, true);
+			break;
+		default:
+			tmp = engine3d->addSoundSourceFromFile(buf.c_str(), irrklang::ESM_AUTO_DETECT, true);
+			break;
+		}
 		auto it = LoadedSounds.end();
 		if (LoadedSounds.find(buf) != it) {
 			doNothing();
@@ -271,6 +289,8 @@ bool GameManager::GameMenu(GLFWwindow* window) {
 		Loading.RenderImage(true);
 		LoadInfoAboutModels(levelNumber);
 		play = true;
+		music->setIsPaused();
+		music->setPlayPosition(0);
 		return true;
 	}
 }
@@ -306,6 +326,7 @@ void GameManager::EndLevel() {
 	Models.clear();
 	LoadedModels.clear();
 	LoadedSounds.clear();
+	music->setIsPaused(false);
 }
 
 void GameManager::LoadModels() {

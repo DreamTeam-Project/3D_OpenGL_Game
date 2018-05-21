@@ -20,6 +20,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "Physics.h"
+#include "Sound.h"
 
 using std::map;
 using std::vector;
@@ -94,8 +95,17 @@ private:
 class AnimatedModel : public GameModel {
 public:
 	AnimatedModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
-		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : 
-		GameModel( real_world_,  type,  place,  quat, path, scale, mass, box,shininess, draw) { }
+		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) : 
+		GameModel( real_world_,  type,  place,  quat, path, scale, mass, box,shininess, draw), 
+		hero(irrklang::vec3df(place.x, place.y, place.z), sounds, WALK_Sound, engine3d, LoadedSounds) { }
+	SoundHero hero;
+
+	void Move(mat4& model) override;
+	void PlayMusic() {
+		float i = 0.0f;
+		hero.Refresh(irrklang::vec3df(0.0f, 0.0f, 0.0f), irrklang::vec3df(0.0f, 0.0f, 0.0f), WALK_Sound, i);
+	}
 };
 
 #endif

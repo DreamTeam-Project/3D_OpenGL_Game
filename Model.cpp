@@ -69,6 +69,15 @@ void GameModel::LoadModel() {
 	ProcessNode(scene_->mRootNode, scene_);
 }
 
+void AnimatedModel::Move(mat4& model) {
+	PlayMusic();
+	model = glm::translate(model, rigid_body_->get_pos());
+	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale_);
+}
+
 void GameModel::SetShaderParameters(const GameShader& shader) {
 	mat4 model;
 	Move(model);

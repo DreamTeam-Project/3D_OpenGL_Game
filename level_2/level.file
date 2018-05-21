@@ -10,7 +10,7 @@
 
 	< unit >
 		< type  >   < 2 >
-		< path  >   < level_test\cat\walk.dae > 
+		< path  >   < obj\cat\walk.dae > 
 		< mass  >	< 3.0 >
 
 		< num   >   < 10 >
@@ -38,7 +38,7 @@
 
 < unit >
 	< type  >   < 1 >
-	< path  >   < level_test\lava\lava.obj >
+	< path  >   < obj\lava\lava.obj >
 	< mass  >	< 0.0 >
 
 	< num   >   < 1 >
@@ -54,7 +54,7 @@
 
 < unit >
 	< type  >   < 1 >
-	< path  >   < level_test\Car\Car.obj >
+	< path  >   < obj\Car\Car.obj >
 	< mass  >	< 10.0 >
 
 	< num   >   < 1 >

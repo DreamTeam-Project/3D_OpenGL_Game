@@ -1,12 +1,15 @@
 < sound >
-	< sound1.mp3 >
-	< sound2.mp3 >
-	< sound3.mp3 >
+	< textures\shagi.mp3 >				< 1 >
+	< textures\klac.mp3 >				< 1 >
+	< textures\MenuSound.mp3 >			< 1 >
+	< textures\SOAD.mp3 >				< 1 >
+	< textures\drobovik.mp3 >			< 1 >
+	< textures\destiny.mp3 >			< 1 >
 < end >
 
 < unit >
 	< type  >   < 1 >
-	< path  >   < level_1\lava\lava.obj >
+	< path  >   < textures\obj\lava\lava.obj >
 	< mass  >	< 0.0 >
 
 	< num   >   < 1 >
@@ -22,7 +25,7 @@
 
 < unit >
 	< type  >   < 2 >
-	< path  >   < level_1\Petroleum_Lamp\Petroleum_Lamp.obj >
+	< path  >   < textures\obj\Petroleum_Lamp\Petroleum_Lamp.obj >
 	< mass  >	< 10.0 >
 
 	< num   >   < 1 >
@@ -33,7 +36,13 @@
 	< num   >   < 1 >
 	< box   >	< 1.0 1.0 1.0 >
 
-	< num   >   < 0 > 
+	< num   >   < 6 >
+	< sound >	< textures\shagi.mp3 >
+	< sound >	< textures\klac.mp3 >
+	< sound >	< textures\MenuSound.mp3 >
+	< sound >	< textures\SOAD.mp3 >
+	< sound >	< textures\drobovik.mp3 >
+	< sound >   < textures\destiny.mp3 >
 < end >
 
 
