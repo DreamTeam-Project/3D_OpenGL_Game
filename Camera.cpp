@@ -1,16 +1,17 @@
 #include "Camera.h"
 
-Camera::Camera( vec3 up, GLfloat yaw, GLfloat pitch) 
-		: Front(vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+Camera::Camera(vec3 position, vec3 up, GLfloat yaw, GLfloat pitch)
+	: Front(vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+	this->Position = position;
 	this->WorldUp = up;
 	this->Yaw = yaw;
 	this->Pitch = pitch;
 	this->updateCameraVectors();
 }
 
-Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) 
-		: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
-	//this->Position = glm::vec3(posX, posY, posZ);
+Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)
+	: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+	this->Position = glm::vec3(posX, posY, posZ);
 	this->WorldUp = glm::vec3(upX, upY, upZ);
 	this->Yaw = yaw;
 	this->Pitch = pitch;
@@ -19,52 +20,45 @@ Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat up
 
 glm::mat4 Camera::GetViewMatrix() const {
 	return glm::lookAt(
-		Position->get_pos(), Position->get_pos() + Front, Up);
-		//this->Position, this->Position + this->Front, this->Up);
+		position->get_pos(), position->get_pos() + Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime) {
-	double velocity = this->MovementSpeed * deltaTime;
-	added.setX(0);
-	added.setY(0);
-	added.setZ(0);
+	GLfloat velocity = this->MovementSpeed * deltaTime;
+	float velosity =  this->MovementSpeed * deltaTime;
 	if (direction == FORWARD) {
-		/*printf("forw\n");
-		printf("%f %f %f\n", Front.x, Front.y, Front.z);
-		printf("%f %f %f\n", Position->body->getLinearVelocity().getX(), Position->body->getLinearVelocity().getY(), Position->body->getLinearVelocity().getZ());*/
-		Position->set_velosity(
-			Position->body->getLinearVelocity() + btVector3(Front.x* velocity, Front.y*velocity, Front.z*velocity));
-		added += btVector3(Front.x* velocity, Front.y*velocity, Front.z*velocity);
-		//printf("%f %f %f\n", Position->body->getLinearVelocity().getX(), Position->body->getLinearVelocity().getY(), Position->body->getLinearVelocity().getZ());
-		////this->Position += this->Front * velocity;
+		this->Position += this->Front * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() + 
+			btVector3(Front.x* velosity, Front.y*velosity, 
+				Front.z*velosity));
 	}
 	if (direction == BACKWARD) {
-		//this->Position -= this->Front * velocity;
-		/*printf("Bac\n");*/
-		Position->set_velosity(
-			Position->body->getLinearVelocity() - btVector3(Front.x* velocity, Front.y*velocity, Front.z*velocity));
-		added -= btVector3(Front.x* velocity, Front.y*velocity, Front.z*velocity);
+		this->Position -= this->Front * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() -
+			btVector3(Front.x* velosity, Front.y*velosity,
+				Front.z*velosity));
 	}
 	if (direction == LEFT) {
-		/*printf("left\n");*/
-		Position->set_velosity(	Position->body->getLinearVelocity() - btVector3(Right.x* velocity, Right.y*velocity, Right.z*velocity));
-		//this->Position -= this->Right * velocity;
-		added -= btVector3(Right.x* velocity, Right.y*velocity, Right.z*velocity);
+		this->Position -= this->Right * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() 
+			- btVector3(Right.x* velosity, Right.y*velosity, 
+				Right.z*velosity));
 	}
 	if (direction == RIGHT) {
-		/*printf("right\n");*/
-		Position->set_velosity(Position->body->getLinearVelocity() + btVector3(Right.x* velocity, Right.y*velocity, Right.z*velocity));
-		//this->Position += this->Right * velocity;
-		added += btVector3(Right.x* velocity, Right.y*velocity, Right.z*velocity);
+		this->Position += this->Right * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity()
+			+ btVector3(Right.x* velosity, Right.y*velosity,
+				Right.z*velosity));
 	}
-	/*printf("in dir\n");*/
-	Position->body->setActivationState(ACTIVE_TAG);
 }
 
 void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch) {
 	xoffset *= this->MouseSensitivity;
 	yoffset *= this->MouseSensitivity;
-
 
 	this->Yaw += xoffset;
 	this->Pitch += yoffset;
