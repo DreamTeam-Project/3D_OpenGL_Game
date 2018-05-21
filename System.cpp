@@ -92,7 +92,7 @@ void print(const string& what) {
 void ReadFromFile(ifstream& fin, const string& what, string& ret) {
 	getStringFromFile(fin, ret);
 	if (ret != what || ret == "end_of_file") {
-		throw GameException(__LINE__, __func__, "error type");
+		throw GameException(__LINE__, __func__, "Error: error type - string");
 	}
 	getStringFromFile(fin, ret);
 }
@@ -101,7 +101,7 @@ void ReadFromFile(ifstream& fin, const string& what, int& ret) {
 	string buf;
 	getStringFromFile(fin, buf);
 	if (buf != what || buf == "end_of_file") {
-		throw GameException(__LINE__, __func__, "error type");
+		throw GameException(__LINE__, __func__, "Error: error type - int");
 	}
 	getStringFromFile(fin, ret);
 }
@@ -110,7 +110,7 @@ void ReadFromFile(ifstream& fin, const string& what, double& ret) {
 	string buf;
 	getStringFromFile(fin, buf);
 	if (buf != what || buf == "end_of_file") {
-		throw GameException(__LINE__, __func__, "error type");
+		throw GameException(__LINE__, __func__, "Error: error type - double");
 	}
 	getStringFromFile(fin, ret);
 }
@@ -119,7 +119,7 @@ void ReadFromFile(ifstream& fin, const string& what, vec3& ret) {
 	string buf;
 	getStringFromFile(fin, buf);
 	if (buf != what || buf == "end_of_file") {
-		throw GameException(__LINE__, __func__, "error type");
+		throw GameException(__LINE__, __func__, "Error: error type - vec3");
 	}
 	getStringFromFile(fin, ret);
 }
@@ -133,7 +133,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		return;
 	}
 	if (buf != "<") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "Error: error format \">\" ", "string");
 	}
 	fin >> buf;
 	while (buf != ">" || fin.eof()) {
@@ -144,7 +144,7 @@ void getStringFromFile(ifstream& fin, string& ret) {
 		fin >> buf;
 	}
 	if (buf != ">" && fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format >");
+		throw GameException(__LINE__, __func__, "error format >", "string");
 	}
 	if (buf == ">" && fin.eof() && ret == "") {
 		ret = "end_of_file";
@@ -162,7 +162,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "int");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -179,7 +179,7 @@ void getStringFromFile(ifstream& fin, int& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "int");
 	}
 }
 
@@ -187,7 +187,7 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "vec3");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -218,7 +218,7 @@ void getStringFromFile(ifstream& fin, vec3& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "vec3");
 	}
 }
 
@@ -226,7 +226,7 @@ void getStringFromFile(ifstream& fin, double& ret) {
 	string buf = "";
 	fin >> buf;
 	if (buf != "<" || fin.eof()) {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "double");
 	}
 	fin >> buf;
 	if (buf != ">" && !fin.eof()) {
@@ -234,7 +234,7 @@ void getStringFromFile(ifstream& fin, double& ret) {
 			ret = std::stod(buf);
 		}
 		catch (exception& e) {
-			throw GameException(__LINE__, __func__, "error format \"int\" ", e.what());
+			throw GameException(__LINE__, __func__, "error format \"double\" ", e.what());
 		}
 	}
 	if (buf == ">") {
@@ -243,6 +243,6 @@ void getStringFromFile(ifstream& fin, double& ret) {
 	}
 	fin >> buf;
 	if (buf != ">") {
-		throw GameException(__LINE__, __func__, "error format \">\" ");
+		throw GameException(__LINE__, __func__, "error format \">\" ", "double");
 	}
 }

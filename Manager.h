@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Model.h"
 #include "Mesh.h"
@@ -19,6 +20,7 @@
 
 using std::vector;
 using std::string;
+using std::map;
 
 struct Level final {
 	string name_;
@@ -32,7 +34,7 @@ struct LoadedModel final {
 	int type_;
 	uint id_;
 };
-struct Init final {
+struct Unit final {
 	int type;
 	double mass;
 	string path;
@@ -47,8 +49,22 @@ struct Init final {
 
 	int size_sound;
 	vector<string> sound;
-	vector<int> type_1;
-	vector<int> type_2;
+	~Unit() = default;
+};
+struct Union final {
+	int num;
+	vector<vec3> place;
+	vector<vec3> quat;
+	vector<Union*> unions;
+	vector<Unit*> units;
+	~Union() {
+		for (auto& it : unions) {
+			it->~Union();
+		}
+		for (auto& it : units) {
+			it->~Unit();
+		}
+	}
 };
 
 class GameManager {
@@ -63,7 +79,15 @@ public:
 	phys_body camera_;
 
 private:
-	void MadeModels(const Init& init);
+	void LoadSound(ifstream& fin);
+	Unit* LoadUnit(ifstream& fin);
+	Union* LoadUnion(ifstream& fin);
+	void MadeModels(Unit* init);
+	void MadeModels(Unit* init, const vec3& place, const vec3& quat);
+	void MadeModels(const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vector<vec3>& box);
+	void MadeModels(Union* init);
+	void MadeModels(Union* init, const vec3& place, const vec3& quat);
 	void LoadModels();
 	void RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
 	void LoadInfoAboutLevels();
@@ -81,6 +105,7 @@ private:
 	vector<SysStrings> SysText;
 	vector<GameModel*> Models;
 	vector<LoadedModel> LoadedModels;
+	map<string, void*> LoadedSounds;
 };
 
 #endif

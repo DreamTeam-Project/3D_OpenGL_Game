@@ -34,93 +34,213 @@ void GameManager::LoadInfoAboutLevels() {
 #endif
 }
 
-void GameManager::MadeModels(const Init& init) {
-	for (int i = 0; i < init.size_phys; i++) {
-		GameModel* NewModel = nullptr;
-		switch (init.type) {
-		case GAMEMODEL:
-			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
-			break;
-		case ANIMATION:
-			NewModel = new AnimatedModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
-			break;
-		case STRUCTURE:
-			NewModel = new Structure(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 16.0f, true);
-			break;
-		case STREETLAMP:
-			NewModel = new StreetLamp(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true, true);
-			//Light.PointLights.push_back(PointLight(NewModel, ))
-		default:
-			NewModel = new GameModel(real_world_, init.type, init.place[i], init.quat[i], init.path, init.scale[i], init.mass, init.box[0], 32.0f, true);
-		}
-		Models.push_back(NewModel);
+void GameManager::MadeModels(Unit* init, const vec3& place, const vec3& quat) {
+	for (int i = 0; i < init->size_phys; i++) {
+		MadeModels(init->type, place + init->place[i], quat + init->quat[i], init->path, init->scale[i], init->mass, init->box);
 	}
 }
 
-void GameManager::LoadInfoAboutModels(uint levelNumber) {
-	string path_tmp = Levels.at(levelNumber).pathLoader_;
-	std::ifstream fin(path_tmp);
-	if (!fin.is_open()) {
-		throw GameException(__LINE__, __func__, "error open file level.file");
+void GameManager::MadeModels(Unit* init) {
+	for (int i = 0; i < init->size_phys; i++) {
+		MadeModels(init->type, init->place[i], init->quat[i], init->path, init->scale[i], init->mass, init->box);
 	}
-	while (!fin.eof()) {
-		Init buf;
-		string strbuf = "";
+}
 
-		getStringFromFile(fin, strbuf);
-		if (strbuf == "end_of_file") {
+void GameManager::MadeModels(const int& type, const vec3& place, const vec3& quat, const string& path, 
+	const vec3& scale, const double& mass, const vector<vec3>& box) 
+{
+	GameModel* NewModel = nullptr;
+	switch (type) {
+	case GAMEMODEL:
+		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		break;
+	case ANIMATION:
+		NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, -3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		Light.PointLights.push_back(PointLight(NewModel, vec3(3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 3.0f, 3.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		Light.PointLights.push_back(PointLight(NewModel, vec3(-3.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.07f, 0.017f));
+		break;
+	case STRUCTURE:
+		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
+		break;
+	case STREETLAMP:
+		NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true, true);
+		//Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 20.0f, 0.0f), vec3(1), vec3(1), vec3(1), 1.0f, 0.22f, 0.20f));
+	default:
+		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+	}
+	Models.push_back(NewModel);
+}
+
+void GameManager::MadeModels(Union* init) {
+	for (int j = 0; j < init->num; j++) {
+		for (uint i = 0; i < init->unions.size(); i++) {
+			MadeModels(init->unions[i], init->place[j], init->quat[j]);
+		}
+		for (uint i = 0; i < init->units.size(); i++) {
+			MadeModels(init->units[i], init->place[j], init->quat[j]);
+		}
+	}
+}
+
+void GameManager::MadeModels(Union* init, const vec3& place, const vec3& quat) {
+	for (int j = 0; j < init->num; j++) {
+		for (uint i = 0; i < init->unions.size(); i++) {
+			MadeModels(init->unions[i], init->place[j] + place, init->quat[j] + quat);
+		}
+		for (uint i = 0; i < init->units.size(); i++) {
+			MadeModels(init->units[i], init->place[j] + place, init->quat[j] + quat);
+		}
+	}
+}
+
+void GameManager::LoadSound(ifstream& fin) {
+	string buf;
+	getStringFromFile(fin, buf);
+	if (buf == "null" || buf == "end_of_file" || buf != "sound") {
+		throw GameException(__LINE__, __func__, "Error: level.path - sound module is bad");
+	}
+	bool flag = true;
+	while (flag) {
+		getStringFromFile(fin, buf);
+		if (buf == "null" || buf == "end_of_file") {
+			throw GameException(__LINE__, __func__, "Error: level.path - sound module is bad");
+		}
+		if (buf == "end") {
+			flag = false;
 			break;
 		}
-		if (strbuf == "null" || strbuf != "type") {
-			throw GameException(__LINE__, __func__, "error level.path");
+		void* tmp = nullptr;
+		auto it = LoadedSounds.end();
+		if (LoadedSounds.find(buf) != it) {
+			doNothing();
 		}
-		getStringFromFile(fin, buf.type);
+		else {
+			LoadedSounds.insert(std::make_pair(buf, tmp));
+		}
+	}
+}
+
+Unit* GameManager::LoadUnit(ifstream& fin) {
+	Unit* buf = new Unit();
+	string strbuf = "";
+
+	ReadFromFile(fin, "type", buf->type);
+	ReadFromFile(fin, "path", buf->path);
+	ReadFromFile(fin, "mass", buf->mass);
+	ReadFromFile(fin, "num", buf->size_phys);
+
+	if (buf->size_phys <= 0) {
+		throw GameException(__LINE__, __func__, "Error: error level.path - size 0f phys param");
+	}
+	buf->place.resize(buf->size_phys);
+	buf->scale.resize(buf->size_phys);
+	buf->quat.resize(buf->size_phys);
+	for (int i = 0; i < buf->size_phys; i++) {
+		ReadFromFile(fin, "place", buf->place[i]);
+		ReadFromFile(fin, "quat", buf->quat[i]);
+		ReadFromFile(fin, "scale", buf->scale[i]);
+	}
+
+	ReadFromFile(fin, "num", buf->size_box);
+	if (buf->size_box <= 0) {
+		throw GameException(__LINE__, __func__, "Error: error level.path - num of boxes");
+	}
+	buf->box.resize(buf->size_box);
+	for (int i = 0; i < buf->size_box; i++) {
+		ReadFromFile(fin, "box", buf->box[i]);
+	}
+
+	ReadFromFile(fin, "num", buf->size_sound);
+	if (buf->size_sound < 0) {
+		throw GameException(__LINE__, __func__, "Error: error level.path - read num of sound");
+	}
+	buf->sound.resize(buf->size_sound);
+	for (int i = 0; i < buf->size_sound; i++) {
+		ReadFromFile(fin, "sound", buf->sound[i]);
+	}
+
+	getStringFromFile(fin, strbuf);
+	if (strbuf != "end") {
+		throw GameException(__LINE__, __func__, "Error: error level.path - end of unit");
+	}
+
+	return buf;
+}
+
+Union* GameManager::LoadUnion(ifstream& fin) {
+	Union* buf = new Union();
+	string strbuf;
+	ReadFromFile(fin, "num", buf->num);
+	if (buf->num <= 0) {
+		throw GameException(__LINE__, __func__, "Error: error level.path - read num of union");
+	}
+	buf->place.resize(buf->num);
+	buf->quat.resize(buf->num);
+	for (int i = 0; i < buf->num; i++) {
+		ReadFromFile(fin, "place", buf->place[i]);
+		ReadFromFile(fin, "quat", buf->quat[i]);
+	}
+	bool flag = true;
+	while (flag) {
+		getStringFromFile(fin, strbuf);
 		if (strbuf == "null" || strbuf == "end_of_file") {
-			throw GameException(__LINE__, __func__, "error level.path");
+			throw GameException(__LINE__, __func__, "Error: file level.file - union - wrong");
 		}
-
-		ReadFromFile(fin, "path", buf.path);
-		ReadFromFile(fin, "mass", buf.mass);
-		ReadFromFile(fin, "num", buf.size_phys);
-
-		if (buf.size_phys <= 0) {
-			throw GameException(__LINE__, __func__, "error level.path");
+		else if (strbuf == "unit") {
+			Unit* unitbuf = LoadUnit(fin);
+			buf->units.push_back(unitbuf);
 		}
-		buf.place.resize(buf.size_phys);
-		buf.scale.resize(buf.size_phys);
-		buf.quat.resize(buf.size_phys);
-		for (int i = 0; i < buf.size_phys; i++) {
-			ReadFromFile(fin, "place", buf.place[i]);
-			ReadFromFile(fin, "quat", buf.quat[i]);
-			ReadFromFile(fin, "scale", buf.scale[i]);
+		else if (strbuf == "union") {
+			Union* unionbuf = LoadUnion(fin);
+			buf->unions.push_back(unionbuf);
 		}
-
-		ReadFromFile(fin, "num", buf.size_box);
-		if (buf.size_box <= 0) {
-			throw GameException(__LINE__, __func__, "error level.path");
+		else if (strbuf == "end") {
+			flag = false;
+			break;
 		}
-		buf.box.resize(buf.size_box);
-		for (int i = 0; i < buf.size_box; i++) {
-			ReadFromFile(fin, "box", buf.box[i]);
+		else {
+			throw GameException(__LINE__, __func__, "Error: level.file - wrong name");
 		}
-
-		ReadFromFile(fin, "num", buf.size_sound);
-		if (buf.size_sound < 0) {
-			throw GameException(__LINE__, __func__, "error level.path");
-		}
-		buf.sound.resize(buf.size_sound);
-		buf.type_1.resize(buf.size_sound);
-		buf.type_2.resize(buf.size_sound);
-		for (int i = 0; i < buf.size_sound; i++) {
-			ReadFromFile(fin, "sound", buf.sound[i]);
-			ReadFromFile(fin, "yes", buf.type_1[i]);
-			ReadFromFile(fin, "no", buf.type_2[i]);
-		}
-		MadeModels(buf);
 	}
-	if (Models.size() == 0) {
-		throw GameException(__LINE__, __func__, "level.file is empty");
+
+	return buf;
+}
+
+void GameManager::LoadInfoAboutModels(uint levelNumber) {
+	string strbuf = Levels.at(levelNumber).pathLoader_;
+	std::ifstream fin(strbuf);
+	if (!fin.is_open()) {
+		throw GameException(__LINE__, __func__, "Error: file level.file - can't open");
 	}
+	LoadSound(fin);
+	while (!fin.eof()) {
+		getStringFromFile(fin, strbuf);
+		if (strbuf == "null") {
+			throw GameException(__LINE__, __func__, "Error: file level.file - null");
+		}
+		else if (strbuf == "end_of_file") {
+			break;
+		}
+		else if (strbuf == "unit") {
+			Unit* buf = LoadUnit(fin);
+			MadeModels(buf);
+			buf->~Unit();
+		}
+		else if (strbuf == "union") {
+			Union* buf = LoadUnion(fin);
+			MadeModels(buf);
+			buf->~Union();
+		}
+		else {
+			throw GameException(__LINE__, __func__, "Error: level.file - wrong name");
+		}
+	}
+	if (!Models.size()) {
+		throw GameException(__LINE__, __func__, "Error: LoadedModels is empty");
+	}
+	fin.close();
 	LoadModels();
 }
 
@@ -159,7 +279,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	real_world_.do_step(time);
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
-	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(SysText);
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
@@ -185,6 +305,7 @@ void GameManager::EndLevel() {
 	SysText.clear();
 	Models.clear();
 	LoadedModels.clear();
+	LoadedSounds.clear();
 }
 
 void GameManager::LoadModels() {
@@ -259,6 +380,7 @@ int GameManager::ChooseLevel(GLFWwindow* window) {
 				}
 			}
 			else if (key == 2) {
+				SysText.clear();
 				return chosen - 1;
 			}
 			key = 0;

@@ -51,6 +51,14 @@ GameModel::GameModel(const GameModel* model, const vec3& place, const vec3& quat
 	quat_(quat), scale_(scale), draw_(draw), scene_(model->scene_), meshes_(model->meshes_)
 	{   }
 
+void GameModel::Move(mat4& model) {
+	model = glm::translate(model, rigid_body_->get_pos());
+	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale_);
+}
+
 void GameModel::LoadModel() {
 	Assimp::Importer importer_;
 	scene_ = importer_.ReadFile(path_, ASSIMP_FLAGS);
@@ -61,73 +69,11 @@ void GameModel::LoadModel() {
 	ProcessNode(scene_->mRootNode, scene_);
 }
 
-void GameModel::ProcessNode(aiNode *node, const aiScene *scene) {
-	for (uint i = 0; i < scene->mNumMeshes; i++) {
-		aiMesh *mesh = scene->mMeshes[i];
-		meshes_.push_back(ProcessMesh(mesh, scene, i));
-	}
-}
-
-Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex) {
-	Mesh* ret = nullptr;
-	vector<Vertex> vertices;
-	vector<uint> indices;
-	vector<GameTexture> textures;
-
-	indices.reserve(mesh->mNumFaces * 3);
-	vertices.reserve(mesh->mNumVertices);
-
-	for (uint i = 0; i < mesh->mNumVertices; i++) {
-		Vertex vertex;
-		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		if (mesh->HasTextureCoords(0)) {
-			vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		}
-		else {
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		}
-		vertices.push_back(vertex);
-	}
-
-	for (uint i = 0; i < mesh->mNumFaces; i++) {
-		indices.push_back(mesh->mFaces[i].mIndices[0]);
-		indices.push_back(mesh->mFaces[i].mIndices[1]);
-		indices.push_back(mesh->mFaces[i].mIndices[2]);
-	}
-	
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	vector<GameTexture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
-	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	vector<GameTexture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
-	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-	return CreateMesh(vertices, indices, textures);;
-}
-
-vector<GameTexture> GameModel::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName) {
-	vector<GameTexture> textures;
-	for (uint i = 0; i < mat->GetTextureCount(type); i++) {
-		aiString str;
-		mat->GetTexture(type, i, &str);
-		bool skip = false;
-		for (uint j = 0; j < textures_loaded_.size(); j++) {
-			if (std::strcmp(textures_loaded_[j].path.data(), str.C_Str()) == 0) {
-				textures.push_back(textures_loaded_[j]);
-				skip = true;
-				break;
-			}
-		}
-		if (!skip) {
-			GameTexture texture;
-			texture.id = TextureFromFile(str.C_Str(), this->directory_);
-			texture.type = typeName;
-			texture.path = str.C_Str();
-			textures.push_back(texture);
-			textures_loaded_.push_back(texture);
-		}
-	}
-	return textures;
+void GameModel::SetShaderParameters(const GameShader& shader) {
+	mat4 model;
+	Move(model);
+	shader.setMat4("model", model);
+	shader.setFloat("material.shininess", shininess_);
 }
 
 uint TextureFromFile(const char *path, const string &directory) {
@@ -173,17 +119,71 @@ uint TextureFromFile(const char *path, const string &directory) {
 	return textureID;
 }
 
-void GameModel::Move(mat4& model) {
-	model = glm::translate(model, rigid_body_->get_pos());
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, scale_);
+void GameModel::ProcessNode(aiNode *node, const aiScene *scene) {
+	for (uint i = 0; i < scene->mNumMeshes; i++) {
+		aiMesh *mesh = scene->mMeshes[i];
+		meshes_.push_back(ProcessMesh(mesh, scene, i));
+	}
 }
 
-void GameModel::SetShaderParameters(const GameShader& shader) {
-	mat4 model;
-	Move(model);
-	shader.setMat4("model", model);
-	shader.setFloat("material.shininess", shininess_);
+Mesh* GameModel::ProcessMesh(aiMesh *mesh, const aiScene *scene, uint MeshIndex) {
+	Mesh* ret = nullptr;
+	vector<Vertex> vertices;
+	vector<uint> indices;
+	vector<GameTexture> textures;
+
+	indices.reserve(mesh->mNumFaces * 3);
+	vertices.reserve(mesh->mNumVertices);
+
+	for (uint i = 0; i < mesh->mNumVertices; i++) {
+		Vertex vertex;
+		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		if (mesh->HasTextureCoords(0)) {
+			vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		}
+		else {
+			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+		}
+		vertices.push_back(vertex);
+	}
+
+	for (uint i = 0; i < mesh->mNumFaces; i++) {
+		indices.push_back(mesh->mFaces[i].mIndices[0]);
+		indices.push_back(mesh->mFaces[i].mIndices[1]);
+		indices.push_back(mesh->mFaces[i].mIndices[2]);
+	}
+
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	vector<GameTexture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	vector<GameTexture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
+	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+	return CreateMesh(vertices, indices, textures);;
+}
+
+vector<GameTexture> GameModel::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const string& typeName) {
+	vector<GameTexture> textures;
+	for (uint i = 0; i < mat->GetTextureCount(type); i++) {
+		aiString str;
+		mat->GetTexture(type, i, &str);
+		bool skip = false;
+		for (uint j = 0; j < textures_loaded_.size(); j++) {
+			if (std::strcmp(textures_loaded_[j].path.data(), str.C_Str()) == 0) {
+				textures.push_back(textures_loaded_[j]);
+				skip = true;
+				break;
+			}
+		}
+		if (!skip) {
+			GameTexture texture;
+			texture.id = TextureFromFile(str.C_Str(), this->directory_);
+			texture.type = typeName;
+			texture.path = str.C_Str();
+			textures.push_back(texture);
+			textures_loaded_.push_back(texture);
+		}
+	}
+	return textures;
 }

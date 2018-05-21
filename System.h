@@ -38,6 +38,7 @@ using std::to_string;
 enum GameEnumClass {
 	GAMEMODEL, STRUCTURE, ANIMATION, STREETLAMP
 };
+
 class GameException : public exception {
 public:
 	GameException() = delete;
@@ -87,11 +88,11 @@ const string FontFile = "textures/font.ttf";
 const string LoadFile = "Load.file";
 const uint HeightFont = 48u;
 const uint WidthFont = 0u;
-const float lightSky = 0.9f;
+const float lightSky = 0.4f;
 const GLuint WIDTH = 1024, HEIGHT = 600;
 const vec3 direction(-0.2f, -1.0f, -0.3f);
 const vec3 diffuse(0.05f, 0.05f, 0.05f);
 const vec3 specular(0.1f, 0.1f, 0.1f);
-const vec3 ambient(1.0f, 1.0f, 1.0f);
+const vec3 ambient(0.0f, 0.0f, 0.0f);
 
 #endif

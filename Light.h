@@ -29,7 +29,7 @@ struct PointLight {
 	PointLight(GameModel* mod, const vec3& pos, const vec3& diff, const vec3& amb,
 		const vec3& spec, float con, float lin, float quad) : 
 	model(mod), position_(pos), ambient_(amb), diffuse_(diff), 
-		specular_(spec), constant_(con), quadratic_(quad) {  }
+		specular_(spec), constant_(con), quadratic_(quad), linear_(lin) {  }
 	GameModel* model;
 	vec3 position_;
 	vec3 ambient_;
