@@ -21,7 +21,6 @@ using std::string;
 using std::exception;
 using glm::vec3;
 using std::vector;
-
 static void StartWindow();
 static void DrawInWindow();
 
@@ -31,7 +30,9 @@ void ProcessInputInGame(GLFWwindow *window);
 
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 10.0f, 0.0f));
+GameManager* game_man;
+
+Camera camera(vec3(10.0f, 10.0f, 10.0f));
 
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -43,6 +44,9 @@ GLfloat lastFrame = 0.0f;
 
 int main() {
 	try {
+#if DEBUG_GAME
+		print("go to main");
+#endif
 		StartWindow();
 #if DEBUG_GAME
 		system("pause");
@@ -55,12 +59,15 @@ int main() {
 	catch (...) {
 		print("Error default\n");
 	}
-#if TERMINAL
+#if _DEBUG
 	system("pause");
 #endif
 }
 
 static void StartWindow() {
+#if DEBUG_GAME 
+	print("go to StartWindow");
+#endif
 	if (!glfwInit()) {
 		throw GameException(__LINE__, __func__, "Error: initialization GLFW");
 	}
@@ -91,10 +98,17 @@ static void StartWindow() {
 
 	DrawInWindow();
 
+
 	glfwTerminate();
 }
 
 static void DrawInWindow() {
+#if DEBUG_GAME
+	print("\ngo to DrawWindow");
+#endif	
+	Image Loading(LoadImage);
+	Loading.RenderImage(true);
+
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -102,7 +116,8 @@ static void DrawInWindow() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameManager Manager;
-	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window)) {
+	game_man = &Manager;
+	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
 
 		while (!glfwWindowShouldClose(game_window) && Manager.play) {
 			GLfloat currentFrame = glfwGetTime();
@@ -120,6 +135,8 @@ static void DrawInWindow() {
 			glfwSwapBuffers(game_window);
 			glfwPollEvents();
 		}
+
+		Loading.RenderImage(true);
 		Manager.EndLevel();
 	}
 }
@@ -159,5 +176,26 @@ void ProcessInputInGame(GLFWwindow *window) {
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		camera.position->jump();
+	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+		printf("just R\n");
+		static int press = 0;
+		press++;
+		if (press % 100 == 11) {
+			phys_body* tmp = camera.position->aim(game_man->real_world_);
+			if (tmp == nullptr) {
+				
+				printf("null\n");
+				return;
+			}
+				
+			game_man->AllModels.push_back(new GameModel(game_man->AllModels[0], tmp,
+				vec3(0, 0, 0), vec3(1, 1, 1), true));
+			printf("created bullet\n");
+		}
+		
 	}
 }
