@@ -41,6 +41,11 @@ void SoundCharacter::DoSound() {
 			Walk->setIsPaused(false);
 		}
 		if (Status == ALIVE_Sound) {
+			Walk->setIsPaused();
+			bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ALIVE_Sound]);
+			if (!check) {
+				engine3d->play3D(ObjectSounds[ALIVE_Sound], Pos);
+			}
 			//live as long as you can
 		}
 	}
@@ -59,48 +64,53 @@ void SoundHero::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum Ch
 }
 
 void SoundHero::DoSound() {
-		if (Status != ATTACK_Sound) {
-			if (L0 > 0) {
-				L0 = L0 - dt;
-			}
-			if (L0 <= 0) {
-				SOAD->setIsPaused();
-				SOAD->setPlayPosition(0);
-			}
+	if (Status != ATTACK_Sound) {
+		if (L0 > 0) {
+			L0 = L0 - dt;
 		}
-		if (Status == DEAD_Sound) {
-			Walk->setIsPaused();
-			bool check = engine3d->isCurrentlyPlaying(ObjectSounds[DEAD_Sound]);
-			if (!check) {
-				engine3d->play3D(ObjectSounds[DEAD_Sound], Pos);
-			}
+		if (L0 <= 0) {
+			SOAD->setIsPaused();
+			SOAD->setPlayPosition(0);
+		}
+	}
+	if (Status == DEAD_Sound) {
+		Walk->setIsPaused();
+		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[DEAD_Sound]);
+		if (!check) {
+			engine3d->play3D(ObjectSounds[DEAD_Sound], Pos);
+		}
 
+	}
+	if (Status == ATTACK_Sound) {
+		L0 = SOADLENGTH;
+		Walk->setIsPaused();
+		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ATTACK_Sound]);
+		if (!check) {
+			engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos);
 		}
-		if (Status == ATTACK_Sound) {
-			L0 = SOADLENGTH;
-			Walk->setIsPaused();
-			bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ATTACK_Sound]);
-			if (!check) {
-				engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos);
-			}
-			bool check2 = engine3d->isCurrentlyPlaying(ObjectSounds[BACKBATTLE_Sound]);
-			if (check2) {
-				SOAD->setIsPaused(false);
-			}
+		bool check2 = engine3d->isCurrentlyPlaying(ObjectSounds[BACKBATTLE_Sound]);
+		if (check2) {
+			SOAD->setIsPaused(false);
 		}
-		if (Status == JUMP_Sound) {
-			Walk->setIsPaused();
-			bool check = engine3d->isCurrentlyPlaying(ObjectSounds[JUMP_Sound]);
-			if (!check) {
-				engine3d->play3D(ObjectSounds[JUMP_Sound], Pos);
-			}
+	}
+	if (Status == JUMP_Sound) {
+		Walk->setIsPaused();
+		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[JUMP_Sound]);
+		if (!check) {
+			engine3d->play3D(ObjectSounds[JUMP_Sound], Pos);
 		}
-		if (Status == WALK_Sound) {
-			Walk->setIsPaused(false);
+	}
+	if (Status == WALK_Sound) {
+		Walk->setIsPaused(false);
+	}
+	if (Status == ALIVE_Sound) {
+		Walk->setIsPaused();
+		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ALIVE_Sound]);
+		if (!check) {
+			engine3d->play3D(ObjectSounds[ALIVE_Sound], Pos);
 		}
-		if (Status == ALIVE_Sound) {
-			//live, die, to sides of one pie....
-		}
+		//live, die, to sides of one pie....
+	}
 
 }
 
@@ -114,7 +124,9 @@ void SoundStructure::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, en
 	else {
 		IsNear = false;
 	}
-	this->DoSound();
+	if (Path.size() != 0) {
+		this->DoSound();
+	}
 }
 
 void SoundStructure::DoSound() {
@@ -133,19 +145,28 @@ void SoundWorld::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum W
 	irrklang::vec3df dist = pos0 - lpos0;
 	SoundMenu->setPosition(Pos);
 	L0 = L0 - dt;
-	if (!L0) {
-		int TypeOfSound = rand() % 5;
+	if (L0 < 0) {
+		int TypeOfSound = rand() % 7;
 		if (TypeOfSound == 1) {
 			Status = WIND_Sound;
 		}
 		if (TypeOfSound == 2) {
-			Status = SCREAM_Sound;
+			Status = SCREAM1_Sound;
 		}
 		if (TypeOfSound == 3) {
-			Status = LAUGH_Sound;
+			Status = SCREAM2_Sound;
 		}
 		if (TypeOfSound == 4) {
-			Status = BIRDS_Sound;
+			Status = LAUGH1_Sound;
+		}
+		if (TypeOfSound == 5) {
+			Status = LAUGH2_Sound;
+		}
+		if (TypeOfSound == 6) {
+			Status = BIRDS1_Sound;
+		}
+		if (TypeOfSound == 0) {
+			Status = BIRDS2_Sound;
 		}
 		L0 = BACKVOICE_DISTANCE;
 	}
@@ -154,26 +175,30 @@ void SoundWorld::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum W
 }
 
 void SoundWorld::DoSound() {
-
-	if (Status == MENU_Sound) {
-		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[MENU_Sound]);
-		if (!check) {
-			SoundMenu->setIsPaused(false);
-		}
-	}
+	
 	if (Status == WIND_Sound) {
 		engine3d->play3D(ObjectSounds[WIND_Sound], Pos);
 	}
-	if (Status == SCREAM_Sound) {
-		engine3d->play3D(ObjectSounds[SCREAM_Sound], Pos);
+	if (Status == SCREAM1_Sound) {
+		engine3d->play3D(ObjectSounds[SCREAM1_Sound], Pos);
 	}
-	if (Status == LAUGH_Sound) {
-		engine3d->play3D(ObjectSounds[LAUGH_Sound], Pos);
+	if (Status == LAUGH1_Sound) {
+		engine3d->play3D(ObjectSounds[LAUGH1_Sound], Pos);
 	}
-	if (Status == BIRDS_Sound) {
-		engine3d->play3D(ObjectSounds[BIRDS_Sound], Pos);
+	if (Status == BIRDS1_Sound) {
+		engine3d->play3D(ObjectSounds[BIRDS1_Sound], Pos);
 	}
-	if (Status == GAME_Sound) {
-		//find every easter egg
+	if (Status == SCREAM2_Sound) {
+		engine3d->play3D(ObjectSounds[SCREAM2_Sound], Pos);
 	}
+	if (Status == LAUGH2_Sound) {
+		engine3d->play3D(ObjectSounds[LAUGH2_Sound], Pos);
+	}
+	if (Status == BIRDS2_Sound) {
+		engine3d->play3D(ObjectSounds[BIRDS2_Sound], Pos);
+	}
+}
+
+int main() {
+	return 0;
 }

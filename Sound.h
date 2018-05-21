@@ -1,7 +1,7 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include <irrKlang.h>
+#include "irrKlang.h"
 #include <cstdio>
 #include <vector>
 #include <string>
@@ -31,12 +31,13 @@ enum StructureSound {
 };
 
 enum WorldSound {
-	MENU_Sound,
 	WIND_Sound,
-	SCREAM_Sound,
-	LAUGH_Sound,
-	BIRDS_Sound,
-	GAME_Sound
+	SCREAM1_Sound,
+	SCREAM2_Sound,
+	LAUGH1_Sound,
+	LAUGH2_Sound,
+	BIRDS1_Sound,
+	BIRDS2_Sound
 };
 
 enum TypeSound {
@@ -88,6 +89,7 @@ public:
 };
 
 class SoundStructure {
+public:
 	irrklang::vec3df Pos;
 	vector<string> Path;
 	std::vector<irrklang::ISoundSource*> ObjectSounds;
@@ -97,7 +99,9 @@ class SoundStructure {
 
 	SoundStructure(irrklang::vec3df& pos0, const vector<string>& path0, enum StructureSound action, irrklang::ISoundEngine* engine3d_, map<string, irrklang::ISoundSource*>& GlobalMusicDataBase)
 		: Pos(pos0), Path(path0), Status(action), engine3d(engine3d_) {
-		ObjectSounds.push_back(GlobalMusicDataBase[Path[0]]);
+		if (Path.size() != 0) {
+			ObjectSounds.push_back(GlobalMusicDataBase[Path[0]]);
+		}
 	}
 	~SoundStructure() {
 		ObjectSounds.clear();
@@ -109,6 +113,7 @@ class SoundStructure {
 };
 
 class SoundWorld {
+public:
 	irrklang::vec3df Pos;
 	vector<string> Path;
 	vector<irrklang::ISoundSource*> ObjectSounds;
@@ -118,7 +123,7 @@ class SoundWorld {
 	irrklang::ik_f32 dt;
 	irrklang::ISoundEngine* engine3d;
 
-	SoundWorld(irrklang::vec3df& pos0, const vector<string>& path0, enum WorldSound stat0, 
+	SoundWorld(irrklang::vec3df& pos0, const vector<string>& path0, enum WorldSound stat0,
 		irrklang::ISoundEngine* engine3d_, map<string, irrklang::ISoundSource*>& GlobalMusicDataBase)
 		: Pos(pos0), Path(path0), Status(stat0), engine3d(engine3d_) {
 		for (int i = 0; i < Path.size(); i++) {
