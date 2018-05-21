@@ -37,7 +37,7 @@ uint TextureFromFile(const char *path, const string &directory);
 class GameModel {
 public:
 	GameModel() = delete;
-	explicit GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw = false);
+	explicit GameModel(const GameModel* model, phys_body* body, vec3 quat, vec3 scale, bool draw = false);
 	explicit GameModel( phys_world& real_world_, int& type, vec3& place, vec3& quat, string& path_2, vec3& scale, double mass, vec3& box, float shininess = 32.0f, bool draw = true) :
 		draw_(draw),
 		shininess_(shininess),

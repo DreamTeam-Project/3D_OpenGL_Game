@@ -17,9 +17,10 @@ void GameModel::CopyModel(const GameModel* model) {
 	scene_ = model->scene_;
 }
 
-GameModel::GameModel(const GameModel* model, vec3 place, vec3 quat, vec3 scale, bool draw) :
+GameModel::GameModel(const GameModel* model, phys_body* body, vec3 quat, vec3 scale, bool draw) :
 	quat_(quat), scale_(scale), draw_(draw), scene_(model->scene_),
-	Entries_(model->Entries_), meshes_(model->meshes_), GlobalInverseTransform_(model->GlobalInverseTransform_)
+	Entries_(model->Entries_), meshes_(model->meshes_), GlobalInverseTransform_(model->GlobalInverseTransform_),
+	rigid_body_(body)
 	{   }
 
 void GameModel::LoadModel() {

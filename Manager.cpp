@@ -1,7 +1,15 @@
 #include "Manager.h"
 
-GameManager::GameManager() : text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), play(false),
-real_world_(phys_world()){
+extern Camera camera;
+
+GameManager::GameManager() :
+text(FontFile), 
+box(DarkStormy, lightSky), 
+Shader("Light.vs", "Light.fs"),
+play(false),
+real_world_(phys_world())
+{
+	camera.Position = new Character(real_world_, btVector3(10, 10, 10), btVector3(1, 1, 1), btScalar(40));
 	LoadInfoAboutLevels();
 }
 
@@ -166,7 +174,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	Light.SetLight(Shader);
 	Shader.setMat4("projection", projection);
 	Shader.setMat4("view", view);
-	Shader.setVec3("viewPos", camera.Position);
+	Shader.setVec3("viewPos", camera.Position->get_pos());
 	for (auto& it : AllModels) {
 		if (it->draw_) {
 			it->SetShaderParameters(Shader);
@@ -176,8 +184,8 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 }
 
 bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
-	//int levelNumber = ChooseLevel();
-	int levelNumber = ChooseLevel(window);
+	int levelNumber = ChooseLevel();
+	//int levelNumber = ChooseLevel(window);
 	if (levelNumber == -1) {
 		return false;
 	}
@@ -189,8 +197,13 @@ bool GameManager::GameMenu(GLFWwindow* window, const Image& Loading) {
 	}
 }
 
-void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
-	real_world_.do_step(time);
+void GameManager::RenderWorld(const mat4& projection, const mat4& view, Camera& camera, float time) {
+	real_world_.do_step(time, real_world_);
+	get_creation();
+	//camera.Position->set_velosity();
+	/*camera.added.setX(0);
+	camera.added.setY(0);
+	camera.added.setZ(0);*/
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
 	text.RenderText("HP, MP bullets", 10.0f, (float)WIDTH / 2, 1.0f, vec3(1.0f, 0.0f, 0.0f));

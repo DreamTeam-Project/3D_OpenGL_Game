@@ -30,7 +30,9 @@ void ProcessInputInGame(GLFWwindow *window);
 
 GLFWwindow* game_window = nullptr;
 
-Camera camera(vec3(0.0f, 0.0f, 0.0f));
+GameManager* game_man;
+
+Camera camera(vec3(10.0f, 10.0f, 10.0f));
 
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -114,6 +116,7 @@ static void DrawInWindow() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameManager Manager;
+	game_man = &Manager;
 	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window, Loading)) {
 
 		while (!glfwWindowShouldClose(game_window) && Manager.play) {
@@ -173,5 +176,19 @@ void ProcessInputInGame(GLFWwindow *window) {
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		camera.Position->jump();
+	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+		printf("just R\n");
+		static int press = 0;
+		press++;
+		if (press % 100 == 11) {
+			game_man->AllModels.push_back(new GameModel(game_man->AllModels[0], camera.Position->aim(game_man->real_world_),
+				vec3(0, 0, 0), vec3(1, 1, 1), true));
+			printf("created bullet\n");
+		}
+		
 	}
 }
