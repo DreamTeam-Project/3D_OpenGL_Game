@@ -101,6 +101,7 @@ phys_world::~phys_world() {
 }
 
 glm::vec3 phys_body::get_pos() {
+	//printf("%p\n", this);
 	btVector3 tmp = body->getCenterOfMassPosition();
 	return glm::vec3(tmp.getX(), tmp.getY(), tmp.getZ());
 }
@@ -175,10 +176,15 @@ int Character::getHealth() {
 }
 
 phys_body* Character::aim(phys_world& real_world) {
-	Bullet* tmp = new Bullet( real_world, this->body->getCenterOfMassPosition() +
-		btVector3(3, 3, 3), btVector3(1, 1, 1), btScalar(1));
-	tmp->set_velosity(100*btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
-	return tmp;
+	if (bullets > 0) {
+		bullets--;
+		Bullet* tmp = new Bullet(real_world, this->body->getCenterOfMassPosition() +
+			btVector3(3, 3, 3), btVector3(1, 1, 1), btScalar(1));
+		tmp->set_velosity(100 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
+		return tmp;
+	}
+	return nullptr;
+	
 	//Bullet* tmp = new Bullet(world_saver, body->getCenterOfMassPosition(), btVector3(1, 1, 1), btScalar(1));
 
 }
@@ -214,6 +220,9 @@ void Character::collidedwith(char type) {
 		break;
 	case bullet:
 		health -= 10;
+		break;
+	case box_bullet:
+		bullets += 10;
 		break;
 	case enemy_close:
 		health -= 20;
@@ -266,4 +275,22 @@ int Enemy_dis::do_something(phys_world& world) {
 		to_create.push_back(tmp);
 	}
 	return 0;
+}
+
+void Box_bullet::collidedwith(char type) {
+	switch (type) {
+	case standart:
+		break;
+	case character:
+		status = 0;
+		body->setActivationState(DISABLE_SIMULATION);
+		break;
+	case bullet:
+		break;
+	case enemy_close:
+		break;
+	default:
+		break;
+	}
+	return;
 }

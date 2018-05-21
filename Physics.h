@@ -35,8 +35,9 @@ enum Physicalobj {
 	standart,
 	enemy_dis,
 	enemy_close,
-	wall,
-	bullet
+	light,
+	bullet,
+	box_bullet
 };
 
 enum Status{
@@ -88,7 +89,11 @@ class Character: public phys_body {
 public:
 	int health;
 	bool inair;
+	int bullets;
 	char get_status();
+	int get_bullets() {
+		return bullets;
+	}
 	void jump();
 	phys_body* aim(phys_world& real_world);
 	void legs();
@@ -96,7 +101,8 @@ public:
 	void collidedwith(char type) override;
 	Character(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, character),
-		health(50), 
+		health(50),
+		bullets(50),
 		inair(false)
 	{
 		persona = this;
@@ -138,9 +144,18 @@ public:
 	bool status;
 	void collidedwith(char type) override;
 	Bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
-		phys_body(world, position, col_shape, mass, character),
+		phys_body(world, position, col_shape, mass, bullet),
 		status(true)
 	{}
+};
+
+class Box_bullet : public phys_body {
+	int status;
+	Box_bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
+		phys_body(world, position, col_shape, mass, box_bullet),
+		status(1)
+	{}
+	void collidedwith(char type) override;
 };
 
 bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
