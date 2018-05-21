@@ -1,9 +1,26 @@
 #include "Physics.h"
+extern Camera camera;
 
-void phys_body::set_velosity(btVector3& vel) {
+static int timer = 0;
+vector<phys_body*> to_create;
+phys_body* persona;
+vector<phys_body*> get_creation() {
+	return to_create;
+}
+
+void phys_body::set_velosity(btVector3 vel) {
 	body->setLinearVelocity(vel);
 }
-vector<phys_body*> collided;
+
+struct collided_id {
+	phys_body* your;
+	char type_ag;
+};
+
+vector<phys_body*> enemies;
+
+
+vector<struct collided_id> collided;
 
 phys_body::phys_body(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass, int type):
 type_(type) {
@@ -28,6 +45,7 @@ type_(type) {
 	body = new btRigidBody(rbInfo);
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	body->setUserPointer(this);
+	body->setActivationState(DISABLE_DEACTIVATION);
 
 	world.dynamicsWorld->addRigidBody(body);
 }
@@ -40,6 +58,7 @@ phys_world::phys_world() {
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	gContactAddedCallback = callbackFunc;
 	dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	//world_saver = this;
 }
 
 phys_world::~phys_world() {
@@ -77,6 +96,8 @@ phys_world::~phys_world() {
 	delete dispatcher;
 
 	delete collisionConfiguration;
+
+	//world_saver = nullptr;
 }
 
 glm::vec3 phys_body::get_pos() {
@@ -88,10 +109,14 @@ bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int
 	//std::cout << "collision" << std::endl;
 	const btCollisionObject* col_obj1 =obj1->getCollisionObject();
 	phys_body* body_1 = (phys_body*)col_obj1->getUserPointer();
-	body_1->hit();
+	char type_1 = body_1->type_;
+	
+	
 	const btCollisionObject* col_obj2 = obj2->getCollisionObject();
 	phys_body* body_2 = (phys_body*)col_obj2->getUserPointer();
-	body_2->hit();
+	char type_2 = body_2->type_;
+	body_2->hit(type_2);
+	body_1->hit(type_2);
 	return false;
 }
 
@@ -99,32 +124,30 @@ char phys_body::get_status() {
 	return EXIST;
 }
 
-void phys_body::collidedwith() {
 
-	return;
-}
 
-void Character::collidedwith() {
-	printf("Collide\n");
-	health-=100;
-	body->setLinearVelocity(btVector3(0.0, 10.0, 0.0));
-}
-void phys_world::do_step(btScalar time) {
+void phys_world::do_step(btScalar time, phys_world& world) {
 	dynamicsWorld->stepSimulation(time);
 	int i = collided.size();
-	printf("i = %d\n", i);
+	//printf("i = %d\n", i);
 	while (i > 0) {
-		collided[i-1]->collidedwith();
+		collided[i-1].your->collidedwith(collided[i-1].type_ag);
 		i--;
 		collided.pop_back();
 	}
-	
+	i = enemies.size();
+	while (i > 0) {
+		enemies[i - 1]->do_something(world);
+	}
 
 }
 
-void phys_body::hit() {
+void phys_body::hit(char type) {
 	//std::cout << "hello" << std::endl;
-	collided.push_back(this);
+	struct collided_id a;
+	a.type_ag = type;
+	a.your = this;
+	collided.push_back(a);
 }
 
 phys_body::phys_body() :
@@ -140,13 +163,107 @@ char Character::get_status() {
 }
 
 void Character::jump() {
-	body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
+	if (inair == false) {
+		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
+		inair = true;
+	}
+	body->setActivationState(ACTIVE_TAG);
 }
 
 int Character::getHealth() {
 	return health;
 }
 
-void Character::moving(glm::vec3& didection) {
+phys_body* Character::aim(phys_world& real_world) {
+	Bullet* tmp = new Bullet( real_world, this->body->getCenterOfMassPosition() +
+		btVector3(3, 3, 3), btVector3(1, 1, 1), btScalar(1));
+	tmp->set_velosity(100*btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
+	return tmp;
+	//Bullet* tmp = new Bullet(world_saver, body->getCenterOfMassPosition(), btVector3(1, 1, 1), btScalar(1));
 
+}
+
+void Character::legs() {
+
+}
+
+void Enemy_dis::collidedwith(char type) {
+	switch (type) {
+	case standart: 
+		
+		break;
+	case character:
+		break;
+	case bullet:
+		health -= persona->get_damage();
+		if (health < 0) {
+			body->setActivationState(DISABLE_SIMULATION);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void Character::collidedwith(char type) {
+	switch (type) {
+	case standart:
+		inair = false;
+		break;
+	case character:
+		break;
+	case bullet:
+		health -= 10;
+		break;
+	case enemy_close:
+		health -= 20;
+	default:
+		break;
+	}
+}
+
+void phys_body::collidedwith(char type) {
+
+	return;
+}
+
+void Enemy_close::collidedwith(char type) {
+	switch (type) {
+	case standart:
+		break;
+	case character:
+		health -= persona->get_damage();
+		break;
+	case bullet:
+		health -= persona->get_damage();
+		break;
+	case enemy_close:
+		health -= 20;
+	default:
+		break;
+	}
+	return;
+}
+
+void Bullet::collidedwith(char type) {
+	status = false;
+}
+
+int Enemy_close::do_something(phys_world& world) {
+	if (health > 0) {
+		body->setActivationState(DISABLE_DEACTIVATION);
+		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+	}
+	
+	return 0;
+}
+
+
+int Enemy_dis::do_something(phys_world& world) {
+	timer++;
+	if (timer % 1000 == 101 && health>0) {
+		Bullet* tmp = new Bullet(world, body->getCenterOfMassPosition() + btVector3(1, 1, 1), btVector3(1, 1, 1), btScalar(1));
+		to_create.push_back(tmp);
+	}
+	return 0;
 }
