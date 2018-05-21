@@ -45,6 +45,7 @@ type_(type) {
 	body = new btRigidBody(rbInfo);
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	body->setUserPointer(this);
+	body->setActivationState(DISABLE_DEACTIVATION);
 
 	world.dynamicsWorld->addRigidBody(body);
 }
