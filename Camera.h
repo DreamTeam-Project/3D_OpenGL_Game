@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Physics.h"
+
 enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
@@ -22,10 +24,12 @@ const GLfloat SENSITIVTY = 0.25f;
 const GLfloat ZOOM = 45.0f;
 
 using glm::vec3;
+class Character;
 
 class Camera {
 public:
 	vec3 Position;
+	Character* position;
 	vec3 Front;
 	vec3 Up;
 	vec3 Right;

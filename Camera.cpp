@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-Camera::Camera(vec3 position, vec3 up, GLfloat yaw, GLfloat pitch) 
-		: Front(vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+Camera::Camera(vec3 position, vec3 up, GLfloat yaw, GLfloat pitch)
+	: Front(vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
 	this->Position = position;
 	this->WorldUp = up;
 	this->Yaw = yaw;
@@ -9,8 +9,8 @@ Camera::Camera(vec3 position, vec3 up, GLfloat yaw, GLfloat pitch)
 	this->updateCameraVectors();
 }
 
-Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) 
-		: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
+Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)
+	: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM) {
 	this->Position = glm::vec3(posX, posY, posZ);
 	this->WorldUp = glm::vec3(upX, upY, upZ);
 	this->Yaw = yaw;
@@ -19,22 +19,40 @@ Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat up
 }
 
 glm::mat4 Camera::GetViewMatrix() const {
-	return glm::lookAt(this->Position, this->Position + this->Front, this->Up);
+	return glm::lookAt(
+		position->get_pos(), position->get_pos() + Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime) {
 	GLfloat velocity = this->MovementSpeed * deltaTime;
+	float velosity =  this->MovementSpeed * deltaTime;
 	if (direction == FORWARD) {
 		this->Position += this->Front * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() + 
+			btVector3(Front.x* velosity, Front.y*velosity, 
+				Front.z*velosity));
 	}
 	if (direction == BACKWARD) {
 		this->Position -= this->Front * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() -
+			btVector3(Front.x* velosity, Front.y*velosity,
+				Front.z*velosity));
 	}
 	if (direction == LEFT) {
 		this->Position -= this->Right * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity() 
+			- btVector3(Right.x* velosity, Right.y*velosity, 
+				Right.z*velosity));
 	}
 	if (direction == RIGHT) {
 		this->Position += this->Right * velocity;
+		position->set_velosity(
+			position->body->getLinearVelocity()
+			+ btVector3(Right.x* velosity, Right.y*velosity,
+				Right.z*velosity));
 	}
 }
 
