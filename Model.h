@@ -203,7 +203,13 @@ public:
 		//	i--;
 		//}
 		walls.push_back(new phys_body(real_world_, btVector3(place.x + 1, place.y + 1, place.z + 1), btVector3(box[0].x, box[0].y, box[0].z), btScalar(0)));
-
+	}
+	~ChurchModel() {
+		int i = walls.size();
+		while (i > 0) {
+			delete walls[i - 1];
+			i--;
+		}
 
 	}
 };
