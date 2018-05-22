@@ -216,9 +216,10 @@ public:
 };
 
 class HP_box : public phys_body {
+public:
 	int resive_HP;
 	int status;
-public:
+
 	HP_box(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, hp_box),
 		status(1),

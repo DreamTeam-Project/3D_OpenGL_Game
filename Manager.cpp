@@ -88,7 +88,7 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		NewModel = new XPBoxModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 		break;
 	case CHURCH:
-		NewModel = new ChurchModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 16.0f, true);
+		NewModel = new ChurchModel(real_world_, type, place, quat, path, scale, mass, box, sounds, engine3d, LoadedSounds, 16.0f, true);
 		break;
 	default:
 		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);

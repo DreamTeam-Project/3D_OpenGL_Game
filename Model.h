@@ -181,18 +181,30 @@ public:
 		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : 
 		Structure(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
 	{
-		//rigid_body_ = new  XP_box(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		rigid_body_ = new  HP_box(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 	}
 };
 
 class ChurchModel : public Structure {
 public:
+	vector<phys_body*> walls;
 	ChurchModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
-		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		const vec3& scale, const double& mass, const vector<vec3>& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
 		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) : 
-		Structure(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
+		Structure(real_world_, place, quat, path, scale, mass, box[0], shininess, draw) 
 	{
-		//rigid_body_ = new Church(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box[0].x, box[0].y, box[0].z), btScalar(0));
+		//if (i = place.size() != box.size()) {
+		//	throw GameException(__LINE__, __func__, string( "error structure, wrong size place and box\n"));
+		//}
+		//while (i > 1) {
+		//	phys_body* tmp  = new phys_body(real_world_, btVector3(place[i-1].x, place[i-1].y, place[i-1].z), btVector3(box[i-1].x, box[i-1].y, box[i-1].z), btScalar(0));
+		//	walls.push_back(tmp);
+		//	i--;
+		//}
+		walls.push_back(new phys_body(real_world_, btVector3(place.x + 1, place.y + 1, place.z + 1), btVector3(box[0].x, box[0].y, box[0].z), btScalar(0)));
+
+
 	}
 };
 

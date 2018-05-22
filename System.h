@@ -36,7 +36,7 @@ using std::ifstream;
 using std::to_string;
 
 enum GameEnumClass {
-	GAMEMODEL, STRUCTURE, ANIMATION, STREETLAMP
+	GAMEMODEL, STRUCTURE, CHARACTER, BULLET, BOX_BULLET, ENEMY_DIS, ENEMY_CLOSE, FLOOR, HP_BOX, CHURCH
 };
 
 class GameException : public exception {
