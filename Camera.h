@@ -24,12 +24,12 @@ const GLfloat SENSITIVTY = 0.25f;
 const GLfloat ZOOM = 45.0f;
 
 using glm::vec3;
-class Character;
+class phys_body;
 
 class Camera {
 public:
 	vec3 Position;
-	Character* position;
+	phys_body* position;
 	vec3 Front;
 	vec3 Up;
 	vec3 Right;

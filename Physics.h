@@ -170,7 +170,9 @@ public:
 	Enemy_dis(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, bullet),
 		health(50)
-	{}
+	{
+		printf("enemy_dis created\n");
+	}
 
 };
 

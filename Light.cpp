@@ -19,7 +19,7 @@ void GameLight::SetSpotLights(const GameShader& shader) {
 	string buf;
 	for (uint i = 0; i < SpotLights.size(); i++) {
 		buf = string("spotLights[") + to_string(i) + string("].");
-		shader.setVec3(buf + "position", SpotLights[i].position_ + SpotLights[i].model->rigid_body_->get_pos());
+		shader.setVec3(buf + "position", camera.position->get_pos());
 		shader.setVec3(buf + "direction", camera.Front);
 		shader.setVec3(buf + "ambient", SpotLights[i].ambient_);
 		shader.setVec3(buf + "diffuse", SpotLights[i].diffuse_);

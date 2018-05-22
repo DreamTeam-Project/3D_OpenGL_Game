@@ -62,7 +62,8 @@ void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean co
 
 	this->Yaw += xoffset;
 	this->Pitch += yoffset;
-
+	/*position->body->setAngularVelocity(btVector3(0, 0, (double)xoffset));
+	this->Yaw = ()*/
 	if (constrainPitch) {
 		if (this->Pitch > 89.0f)
 			this->Pitch = 89.0f;

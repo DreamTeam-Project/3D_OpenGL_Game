@@ -117,7 +117,8 @@ public:
 		GameModel( real_world_, place, quat, path, scale, mass, box,shininess, draw), 
 		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, ALIVE_Sound, engine3d, LoadedSounds) 
 	{ 
-		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+		rigid_body_ = new Character(real_world_, btVector3(place.x+10, place.y+10, place.z+10), btVector3(box.x, box.y, box.z), btScalar(mass));
+		camera.position = rigid_body_;
 	}
 	SoundHero hero;
 	irrklang::vec3df a;

@@ -36,7 +36,16 @@ using std::ifstream;
 using std::to_string;
 
 enum GameEnumClass {
-	GAMEMODEL, STRUCTURE, CHARACTER, BULLET, BOX_BULLET, ENEMY_DIS, ENEMY_CLOSE, FLOOR, HP_BOX, CHURCH
+	GAMEMODEL,
+	STRUCTURE,
+	CHARACTER,
+	BULLET,
+	BOX_BULLET,
+	ENEMY_DIS,
+	ENEMY_CLOSE,
+	FLOOR,
+	HP_BOX,
+	CHURCH
 };
 
 class GameException : public exception {
@@ -94,6 +103,6 @@ const GLuint WIDTH = 1024, HEIGHT = 600;
 const vec3 direction(-0.2f, -1.0f, -0.3f);
 const vec3 diffuse(0.05f, 0.05f, 0.05f);
 const vec3 specular(0.1f, 0.1f, 0.1f);
-const vec3 ambient(1.0f, 1.0f, 1.0f);
+const vec3 ambient(0.0f, 0.0f, 0.0f);
 
 #endif
