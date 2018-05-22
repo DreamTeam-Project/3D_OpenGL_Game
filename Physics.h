@@ -15,6 +15,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Sound.h"
 
 
 //#include <glm/gtc/matrix_transform.hpp>
@@ -39,13 +40,9 @@ enum Physicalobj {
 	enemy_close,
 	light,
 	bullet,
-	box_bullet
+	box_bullet,
+	hp_box
 };
-
-enum Status{
-EXIST,
-ALIFE,
-DEAD};
 
 class phys_world {
 public:
@@ -84,9 +81,13 @@ public:
 	virtual void collidedwith(char type);
 	void hit(char type);
 	glm::vec3 get_quat() {
-		return glm::vec3(body->getOrientation().getX(), body->getOrientation().getY(), body->getOrientation().getZ());
+		btScalar x,y, z;
+		body->getOrientation().getEulerZYX(x, y,z);
+		return glm::vec3(x,y,z);
 	}
-	virtual char get_status();
+	virtual int get_status() {
+		return ALIVE_Sound;
+	};
 };
 
 class Bullet;
@@ -98,7 +99,7 @@ public:
 	int health;
 	bool inair;
 	int bullets;
-	char get_status();
+	int shoot;
 	int get_bullets() {
 		return bullets;
 	}
@@ -106,6 +107,21 @@ public:
 	phys_body* aim(phys_world& real_world);
 	void legs();
 	int getHealth();
+	int get_status() override {
+		if (health <= 0) {
+			return DEAD_Sound;
+		}
+		if (shoot == 1) {
+			return ATTACK_Sound;
+		}
+		if (inair == 1) {
+			return JUMP_Sound;
+		}
+		if (body->getLinearVelocity().norm() > 0) {
+			return WALK_Sound;
+		}
+		return ALIVE_Sound;
+	}
 	void collidedwith(char type) override;
 	Character(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, character),
@@ -120,8 +136,19 @@ public:
 class Enemy_dis :public phys_body {
 public:
 	int health;
+	int shoot;
 	int do_something(phys_world& world) override;
-	char get_status() {
+	int get_status() override {
+		if (health <= 0) {
+			return DEAD_Sound;
+		}
+		if (shoot == 1) {
+			return ATTACK_Sound;
+		}
+		if (body->getLinearVelocity().norm() > 0) {
+			return WALK_Sound;
+		}
+		return ALIVE_Sound;
 		return 0;
 	}
 	void collidedwith(char type) override;
@@ -145,6 +172,15 @@ public:
 		phys_body(world, position, col_shape, mass, character),
 		health(50)
 	{}
+	int get_status() override {
+		if (health <= 0) {
+			return DEAD_Sound;
+		}
+		if (body->getLinearVelocity().norm() > 0) {
+			return WALK_Sound;
+		}
+		return ALIVE_Sound;
+	}
 };
 
 class Bullet : public phys_body {
@@ -157,13 +193,36 @@ public:
 	{
 		bullets.push_back(this);
 	}
+	int get_status() override {
+		return ALIVE_Sound;
+	}
 };
 
 class Box_bullet : public phys_body {
+public:
 	int status;
+
 	Box_bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, box_bullet),
 		status(1)
+	{}
+	void collidedwith(char type) override;
+	int get_status() override {
+		if (status == 1) {
+			return ALIVE_Sound;
+		}
+		return DEAD_Sound;
+	}
+};
+
+class HP_box : public phys_body {
+	int resive_HP;
+	int status;
+public:
+	HP_box(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
+		phys_body(world, position, col_shape, mass, hp_box),
+		status(1),
+		resive_HP(15)
 	{}
 	void collidedwith(char type) override;
 };

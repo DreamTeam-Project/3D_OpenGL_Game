@@ -83,8 +83,7 @@ public:
 
 	phys_world real_world_;
 	phys_body camera_;
-	irrklang::ISoundEngine* engine3d;
-	vector<GameModel*> Models;
+
 private:
 	void LoadSound(ifstream& fin);
 	Unit* LoadUnit(ifstream& fin);
@@ -103,7 +102,7 @@ private:
 	int ChooseLevel(GLFWwindow* window);
 	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
 	
-
+	irrklang::ISoundEngine* engine3d;
 	irrklang::ISound* music;
 	Image Loading;
 	Skybox box;
@@ -113,7 +112,7 @@ private:
 	irrklang::ISoundSource* menuSound;
 	vector<Level> Levels;
 	vector<SysStrings> SysText;
-	//vector<GameModel*> Models;
+	vector<GameModel*> Models;
 	vector<LoadedModel> LoadedModels;
 	map<string, irrklang::ISoundSource*> LoadedSounds;
 };

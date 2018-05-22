@@ -62,16 +62,34 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 	case GAMEMODEL:
 		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 		break;
-	case ANIMATION:
-		NewModel = new AnimatedModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		
+	case CHARACTER:
+		NewModel = new CharacterModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 4.0f, 0.0f), vec3(0.8f, 0.8f, 0.8f), vec3(0.1f, 0.1f, 0.1f), camera.Front, vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f, 12.5f, 17.5f));
 		break;
 	case STRUCTURE:
 		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
 		break;
-	case STREETLAMP:
-		NewModel = new StreetLamp(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true, true);
-		
+	case BULLET:
+		NewModel = new BulletModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		break;
+	case BOX_BULLET:
+		NewModel = new BulletBoxModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		break;
+	case FLOOR:
+		NewModel = new FloorModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 8.0f, true);
+		break;
+	case ENEMY_CLOSE:
+		NewModel = new EnemyCloseModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 32.0f, true);
+		break;
+	case ENEMY_DIS:
+		NewModel = new EnemyDisModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 32.0f, true);
+		break;
+	case HP_BOX:
+		NewModel = new XPBoxModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		break;
+	case CHURCH:
+		NewModel = new ChurchModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 16.0f, true);
+		break;
 	default:
 		NewModel = new GameModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 	}
@@ -275,7 +293,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	Shader.setVec3("viewPos", camera.Position);
 	for (auto& it : Models) {
 		if (it->draw_) {
-			it->SetShaderParameters(Shader);
+			it->SetShaderParameters(Shader, time);
 			it->Draw(Shader);
 		}
 	}

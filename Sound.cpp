@@ -175,7 +175,7 @@ void SoundWorld::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum W
 }
 
 void SoundWorld::DoSound() {
-	
+
 	if (Status == WIND_Sound) {
 		engine3d->play3D(ObjectSounds[WIND_Sound], Pos);
 	}
@@ -197,8 +197,4 @@ void SoundWorld::DoSound() {
 	if (Status == BIRDS2_Sound) {
 		engine3d->play3D(ObjectSounds[BIRDS2_Sound], Pos);
 	}
-}
-
-int main() {
-	return 0;
 }

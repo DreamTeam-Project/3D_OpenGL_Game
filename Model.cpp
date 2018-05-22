@@ -1,5 +1,54 @@
 #include "Model.h"
 
+GameModel::GameModel(phys_body* psmodel, GameModel* grmodel, bool draw) : 
+	draw_(draw),
+	shininess_(grmodel->shininess_),
+	path_(grmodel->path_),
+	quat_(grmodel->quat_),
+	scale_(grmodel->scale_),
+	type_(grmodel->type_),
+	rigid_body_(psmodel),
+	meshes_(grmodel->meshes_)
+{	 }
+
+GameModel::GameModel(const GameModel* model, const vec3& place, const vec3& quat, const vec3& scale, bool draw) :
+	quat_(quat), scale_(scale), draw_(draw), scene_(model->scene_), meshes_(model->meshes_)
+	{   }
+
+GameModel::GameModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+	const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw) :
+	draw_(draw),
+	shininess_(shininess),
+	path_(path),
+	quat_(quat),
+	scale_(scale),
+	type_(type)
+{
+	rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+}
+
+GameModel::GameModel(phys_world& real_world_, const vec3& place, const vec3& quat, const string& path,
+	const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw) :
+	draw_(draw),
+	shininess_(shininess),
+	path_(path),
+	quat_(quat),
+	scale_(scale) {  }
+
+void GameModel::Move(mat4& model, float deltaTime) {
+	model = glm::translate(model, rigid_body_->get_pos());
+	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale_);
+}
+
+
+
+void Structure::Move(mat4& model, float deltaTime) {
+	model = model_;
+}
+
 Structure::Structure(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
 	const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw) :
 	GameModel(real_world_, type, place, quat, path, scale, mass, box, shininess, draw)
@@ -11,63 +60,18 @@ Structure::Structure(phys_world& real_world_, const int& type, const vec3& place
 	model_ = glm::scale(model_, scale);
 }
 
-void Structure::Move(mat4& model) {
-	model = model_;
-}
-
-GameModel::GameModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
-	const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw) :
-	draw_(draw),
-	shininess_(shininess),
-	path_(path),
-	quat_(quat),
-	scale_(scale),
-	type_(type)
-{
-	if (type == 1) {
-		rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-	}
-	if (type == 2) {
-		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-	}
-
-}
-
 void GameModel::Draw(const GameShader& shader) {
 	for (uint i = 0; i < meshes_.size(); i++) {
 		meshes_[i]->Draw(shader);
 	}
 }
 
-GameModel::GameModel(phys_body* psmodel, GameModel* grmodel, bool draw) :
-	draw_(draw),
-	shininess_(grmodel->shininess_),
-	path_(grmodel->path_),
-	quat_(grmodel->quat_),
-	scale_(grmodel->scale_),
-	type_(grmodel->type_),
-	rigid_body_(psmodel),
-	meshes_(grmodel->meshes_)
-{	 }
-
 void GameModel::ClearLoaded() {
 	textures_loaded_.clear();
 }
 
-void GameModel::CopyModel(const GameModel* model) {;
+void GameModel::CopyModel(const GameModel* model) {
 	meshes_ = model->meshes_;
-}
-
-GameModel::GameModel(const GameModel* model, const vec3& place, const vec3& quat, const vec3& scale, bool draw) :
-	quat_(quat), scale_(scale), draw_(draw), scene_(model->scene_), meshes_(model->meshes_)
-	{   }
-
-void GameModel::Move(mat4& model) {
-	model = glm::translate(model, rigid_body_->get_pos());
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, scale_);
 }
 
 void GameModel::LoadModel() {
@@ -80,18 +84,9 @@ void GameModel::LoadModel() {
 	ProcessNode(scene_->mRootNode, scene_);
 }
 
-void AnimatedModel::Move(mat4& model) {
-	PlayMusic();
-	model = glm::translate(model, rigid_body_->get_pos());
-	model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, scale_);
-}
-
-void GameModel::SetShaderParameters(const GameShader& shader) {
+void GameModel::SetShaderParameters(const GameShader& shader, float deltaTime) {
 	mat4 model;
-	Move(model);
+	Move(model, deltaTime);
 	shader.setMat4("model", model);
 	shader.setFloat("material.shininess", shininess_);
 }

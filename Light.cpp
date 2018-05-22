@@ -1,4 +1,5 @@
 #include "Light.h"
+extern Camera camera;
 
 void GameLight::SetPointLights(const GameShader& shader) {
 	string buf;
@@ -19,7 +20,7 @@ void GameLight::SetSpotLights(const GameShader& shader) {
 	for (uint i = 0; i < SpotLights.size(); i++) {
 		buf = string("spotLights[") + to_string(i) + string("].");
 		shader.setVec3(buf + "position", SpotLights[i].position_ + SpotLights[i].model->rigid_body_->get_pos());
-		shader.setVec3(buf + "direction", SpotLights[i].direction_/* * SpotLights[i].model->quat_*/);
+		shader.setVec3(buf + "direction", camera.Front);
 		shader.setVec3(buf + "ambient", SpotLights[i].ambient_);
 		shader.setVec3(buf + "diffuse", SpotLights[i].diffuse_);
 		shader.setVec3(buf + "specular", SpotLights[i].specular_);

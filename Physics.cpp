@@ -123,9 +123,6 @@ bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int
 	return false;
 }
 
-char phys_body::get_status() {
-	return EXIST;
-}
 
 
 
@@ -156,14 +153,6 @@ void phys_body::hit(char type) {
 phys_body::phys_body() :
 	body(nullptr) {}
 
-char Character::get_status() {
-	if (health > 0) {
-		printf("ALIFE\n");
-		return ALIFE;
-	}
-	printf("deadddd\n");
-	return DEAD;
-}
 
 void Character::jump() {
 	if (inair == false) {
@@ -177,13 +166,22 @@ int Character::getHealth() {
 	return health;
 }
 
-phys_body* find_free_bullet(phys_world& real_world, btVector3 pos) {
-	/*int i = bullets.size();
+phys_body* find_free_bullet(phys_world& real_world) {
+	if (bullets.empty()) {
+		Bullet* tmp = new Bullet(real_world, btVector3(1, 1, 1), btVector3(1, 1, 1), btScalar(1));
+		//bullets.push_back(tmp);
+		return tmp;
+	}
+	int i = bullets.size();
+	printf("%d\n", i);
 	while (i > 0) {
-		if (bullets[i]->get_status() == 0)
+		if (bullets[i-1]->get_status() == 0)
 			return bullets[i - 1];
-	}*/
-	Bullet* tmp = new Bullet(real_world, pos+ btVector3(1,1,1), btVector3(1, 1, 1), btScalar(1));
+		i--;
+	}
+	printf("after all\n");
+	Bullet* tmp = new Bullet(real_world, btVector3(1,1,1), btVector3(1, 1, 1), btScalar(1));
+	bullets.push_back(tmp);
 	return tmp;
 }
 
@@ -191,10 +189,15 @@ phys_body* find_free_bullet(phys_world& real_world, btVector3 pos) {
 phys_body* Character::aim(phys_world& real_world) {
 	if (bullets > 0) {
 		bullets--;
-		phys_body* tmp =  find_free_bullet(real_world, body->getCenterOfMassPosition());
-		//tmp->body->setCenterOfMassTransform
+		phys_body* tmp = find_free_bullet(real_world);
+		btTransform btt;
+		tmp->body->getMotionState()->getWorldTransform(btt);
+		btt.setOrigin(body->getCenterOfMassPosition()); // move body to the scene node new position
 
-			//remove() btRigidBody from dynamicsWorld, update its transform(from MotionState) from Ogre Position(_getDerivedPosition) and Orientation(), add() modified btRigidBody to dynamicsWorld() and activate()
+													   // update _body according to CharacterDemo demo
+
+		tmp->body->getMotionState()->setWorldTransform(btt);
+		tmp->body->setCenterOfMassTransform(btt);
 		tmp->set_velosity(100 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
 		return tmp;
 	}
@@ -241,6 +244,8 @@ void Character::collidedwith(char type) {
 		break;
 	case enemy_close:
 		health -= 20;
+	case hp_box:
+		health += 15;
 	default:
 		break;
 	}
@@ -271,11 +276,13 @@ void Enemy_close::collidedwith(char type) {
 
 void Bullet::collidedwith(char type) {
 	status = false;
+	return;
 }
 
 int Enemy_close::do_something(phys_world& world) {
 	if (health > 0) {
 		body->setActivationState(DISABLE_DEACTIVATION);
+		body->setAngularVelocity(btVector3(0, 0, 1));
 		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
 	}
 	
@@ -288,11 +295,32 @@ int Enemy_dis::do_something(phys_world& world) {
 	if (timer % 1000 == 101 && health>0) {
 		Bullet* tmp = new Bullet(world, body->getCenterOfMassPosition() + btVector3(1, 1, 1), btVector3(1, 1, 1), btScalar(1));
 		to_create.push_back(tmp);
+		body->setActivationState(DISABLE_DEACTIVATION);
+		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		body->setAngularVelocity(btVector3(0, 0, 1));
 	}
 	return 0;
 }
 
 void Box_bullet::collidedwith(char type) {
+	switch (type) {
+	case standart:
+		break;
+	case character:
+		status = 0;
+		body->setActivationState(DISABLE_SIMULATION);
+		break;
+	case bullet:
+		break;
+	case enemy_close:
+		break;
+	default:
+		break;
+	}
+	return;
+}
+
+void HP_box::collidedwith(char type) {
 	switch (type) {
 	case standart:
 		break;

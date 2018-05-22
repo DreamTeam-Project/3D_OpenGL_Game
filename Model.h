@@ -23,6 +23,7 @@
 #include "Physics.h"
 #include "Sound.h"
 
+extern Camera camera;
 using std::map;
 using std::vector;
 using std::string;
@@ -40,13 +41,15 @@ public:
 	GameModel(phys_body* psmodel, GameModel* grmodel, bool draw = false);
 	explicit GameModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path, 
 		const vec3& scale, const double& mass, const vec3& box, float shininess = 32.0f, bool draw = true);
+	explicit GameModel(phys_world& real_world_, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess = 32.0f, bool draw = true);
 	void Draw(const GameShader& shader);
 	void LoadModel();
 	void CopyModel(const GameModel* model);
 	void ClearLoaded();
 
-	void SetShaderParameters(const GameShader& shader);
-	virtual void Move(mat4& model);
+	void SetShaderParameters(const GameShader& shader, float deltaTime);
+	virtual void Move(mat4& model, float deltaTime);
 
 	~GameModel() {
 		delete rigid_body_;
@@ -77,38 +80,158 @@ public:
 	Structure() = delete;
 	Structure(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
 		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true);
-	void Move(mat4& model) override;
-private:
+	Structure(phys_world& real_world_, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : GameModel(real_world_, place, quat, path, scale, mass, box, shininess, draw)
+	{ }
+	void Move(mat4& model, float deltaTime) override;
+protected:
 	mat4 model_;
 };
 
-class StreetLamp : public Structure {
+class FloorModel : public Structure {
 public:
-	StreetLamp() = delete;
-	StreetLamp(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path, 
-		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true, bool on = true) :
-		Structure( real_world_, type, place, quat,  path,  scale,  mass, box, shininess, draw),
-		light(on)
-	{ }
+	FloorModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) :
+		Structure(real_world_, type, place, quat, path, scale, mass, box, shininess, draw),
+		floor(a = irrklang::vec3df(place.x, place.y, place.z), sounds, PASSIVE_Sound, engine3d, LoadedSounds) { }
 private:
-	bool light;
+	irrklang::vec3df a;
+	SoundStructure floor;
+	void Move(mat4& model, float deltaTime) override {
+		model = model_;
+		PlayMusic(deltaTime);
+	}
+	void PlayMusic(float deltaTime) {
+		irrklang::vec3df tmp1 = irrklang::vec3df(rigid_body_->get_pos().x, rigid_body_->get_pos().y, rigid_body_->get_pos().z);
+		irrklang::vec3df tmp2 = irrklang::vec3df(camera.position->get_pos().x, camera.position->get_pos().y, camera.position->get_pos().z);
+		floor.Refresh(tmp1, tmp2, (StructureSound)rigid_body_->get_status());
+	}
 };
 
-class AnimatedModel : public GameModel {
+class CharacterModel : public GameModel {
 public:
-	AnimatedModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+	CharacterModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
 		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
 		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) : 
-		GameModel( real_world_,  type,  place,  quat, path, scale, mass, box,shininess, draw), 
-		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, WALK_Sound, engine3d, LoadedSounds) { }
+		GameModel( real_world_, place, quat, path, scale, mass, box,shininess, draw), 
+		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, ALIVE_Sound, engine3d, LoadedSounds) 
+	{ 
+		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
 	SoundHero hero;
 	irrklang::vec3df a;
-	void Move(mat4& model) override;
-	void PlayMusic() {
-		float i = 0.0f;
-		irrklang::vec3df tmp = irrklang::vec3df(0.0f, 0.0f, 0.0f);
-		hero.Refresh(tmp, tmp, WALK_Sound, i);
+	void Move(mat4& model, float deltaTime) override {
+		PlayMusic(deltaTime);
+		model = glm::translate(model, rigid_body_->get_pos());
+		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, scale_);
 	}
+	void PlayMusic(float deltaTime) {
+		irrklang::vec3df tmp1 = irrklang::vec3df(rigid_body_->get_pos().x, rigid_body_->get_pos().y, rigid_body_->get_pos().z);
+		hero.Refresh(tmp1, tmp1, (CharacterSound)rigid_body_->get_status(), deltaTime);
+	}
+};
+
+class EnemyDisModel : public GameModel {
+public:
+	EnemyDisModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) :
+		GameModel(real_world_, place, quat, path, scale, mass, box, shininess, draw),
+		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, ALIVE_Sound, engine3d, LoadedSounds)
+	{
+		rigid_body_ = new Enemy_dis(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+	irrklang::vec3df a;
+	void Move(mat4& model, float deltaTime) override {
+		PlayMusic(deltaTime);
+		model = glm::translate(model, rigid_body_->get_pos());
+		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, scale_);
+	}
+	void PlayMusic(float deltaTime) {
+		irrklang::vec3df tmp1 = irrklang::vec3df(rigid_body_->get_pos().x, rigid_body_->get_pos().y, rigid_body_->get_pos().z);
+		irrklang::vec3df tmp2 = irrklang::vec3df(camera.position->get_pos().x, camera.position->get_pos().y, camera.position->get_pos().z);
+		hero.Refresh(tmp1, tmp2, (CharacterSound)rigid_body_->get_status());
+	}
+private:
+	SoundCharacter hero;
+};
+
+class BulletModel : public GameModel {
+public:
+	BulletModel(phys_body* psmodel, GameModel* grmodel, bool draw) : GameModel(psmodel, grmodel, draw)
+	{	 }
+	BulletModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) :
+		GameModel(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
+	{
+		rigid_body_ = new Bullet(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+};
+
+class XPBoxModel : public Structure {
+public:
+	XPBoxModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : 
+		Structure(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
+	{
+		//rigid_body_ = new  XP_box(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+};
+
+class ChurchModel : public Structure {
+public:
+	ChurchModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) : 
+		Structure(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
+	{
+		//rigid_body_ = new Church(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+};
+
+class BulletBoxModel : public Structure {
+public:
+	BulletBoxModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, float shininess, bool draw = true) : 
+		Structure(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
+	{
+		rigid_body_ = new Box_bullet(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+};
+
+class EnemyCloseModel : public GameModel {
+public:
+	EnemyCloseModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
+		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) :
+		GameModel(real_world_, place, quat, path, scale, mass, box, shininess, draw),
+		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, ALIVE_Sound, engine3d, LoadedSounds)
+	{
+		rigid_body_ = new Enemy_close(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
+	}
+	irrklang::vec3df a;
+	void Move(mat4& model, float deltaTime) override {
+		PlayMusic(deltaTime);
+		model = glm::translate(model, rigid_body_->get_pos());
+		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, scale_);
+	}
+	void PlayMusic(float deltaTime) {
+		irrklang::vec3df tmp1 = irrklang::vec3df(rigid_body_->get_pos().x, rigid_body_->get_pos().y, rigid_body_->get_pos().z);
+		irrklang::vec3df tmp2 = irrklang::vec3df(camera.position->get_pos().x, camera.position->get_pos().y, camera.position->get_pos().z);
+		hero.Refresh(tmp1, tmp2, (CharacterSound)rigid_body_->get_status());
+	}
+private:
+	SoundCharacter hero;
 };
 
 #endif
