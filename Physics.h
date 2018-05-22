@@ -68,6 +68,19 @@ public:
 	virtual int get_damage() {
 		return 0;
 	}
+	virtual phys_body* aim(phys_world& real_world) {
+		return nullptr;
+	}
+	virtual void jump() {
+		return;
+	}
+	virtual int get_bullets() {
+		return 0;
+	}
+
+	virtual int getHealth() {
+		return 0;
+	}
 	glm::vec3 set_angle_vel(btVector3 vel) {
 		body->setAngularVelocity(vel);
 	}
@@ -103,8 +116,8 @@ public:
 	int get_bullets() {
 		return bullets;
 	}
-	void jump();
-	phys_body* aim(phys_world& real_world);
+	void jump() override;
+	phys_body* aim(phys_world& real_world) override;
 	void legs();
 	int getHealth();
 	int get_status() override {
@@ -112,6 +125,7 @@ public:
 			return DEAD_Sound;
 		}
 		if (shoot == 1) {
+			shoot = 0;
 			return ATTACK_Sound;
 		}
 		if (inair == 1) {
@@ -143,6 +157,7 @@ public:
 			return DEAD_Sound;
 		}
 		if (shoot == 1) {
+			shoot = 0;
 			return ATTACK_Sound;
 		}
 		if (body->getLinearVelocity().norm() > 0) {

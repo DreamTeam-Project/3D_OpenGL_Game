@@ -9,7 +9,6 @@ GameManager::GameManager() :
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
 	music = engine3d->play3D(menuSound, irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
-	camera.position = new Character(real_world_, btVector3(10, 10, 10), btVector3(1, 1, 1), btScalar(40));
 	LoadInfoAboutLevels();
 }
 
@@ -291,12 +290,23 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	Shader.setMat4("projection", projection);
 	Shader.setMat4("view", view);
 	Shader.setVec3("viewPos", camera.Position);
-	for (auto& it : Models) {
+	for (int i = 0; i<Models.size();i++) {
+		if (i == 0) {
+			//Models[i]->quat_.x = -camera.Pitch;
+			Models[i]->quat_.y = -camera.Yaw;
+		}
+		if (Models[i]->draw_) {
+			Models[i]->SetShaderParameters(Shader, time);
+			Models[i]->Draw(Shader);
+		}
+	}
+
+	/*for (auto& it : Models) {
 		if (it->draw_) {
 			it->SetShaderParameters(Shader, time);
 			it->Draw(Shader);
 		}
-	}
+	}*/
 }
 
 bool GameManager::GameMenu(GLFWwindow* window) {

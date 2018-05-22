@@ -155,7 +155,9 @@ phys_body::phys_body() :
 
 
 void Character::jump() {
-	if (inair == false) {
+	static int holloo = 0;
+	holloo++;
+	if (/*inair == false*/ holloo % 1000 == 101) {
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
 		inair = true;
 	}
@@ -189,6 +191,7 @@ phys_body* find_free_bullet(phys_world& real_world) {
 phys_body* Character::aim(phys_world& real_world) {
 	if (bullets > 0) {
 		bullets--;
+		shoot = 1;
 		phys_body* tmp = find_free_bullet(real_world);
 		btTransform btt;
 		tmp->body->getMotionState()->getWorldTransform(btt);
@@ -293,7 +296,7 @@ int Enemy_close::do_something(phys_world& world) {
 int Enemy_dis::do_something(phys_world& world) {
 	timer++;
 	if (timer % 1000 == 101 && health>0) {
-		Bullet* tmp = new Bullet(world, body->getCenterOfMassPosition() + btVector3(1, 1, 1), btVector3(1, 1, 1), btScalar(1));
+		phys_body* tmp = find_free_bullet(world);
 		to_create.push_back(tmp);
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
