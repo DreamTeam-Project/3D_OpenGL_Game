@@ -17,6 +17,7 @@ void phys_body::set_velosity(btVector3 vel) {
 struct collided_id {
 	phys_body* your;
 	char type_ag;
+	phys_body* with;
 };
 
 vector<phys_body*> enemies;
@@ -118,8 +119,8 @@ bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int
 	const btCollisionObject* col_obj2 = obj2->getCollisionObject();
 	phys_body* body_2 = (phys_body*)col_obj2->getUserPointer();
 	char type_2 = body_2->type_;
-	body_2->hit(type_2);
-	body_1->hit(type_2);
+	body_2->hit(type_1, body_1);
+	body_1->hit(type_2, body_2);
 	return false;
 }
 
@@ -131,22 +132,24 @@ void phys_world::do_step(btScalar time, phys_world& world) {
 	int i = collided.size();
 	//printf("i = %d\n", i);
 	while (i > 0) {
-		collided[i-1].your->collidedwith(collided[i-1].type_ag);
+		collided[i-1].your->collidedwith(collided[i-1].type_ag, collided[i-1].with);
 		i--;
 		collided.pop_back();
 	}
 	i = enemies.size();
 	while (i > 0) {
 		enemies[i - 1]->do_something(world);
+		i--;
 	}
 
 }
 
-void phys_body::hit(char type) {
+void phys_body::hit(char type, phys_body* with) {
 	//std::cout << "hello" << std::endl;
 	struct collided_id a;
 	a.type_ag = type;
 	a.your = this;
+	a.with = with;
 	collided.push_back(a);
 }
 
@@ -155,9 +158,9 @@ phys_body::phys_body() :
 
 
 void Character::jump() {
-	static int holloo = 0;
-	holloo++;
-	if (/*inair == false*/ holloo % 1000 == 101) {
+	/*static int holloo = 0;
+	holloo++;*/
+	if (inair == false /*holloo % 1000 == 101*/) {
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
 		inair = true;
 	}
@@ -195,7 +198,7 @@ phys_body* Character::aim(phys_world& real_world) {
 		phys_body* tmp = find_free_bullet(real_world);
 		btTransform btt;
 		tmp->body->getMotionState()->getWorldTransform(btt);
-		btt.setOrigin(body->getCenterOfMassPosition()); // move body to the scene node new position
+		btt.setOrigin(body->getCenterOfMassPosition()+ 10*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)); // move body to the scene node new position
 
 													   // update _body according to CharacterDemo demo
 
@@ -214,7 +217,7 @@ void Character::legs() {
 
 }
 
-void Enemy_dis::collidedwith(char type) {
+void Enemy_dis::collidedwith(char type, phys_body* with) {
 	switch (type) {
 	case standart: 
 		
@@ -232,7 +235,7 @@ void Enemy_dis::collidedwith(char type) {
 	}
 }
 
-void Character::collidedwith(char type) {
+void Character::collidedwith(char type, phys_body* with) {
 	switch (type) {
 	case standart:
 		inair = false;
@@ -240,7 +243,8 @@ void Character::collidedwith(char type) {
 	case character:
 		break;
 	case bullet:
-		health -= 10;
+		if(with->get_able() == 1) 
+			health -= 10;
 		break;
 	case box_bullet:
 		bullets += 10;
@@ -254,39 +258,49 @@ void Character::collidedwith(char type) {
 	}
 }
 
-void phys_body::collidedwith(char type) {
+void phys_body::collidedwith(char type, phys_body* with) {
 
 	return;
 }
 
-void Enemy_close::collidedwith(char type) {
+void Enemy_close::collidedwith(char type, phys_body* with) {
 	switch (type) {
 	case standart:
 		break;
 	case character:
-		health -= persona->get_damage();
 		break;
 	case bullet:
-		health -= persona->get_damage();
+		if (with->get_able() == 1) {
+			health -= 10;
+		}
+		
 		break;
 	case enemy_close:
-		health -= 20;
+		break;
 	default:
 		break;
 	}
 	return;
 }
 
-void Bullet::collidedwith(char type) {
-	status = false;
+void Bullet::collidedwith(char type, phys_body* with) {
+	able = false;
+	body->setActivationState(DISABLE_SIMULATION);
 	return;
 }
 
 int Enemy_close::do_something(phys_world& world) {
+//	printf("health = %d\n", health);
 	if (health > 0) {
+	//	printf("do something close\n");
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setAngularVelocity(btVector3(0, 0, 1));
-		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		body->setAngularVelocity(btVector3(0, 10, 0));
+		body->setLinearVelocity(-(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()));
+	}
+	else {
+		body->setActivationState(DISABLE_SIMULATION);
+		body->setAngularVelocity(btVector3(0, 0, 0));
+		body->setLinearVelocity(btVector3(0, 0, 0));
 	}
 	
 	return 0;
@@ -295,17 +309,18 @@ int Enemy_close::do_something(phys_world& world) {
 
 int Enemy_dis::do_something(phys_world& world) {
 	timer++;
-	if (timer % 1000 == 101 && health>0) {
+	//printf("do_somth_dist\n");
+	/*if (timer % 1000 == 101 && health>0) {
 		phys_body* tmp = find_free_bullet(world);
 		to_create.push_back(tmp);
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
 		body->setAngularVelocity(btVector3(0, 0, 1));
-	}
+	}*/
 	return 0;
 }
 
-void Box_bullet::collidedwith(char type) {
+void Box_bullet::collidedwith(char type, phys_body* with) {
 	switch (type) {
 	case standart:
 		break;
@@ -323,7 +338,7 @@ void Box_bullet::collidedwith(char type) {
 	return;
 }
 
-void HP_box::collidedwith(char type) {
+void HP_box::collidedwith(char type, phys_body* with) {
 	switch (type) {
 	case standart:
 		break;

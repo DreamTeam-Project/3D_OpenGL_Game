@@ -1,5 +1,7 @@
-< Level 1 > < level_1\level.file    >
+< Level 1 > < level_one.file    >
 
-< Level 2 > < level_2\level.file    >
 
-< Test    > < level_test\level.file >
+< Level 2 > < level_two.file    >
+
+
+< Test    > < level_test.file >

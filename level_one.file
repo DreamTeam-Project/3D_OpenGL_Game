@@ -1,0 +1,167 @@
+< sound >
+	< textures\Hero\HeroWalk.mp3 >					< 1 >
+	< textures\Hero\HeroShoot.mp3 >					< 1 >
+	< textures\Hero\HeroJump.mp3 >					< 1 >
+	< textures\Hero\HeroDead.mp3 >					< 1 >
+	< textures\Hero\HeroBackBattle.mp3 >			< 1 >
+	< textures\Hero\HeroAlive.mp3 >					< 1 >
+
+	< textures\Mob\MobWalk.mp3 >					< 1 >
+	< textures\Mob\MobShoot.mp3 >					< 1 >
+	< textures\Mob\MobJump.mp3 >					< 1 >
+	< textures\Mob\MobDead.mp3 >					< 1 >
+	< textures\Mob\MobAlive.mp3 >					< 1 >
+
+	< textures\Spider\SpiderWalk.mp3 >				< 1 >
+	< textures\Spider\SpiderAttack.mp3 >			< 1 >
+	< textures\Spider\SpiderJump.mp3 >				< 1 >
+	< textures\Spider\SpiderDead.mp3 >				< 1 >
+	< textures\Spider\SpiderAlive.mp3 >				< 1 >
+
+	< textures\Structure\StructureFloor.mp3 >		< 1 >
+	< textures\Structure\StructureChurch.mp3 >		< 1 >
+	< textures\Structure\StructureDoor.mp3 >		< 1 >
+	< textures\Structure\StructureKachel.mp3 >		< 1 >
+< end >
+
+
+
+< unit >
+	< type  >   < 2 >
+	< path  >   < textures\obj\shotgun\Shotgun.obj >
+	< mass  >	< 40.0 >
+
+	< num   >   < 1 >
+	< place >   <  10.0 10.0 10.0         >
+	< quat  >   <  0.0 270.0 0.0         > 
+	< scale >   <  0.001 0.001 0.001   >
+
+	< num   >   < 1 >
+	< box   >	< 2.0 2.0 10.0 >
+
+	< num   >   < 6 >
+	< sound >   < textures\Hero\HeroDead.mp3 >
+	< sound >   < textures\Hero\HeroWalk.mp3 >
+	< sound >   < textures\Hero\HeroShoot.mp3 >
+	< sound >   < textures\Hero\HeroJump.mp3 >
+	< sound >   < textures\Hero\HeroAlive.mp3 >
+	< sound >   < textures\Hero\HeroBackBattle.mp3 >
+< end >
+
+< unit >
+	< type  >   < 3 >
+	< path  >   < textures\obj\Bullet\Bullet1.obj >
+	< mass  >	< 0.2 >
+
+	< num   >   < 1 >
+	< place >   <  0.0 -10.0 -10.0         >
+	< quat  >   <  0.0 0.0 0.0         > 
+	< scale >   <  0.01 0.01 0.01   >
+
+	< num   >   < 1 >
+	< box   >	< 0.2 0.2 0.2 >
+
+	< num   >   < 0 > 
+< end >
+
+
+
+	< unit >
+		< type  >   < 1 >
+		< path  >   < textures\obj\Floor\GR.obj >
+		< mass  >	< 0.0 >
+
+		< num   >   < 1 >
+		< place >   <  0.0 0.0 0.0         >
+		< quat  >   <  0.0 0.0 0.0         > 
+		< scale >   <  10.0 10.0 10.0   >
+
+		< num   >   < 1 >
+		< box   >	< 1000.0 0.1 1000.0 >
+
+		< num   >   < 0 > 
+	< end >
+
+
+	< unit >
+		< type  >   < 1 >
+		< path  >   < textures\obj\Abandoned Church\3ds file.3DS >
+		< mass  >	< 0.0 >
+
+		< num   >   < 1 >
+		< place >   <  250.0 0.0 0.0         >
+		< quat  >   <  270.0 0.0 0.0         > 
+		< scale >   <  1.0 1.0 1.0   >
+
+		< num   >   < 1 >
+		< box   >	< 50.0 50.0 50.0 >
+
+		< num   >   < 0 > 
+	< end >
+
+
+	< unit >
+		< type  >   < 6 >
+		< path  >   < textures\obj\walkingmob\MobWalking.obj >
+		< mass  >	< 10.0 >
+
+		< num   >   < 1 >
+		< place >   <  0.0 0.0 10.0         >
+		< quat  >   < 0.0 0.0 0.0         > 
+		< scale >   <  0.06 0.06 0.06   >
+
+		< num   >   < 1 >
+		< box   >	< 2.0 10.0 2.0 >
+
+		< num   >   < 5 >
+		< sound >	< textures\Mob\MobDead.mp3 >
+		< sound >	< textures\Mob\MobWalk.mp3 >
+		< sound >	< textures\Mob\MobShoot.mp3 >
+		< sound >	< textures\Mob\MobJump.mp3 >
+		< sound >	< textures\Mob\MobAlive.mp3 >
+	< end >
+
+		< unit >
+		< type  >   < 5 >
+		< path  >   < textures\obj\cat\cat.obj >
+		< mass  >	< 10.0 >
+
+		< num   >   < 1 >
+		< place >   <  10.0 0.0 0.0         >
+		< quat  >   < 0.0 0.0 0.0         > 
+		< scale >   <  10.0 10.0 10.0   >
+
+		< num   >   < 1 >
+		< box   >	< 2.0 10.0 2.0 >
+
+		< num   >   < 5 >
+		< sound >	< textures\Mob\MobDead.mp3 >
+		< sound >	< textures\Mob\MobWalk.mp3 >
+		< sound >	< textures\Mob\MobShoot.mp3 >
+		< sound >	< textures\Mob\MobJump.mp3 >
+		< sound >	< textures\Mob\MobAlive.mp3 >
+	< end >
+
+
+	< unit >
+		< type  >   < 1 >
+		< path  >   < textures\obj\Car\Car.obj >
+		< mass  >	< 10.0 >
+
+		< num   >   < 1 >
+		< place >   <  130.0 0.0 -130.0         >
+		< quat  >   <  0.0 0.0 0.0         > 
+		< scale >   <  1.0 1.0 1.0   >
+
+		< num   >   < 1 >
+		< box   >	< 20.0 20.0 20.0 >
+
+		< num   >   < 0 >
+	< end >
+
+
+
+
+
+
+

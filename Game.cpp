@@ -165,18 +165,18 @@ void ProcessInputInGame(GLFWwindow *window) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-		printf("just R\n");
+//		printf("just R\n");
 		static int press = 0;
 		press++;
 		if (press % 100 == 11) {
 			phys_body* tmp = camera.position->aim(game_man->real_world_);
 			if (tmp == nullptr) {
 
-				printf("null\n");
+//				printf("null\n");
 				return;
 			}
 			game_man->GetCopy(1, tmp);
-			printf("created bullet\n");
+//			printf("created bullet\n");
 		}
 
 	}

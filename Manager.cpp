@@ -63,7 +63,7 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case CHARACTER:
 		NewModel = new CharacterModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 4.0f, 0.0f), vec3(0.8f, 0.8f, 0.8f), vec3(0.1f, 0.1f, 0.1f), camera.Front, vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f, 12.5f, 17.5f));
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), camera.Front, vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f, 17.5f, 12.5f));
 		break;
 	case STRUCTURE:
 		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
@@ -294,6 +294,9 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 		if (i == 0) {
 			//Models[i]->quat_.x = -camera.Pitch;
 			Models[i]->quat_.y = -camera.Yaw;
+			/*if (Models[0]->rigid_body_->get_status() == DEAD_Sound) {
+				this->play = false;
+			}*/
 		}
 		if (Models[i]->draw_) {
 			Models[i]->SetShaderParameters(Shader, time);
@@ -333,11 +336,15 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	vector<phys_body*> to_create = get_creation();
 	int a = to_create.size();
 	while (a > 0) {
-		this->GetCopy(2, to_create[a - 1]);
+		printf("get vector to Rander world %p\n", to_create[0]);
+		this->GetCopy(1, to_create[a - 1]);
+		a--;
 	}
+	to_create.clear();
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
-	text.RenderText(SysText);
+	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 14, (float)WIDTH / 10 * 9, 0.9f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(string("BT ") + to_string(camera.position->get_bullets()), (float)HEIGHT / 14, (float)WIDTH / 10 * 8, 0.9f, vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {

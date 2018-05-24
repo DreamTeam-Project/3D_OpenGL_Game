@@ -113,11 +113,11 @@ class CharacterModel : public GameModel {
 public:
 	CharacterModel(phys_world& real_world_, const int& type, const vec3& place, const vec3& quat, const string& path,
 		const vec3& scale, const double& mass, const vec3& box, const vector<string>& sounds, irrklang::ISoundEngine* engine3d,
-		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = true) : 
-		GameModel( real_world_, place, quat, path, scale, mass, box,shininess, draw), 
+		map<string, irrklang::ISoundSource*> LoadedSounds, float shininess, bool draw = false) : 
+		GameModel( real_world_, place, quat, path, scale, mass, box,shininess, false), 
 		hero(a = irrklang::vec3df(place.x, place.y, place.z), sounds, ALIVE_Sound, engine3d, LoadedSounds) 
 	{ 
-		rigid_body_ = new Character(real_world_, btVector3(place.x+10, place.y+10, place.z+10), btVector3(box.x, box.y, box.z), btScalar(mass));
+		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 		camera.position = rigid_body_;
 	}
 	SoundHero hero;
@@ -238,10 +238,12 @@ public:
 	irrklang::vec3df a;
 	void Move(mat4& model, float deltaTime) override {
 		PlayMusic(deltaTime);
+		//quat_ += vec3(1, 1, 1);
+		quat_ = rigid_body_->get_quat();
 		model = glm::translate(model, rigid_body_->get_pos());
-		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, quat_.x, vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, quat_.y, vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, quat_.z, vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, scale_);
 	}
 	void PlayMusic(float deltaTime) {
