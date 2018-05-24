@@ -84,6 +84,9 @@ public:
 	virtual bool get_able() {
 		return false;
 	}
+	virtual void set_able(bool b) {
+		return;
+	}
 	glm::vec3 set_angle_vel(btVector3 vel) {
 		body->setAngularVelocity(vel);
 	}
@@ -96,10 +99,9 @@ public:
 	};
 	virtual void collidedwith(char type, phys_body* with);
 	void hit(char type, phys_body* with);
-	virtual glm::vec3 get_quat() {
+	glm::vec3 get_quat() {
 		btScalar x,y, z;
 		body->getOrientation().getEulerZYX(x, y,z);
-		printf("%d %d %d\n", x, y, z);
 		return glm::vec3(x,y,z);
 	}
 	virtual int get_status() {
@@ -205,17 +207,14 @@ public:
 		return ALIVE_Sound;
 	}
 
-	glm::vec3 get_quat()  override{
-		btScalar x, y, z;
-		printf("hererere\n");
-		body->getOrientation().getEulerZYX(x, y, z);
-		return glm::vec3(x, y, z);
-	}
 };
 
 class Bullet : public phys_body {
 public:
 	bool able;
+	void set_able(bool b) override {
+		able = b;
+	}
 	void collidedwith(char type, phys_body* able) override;
 	Bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, bullet),

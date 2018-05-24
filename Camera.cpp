@@ -24,36 +24,36 @@ glm::mat4 Camera::GetViewMatrix() const {
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime) {
-	GLfloat velocity = this->MovementSpeed * deltaTime;
+	
 	float velosity =  this->MovementSpeed * deltaTime;
-	if (direction == FORWARD) {
-		this->Position += this->Front * velocity;
-		position->set_velosity(
-			position->body->getLinearVelocity() + 
-			btVector3(Front.x* velosity, Front.y*velosity, 
-				Front.z*velosity));
+	btScalar len = position->body->getLinearVelocity().length();
+	if (len < 10) {
+		if (direction == FORWARD) {
+			position->set_velosity(
+				position->body->getLinearVelocity() +
+				btVector3(Front.x* velosity, Front.y*velosity,
+					Front.z*velosity));
+		}
+		if (direction == BACKWARD) {
+			position->set_velosity(
+				position->body->getLinearVelocity() -
+				btVector3(Front.x* velosity, Front.y*velosity,
+					Front.z*velosity));
+		}
+		if (direction == LEFT) {
+			position->set_velosity(
+				position->body->getLinearVelocity()
+				- btVector3(Right.x* velosity, Right.y*velosity,
+					Right.z*velosity));
+		}
+		if (direction == RIGHT) {
+			position->set_velosity(
+				position->body->getLinearVelocity()
+				+ btVector3(Right.x* velosity, Right.y*velosity,
+					Right.z*velosity));
+		}
 	}
-	if (direction == BACKWARD) {
-		this->Position -= this->Front * velocity;
-		position->set_velosity(
-			position->body->getLinearVelocity() -
-			btVector3(Front.x* velosity, Front.y*velosity,
-				Front.z*velosity));
-	}
-	if (direction == LEFT) {
-		this->Position -= this->Right * velocity;
-		position->set_velosity(
-			position->body->getLinearVelocity() 
-			- btVector3(Right.x* velosity, Right.y*velosity, 
-				Right.z*velosity));
-	}
-	if (direction == RIGHT) {
-		this->Position += this->Right * velocity;
-		position->set_velosity(
-			position->body->getLinearVelocity()
-			+ btVector3(Right.x* velosity, Right.y*velosity,
-				Right.z*velosity));
-	}
+	
 }
 
 void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch) {

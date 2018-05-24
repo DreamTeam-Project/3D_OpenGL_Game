@@ -178,13 +178,16 @@ phys_body* find_free_bullet(phys_world& real_world) {
 		return tmp;
 	}
 	int i = bullets.size();
-	printf("%d\n", i);
+	//printf("%d\n", i);
 	while (i > 0) {
-		if (bullets[i-1]->get_status() == 0)
+		if (bullets[i - 1]->get_able() == 0) {
+			bullets[i - 1]->set_able(1);
 			return bullets[i - 1];
+		}
+			
 		i--;
 	}
-	printf("after all\n");
+	//printf("after all\n");
 	Bullet* tmp = new Bullet(real_world, btVector3(1,1,1), btVector3(1, 1, 1), btScalar(1));
 	bullets.push_back(tmp);
 	return tmp;
@@ -197,19 +200,22 @@ phys_body* Character::aim(phys_world& real_world) {
 		shoot = 1;
 		phys_body* tmp = find_free_bullet(real_world);
 		btTransform btt;
+		
 		tmp->body->getMotionState()->getWorldTransform(btt);
 		btt.setOrigin(body->getCenterOfMassPosition()+ 10*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)); // move body to the scene node new position
 
-													   // update _body according to CharacterDemo demo
+
+		btt.setRotation(btQuaternion(glm::atan(camera.Front.x / camera.Front.z)-1.57,0, 0));
 
 		tmp->body->getMotionState()->setWorldTransform(btt);
 		tmp->body->setCenterOfMassTransform(btt);
-		tmp->set_velosity(100 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z));
+		
+		tmp->set_velosity(50 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z).normalize());
+		tmp->body->setAngularVelocity(btVector3(0, 0, 0));
+
 		return tmp;
 	}
 	return nullptr;
-	
-	//Bullet* tmp = new Bullet(world_saver, body->getCenterOfMassPosition(), btVector3(1, 1, 1), btScalar(1));
 
 }
 
@@ -290,12 +296,26 @@ void Bullet::collidedwith(char type, phys_body* with) {
 }
 
 int Enemy_close::do_something(phys_world& world) {
-//	printf("health = %d\n", health);
+
 	if (health > 0) {
-	//	printf("do something close\n");
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setAngularVelocity(btVector3(0, 10, 0));
-		body->setLinearVelocity(-(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()));
+		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
+
+		btTransform btt;
+		body->getMotionState()->getWorldTransform(btt);
+		btt.setOrigin(body->getCenterOfMassPosition());
+		btVector3 used = -(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		if (used.getZ() > 0) {
+			btt.setRotation(btQuaternion(glm::atan(used.getX() / used.getZ()), 0, 0));
+		}
+		else {
+			btt.setRotation(btQuaternion(-3.14 +(glm::atan(used.getX() / used.getZ())), 0, 0 ));
+		}
+
+		body->getMotionState()->setWorldTransform(btt);
+		body->setCenterOfMassTransform(btt);
+
+
 	}
 	else {
 		body->setActivationState(DISABLE_SIMULATION);
