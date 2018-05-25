@@ -319,8 +319,8 @@ void Bullet::collidedwith(char type, phys_body* with) {
 }
 
 int Enemy_close::do_something(phys_world& world) {
-
-	if (health > 0) {
+	btScalar len = (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).length();
+	if (health > 0 && len < 100) {
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
 
@@ -360,7 +360,8 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
 		body->setAngularVelocity(btVector3(0, 0, 1));
 	}*/
-	if (health > 0) {
+	btScalar len = (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).length();
+	if (health > 0&& len < 100) {
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(-2 * (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
 
