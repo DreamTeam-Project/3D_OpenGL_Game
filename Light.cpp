@@ -19,7 +19,7 @@ void GameLight::SetSpotLights(const GameShader& shader) {
 	string buf;
 	for (uint i = 0; i < SpotLights.size(); i++) {
 		buf = string("spotLights[") + to_string(i) + string("].");
-		shader.setVec3(buf + "position", camera.position->get_pos());
+		shader.setVec3(buf + "position", SpotLights[i].model->rigid_body_->get_pos());
 		shader.setVec3(buf + "direction", camera.Front);
 		shader.setVec3(buf + "ambient", SpotLights[i].ambient_);
 		shader.setVec3(buf + "diffuse", SpotLights[i].diffuse_);
@@ -27,6 +27,8 @@ void GameLight::SetSpotLights(const GameShader& shader) {
 		shader.setFloat(buf + "constant", SpotLights[i].constant_);
 		shader.setFloat(buf + "linear", SpotLights[i].linear_);
 		shader.setFloat(buf + "quadratic", SpotLights[i].quadratic_);
+		shader.setFloat(buf + "cutOff", SpotLights[i].cutOff_);
+		shader.setFloat(buf + "outerCutOff", SpotLights[i].outerCutOff_);
 	}
 }
 

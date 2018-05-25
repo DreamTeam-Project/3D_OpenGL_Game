@@ -16,12 +16,13 @@ void SoundCharacter::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, en
 
 void SoundCharacter::DoSound() {
 	if (IsNear) {
-		if (Status == DEAD_Sound) {
+		if (Status == DEAD_Sound && !IsDead) {
 			Walk->setIsPaused();
 			bool check = engine3d->isCurrentlyPlaying(ObjectSounds[DEAD_Sound]);
 			if (!check) {
 				engine3d->play3D(ObjectSounds[DEAD_Sound], Pos);
 			}
+			IsDead = true;
 		}
 		if (Status == ATTACK_Sound) {
 			Walk->setIsPaused();
@@ -73,13 +74,13 @@ void SoundHero::DoSound() {
 			SOAD->setPlayPosition(0);
 		}
 	}
-	if (Status == DEAD_Sound) {
+	if (Status == DEAD_Sound && !IsDead) {
 		Walk->setIsPaused();
 		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[DEAD_Sound]);
 		if (!check) {
 			engine3d->play3D(ObjectSounds[DEAD_Sound], Pos);
 		}
-
+		IsDead = true;
 	}
 	if (Status == ATTACK_Sound) {
 		L0 = SOADLENGTH;

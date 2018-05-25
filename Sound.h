@@ -7,10 +7,10 @@
 #include <string>
 #include <map>
 
-#define SOADLENGTH 900.0
+#define SOADLENGTH 200.0
 #define MAXDISTANCE 100.0
-#define BACKGROUNDVOLUME 0.5
-#define BACKVOICE_DISTANCE 100.0
+#define BACKGROUNDVOLUME 0.05
+#define BACKVOICE_DISTANCE 20.0
 
 using std::string;
 using std::vector;
@@ -55,10 +55,11 @@ public:
 	irrklang::ISoundEngine* engine3d;
 	irrklang::ISound* Walk;
 	enum CharacterSound Status;
+	bool IsDead;
 	bool IsNear = true;
 	SoundCharacter(irrklang::vec3df& pos0, const vector<string>& path0, enum CharacterSound stat0,
 		irrklang::ISoundEngine* engine3d_, map<string, irrklang::ISoundSource*>& GlobalMusicDataBase) : Pos(pos0), Path(path0),
-		Status(stat0), engine3d(engine3d_) {
+		Status(stat0), engine3d(engine3d_), IsDead(0) {
 		for (int i = 0; i < Path.size(); i++) {
 			ObjectSounds.push_back(GlobalMusicDataBase[Path[i]]);
 		}

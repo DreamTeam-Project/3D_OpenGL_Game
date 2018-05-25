@@ -99,7 +99,7 @@ const string LoadFile = "Load.file";
 const uint HeightFont = 48u;
 const uint WidthFont = 0u;
 const float lightSky = 0.6f;
-const GLuint WIDTH = 1024, HEIGHT = 600;
+const GLuint WIDTH = 1280, HEIGHT = 720;
 const vec3 direction(-0.2f, -1.0f, -0.3f);
 const vec3 diffuse(0.05f, 0.05f, 0.05f);
 const vec3 specular(0.1f, 0.1f, 0.1f);

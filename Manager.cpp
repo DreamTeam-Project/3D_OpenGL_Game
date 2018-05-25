@@ -9,6 +9,7 @@ GameManager::GameManager() :
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
 	music = engine3d->play3D(menuSound, irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
+	//music->setVolume(0.01);
 	LoadInfoAboutLevels();
 }
 
@@ -63,16 +64,17 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case CHARACTER:
 		NewModel = new CharacterModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), camera.Front, vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f, 17.5f, 12.5f));
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 0.8f), vec3(0.5f, 0.5f, 0.5f), camera.Front, vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.014f, 0.0007f, 5.0f, 22.5f));
 		break;
 	case STRUCTURE:
-		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 16.0f, true);
+		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 8.0f, true);
 		break;
 	case BULLET:
 		NewModel = new BulletModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
 		break;
 	case BOX_BULLET:
 		NewModel = new BulletBoxModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 5.0f, 0.0f), vec3(1.0f), vec3(0.2f), vec3(0.0f), 0.09f, 1.0f, 0.032f));
 		break;
 	case FLOOR:
 		NewModel = new FloorModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 8.0f, true);

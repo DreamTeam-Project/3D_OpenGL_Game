@@ -204,7 +204,7 @@ phys_body* Character::aim(phys_world& real_world) {
 		btTransform btt;
 		
 		tmp->body->getMotionState()->getWorldTransform(btt);
-		btt.setOrigin(body->getCenterOfMassPosition()+ 5*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)+ btVector3(0, -1, 0)); // move body to the scene node new position
+		btt.setOrigin(body->getCenterOfMassPosition()+ 10*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)+ btVector3(0, -1, 0)); // move body to the scene node new position
 
 
 		btt.setRotation(btQuaternion(glm::atan(camera.Front.x / camera.Front.z)-1.57,0, 0));
@@ -212,7 +212,7 @@ phys_body* Character::aim(phys_world& real_world) {
 		tmp->body->getMotionState()->setWorldTransform(btt);
 		tmp->body->setCenterOfMassTransform(btt);
 		
-		tmp->set_velosity(50 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z).normalize());
+		tmp->set_velosity(100 * btVector3(camera.Front.x, camera.Front.y, camera.Front.z).normalize());
 		tmp->body->setAngularVelocity(btVector3(0, 0, 0));
 
 		return tmp;
