@@ -158,10 +158,11 @@ phys_body::phys_body() :
 
 
 void Character::jump() {
-	/*static int holloo = 0;
-	holloo++;*/
-	if (inair == false /*holloo % 1000 == 101*/) {
-		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 10, 0));
+	btScalar len = body->getLinearVelocity().length();
+	btScalar h = body->getCenterOfMassPosition().getY();
+
+	if (inair == false && len < 13 && h< 10 /*holloo % 1000 == 101*/) {
+		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 4, 0));
 		inair = true;
 	}
 	body->setActivationState(ACTIVE_TAG);
@@ -199,10 +200,11 @@ phys_body* Character::aim(phys_world& real_world) {
 		bullets--;
 		shoot = 1;
 		phys_body* tmp = find_free_bullet(real_world);
+
 		btTransform btt;
 		
 		tmp->body->getMotionState()->getWorldTransform(btt);
-		btt.setOrigin(body->getCenterOfMassPosition()+ 10*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)); // move body to the scene node new position
+		btt.setOrigin(body->getCenterOfMassPosition()+ 5*btVector3(camera.Front.x, camera.Front.y, camera.Front.z)+ btVector3(0, -1, 0)); // move body to the scene node new position
 
 
 		btt.setRotation(btQuaternion(glm::atan(camera.Front.x / camera.Front.z)-1.57,0, 0));
@@ -231,7 +233,10 @@ void Enemy_dis::collidedwith(char type, phys_body* with) {
 	case character:
 		break;
 	case bullet:
-		health -= persona->get_damage();
+		if (with->get_able() == true) {
+			with->set_able(false);
+			health -= 10;
+		}
 		if (health < 0) {
 			body->setActivationState(DISABLE_SIMULATION);
 		}
@@ -249,16 +254,34 @@ void Character::collidedwith(char type, phys_body* with) {
 	case character:
 		break;
 	case bullet:
-		if(with->get_able() == 1) 
+		if (with->get_able() == 1)
+		{
+			with->set_able(false);
 			health -= 10;
+		}
+			
 		break;
 	case box_bullet:
-		bullets += 10;
+		if (with->get_able() == true) {
+			with->set_able(false);
+			bullets += 10;
+		}
+		
 		break;
 	case enemy_close:
-		health -= 20;
+		if(with->getHealth() > 0)
+			health -= 20;
+		break;
 	case hp_box:
-		health += 15;
+		if (with->get_able() == 1) {
+			with->set_able(0);
+			health += 10;
+		}
+		break;
+	case enemy_dis:
+		if (with->getHealth() > 0)
+			health -= 40;
+		break;
 	default:
 		break;
 	}
@@ -291,7 +314,7 @@ void Enemy_close::collidedwith(char type, phys_body* with) {
 
 void Bullet::collidedwith(char type, phys_body* with) {
 	able = false;
-	body->setActivationState(DISABLE_SIMULATION);
+	//body->setActivationState(DISABLE_SIMULATION);
 	return;
 }
 
@@ -328,7 +351,7 @@ int Enemy_close::do_something(phys_world& world) {
 
 
 int Enemy_dis::do_something(phys_world& world) {
-	timer++;
+	//timer++;
 	//printf("do_somth_dist\n");
 	/*if (timer % 1000 == 101 && health>0) {
 		phys_body* tmp = find_free_bullet(world);
@@ -337,6 +360,33 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
 		body->setAngularVelocity(btVector3(0, 0, 1));
 	}*/
+	if (health > 0) {
+		body->setActivationState(DISABLE_DEACTIVATION);
+		body->setLinearVelocity(-2 * (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
+
+		btTransform btt;
+		body->getMotionState()->getWorldTransform(btt);
+		btt.setOrigin(body->getCenterOfMassPosition());
+		btVector3 used = -(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		if (used.getZ() > 0) {
+			btt.setRotation(btQuaternion(glm::atan(used.getX() / used.getZ()), 0, 0));
+		}
+		else {
+			btt.setRotation(btQuaternion(-3.14 + (glm::atan(used.getX() / used.getZ())), 0, 0));
+		}
+
+		body->getMotionState()->setWorldTransform(btt);
+		body->setCenterOfMassTransform(btt);
+		//printf("%f %f %f\n", this->get_pos().x, this->get_pos().y, this->get_pos().z);
+
+
+	}
+	else {
+		body->setActivationState(DISABLE_SIMULATION);
+		body->setAngularVelocity(btVector3(0, 0, 0));
+		body->setLinearVelocity(btVector3(0, 0, 0));
+	}
+
 	return 0;
 }
 
@@ -345,7 +395,6 @@ void Box_bullet::collidedwith(char type, phys_body* with) {
 	case standart:
 		break;
 	case character:
-		status = 0;
 		body->setActivationState(DISABLE_SIMULATION);
 		break;
 	case bullet:
@@ -363,7 +412,6 @@ void HP_box::collidedwith(char type, phys_body* with) {
 	case standart:
 		break;
 	case character:
-		status = 0;
 		body->setActivationState(DISABLE_SIMULATION);
 		break;
 	case bullet:

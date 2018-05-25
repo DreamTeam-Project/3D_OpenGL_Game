@@ -127,6 +127,7 @@ public:
 	void legs();
 	int getHealth();
 	int get_status() override {
+		//printf("char_get\n");
 		if (health <= 0) {
 			return DEAD_Sound;
 		}
@@ -155,9 +156,8 @@ public:
 
 class Enemy_dis :public phys_body {
 public:
-	int health;
-	int shoot;
-	int do_something(phys_world& world) override;
+	//int shoot;
+	/*int do_something(phys_world& world) override;
 	int get_status() override {
 		if (health <= 0) {
 			return DEAD_Sound;
@@ -178,6 +178,27 @@ public:
 		health(50)
 	{
 		enemies.push_back(this);
+	}*/
+	int health;
+	int do_something(phys_world& world) override;
+	void collidedwith(char type, phys_body* with) override;
+	Enemy_dis(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
+		phys_body(world, position, col_shape, mass, enemy_dis),
+		health(50)
+	{
+		enemies.push_back(this);
+	}
+	int get_status() override {
+		if (health < 0) {
+			return DEAD_Sound;
+		}
+		if (body->getLinearVelocity().norm() > 0) {
+			return WALK_Sound;
+		}
+		return ALIVE_Sound;
+	}
+	int getHealth() override {
+		return health;
 	}
 
 };
@@ -196,6 +217,9 @@ public:
 		health(50)
 	{
 		enemies.push_back(this);
+	}
+	int getHealth() override {
+		return health;
 	}
 	int get_status() override {
 		if (health < 0) {
@@ -232,15 +256,21 @@ public:
 
 class Box_bullet : public phys_body {
 public:
-	int status;
+	bool able;
 
 	Box_bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, box_bullet),
-		status(1)
+		able(1)
 	{}
+	bool get_able() override {
+		return able;
+	}
+	void set_able(bool a) override {
+		able = a;
+	}
 	void collidedwith(char type, phys_body* with) override;
 	int get_status() override {
-		if (status == 1) {
+		if (able == 1) {
 			return ALIVE_Sound;
 		}
 		return DEAD_Sound;
@@ -250,13 +280,19 @@ public:
 class HP_box : public phys_body {
 public:
 	int resive_HP;
-	int status;
+	bool able;
 
 	HP_box(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
-		phys_body(world, position, col_shape, mass, hp_box),
-		status(1),
+		phys_body(world, position, col_shape, 0, hp_box),
+		able(true),
 		resive_HP(15)
 	{}
+	bool get_able() override {
+		return able;
+	}
+	void set_able(bool a) override {
+		able = a;
+	}
 	void collidedwith(char type, phys_body* with) override;
 };
 

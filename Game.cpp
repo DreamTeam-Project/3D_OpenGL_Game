@@ -168,7 +168,7 @@ void ProcessInputInGame(GLFWwindow *window) {
 //		printf("just R\n");
 		static int press = 0;
 		press++;
-		if (press % 100 == 11) {
+		if (press % 200 == 11) {
 			phys_body* tmp = camera.position->aim(game_man->real_world_);
 			if (tmp == nullptr) {
 

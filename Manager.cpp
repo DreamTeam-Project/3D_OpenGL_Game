@@ -293,7 +293,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	for (int i = 0; i<Models.size();i++) {
 		if (i == 0) {
 			//Models[i]->quat_.x = -camera.Pitch;
-			Models[i]->quat_.y = -camera.Yaw;
+			Models[i]->quat_.y = 90-camera.Yaw;
 			/*if (Models[0]->rigid_body_->get_status() == DEAD_Sound) {
 				this->play = false;
 			}*/
