@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #define GLEW_STATIC
+
 #define INFOLOG_SIZE 512
 
 #include <string>
@@ -22,7 +23,7 @@ public:
 	GameShader(const char* vertexPath, const char* fragmentPath);
 	GameShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 	void Use() const;
-	// utility uniform functions
+
 	void setBool(const std::string &name, bool value) const;
 	void setInt(const std::string &name, int value) const;
 	void setFloat(const std::string &name, float value) const;

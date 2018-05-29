@@ -19,10 +19,7 @@ Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat up
 }
 
 glm::mat4 Camera::GetViewMatrix() const {
-	//printf("%f %f %f\n", position->get_pos().x, position->get_pos().y, position->get_pos().z);
-	return glm::lookAt(
-		position->get_pos(), position->get_pos() + Front, Up);
-	
+	return glm::lookAt(position->get_pos(), position->get_pos() + Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime) {
@@ -64,8 +61,6 @@ void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean co
 
 	this->Yaw += xoffset;
 	this->Pitch += yoffset;
-	/*position->body->setAngularVelocity(btVector3(0, 0, (double)xoffset));
-	this->Yaw = ()*/
 	if (constrainPitch) {
 		if (this->Pitch > 89.0f)
 			this->Pitch = 89.0f;

@@ -23,7 +23,6 @@
 #include "Physics.h"
 #include "Sound.h"
 
-extern Camera camera;
 using std::map;
 using std::vector;
 using std::string;
@@ -138,10 +137,6 @@ public:
 		model = glm::scale(model, scale_);
 	}
 	void PlayMusic(float deltaTime) {
-		/*if (rigid_body_->get_status() == ATTACK_Sound) {
-			printf("%d\n", rigid_body_->get_status());
-		}
-		*/
 		irrklang::vec3df tmp1 = irrklang::vec3df(rigid_body_->get_pos().x, rigid_body_->get_pos().y, rigid_body_->get_pos().z);
 		hero.Refresh(tmp1, tmp1, (CharacterSound)rigid_body_->get_status(), deltaTime);
 	}
@@ -160,10 +155,11 @@ public:
 	irrklang::vec3df a;
 	void Move(mat4& model, float deltaTime) override {
 		PlayMusic(deltaTime);
-		model = glm::translate(model, rigid_body_->get_pos());
-		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, rigid_body_->get_pos() - vec3(0.0f, 4.0f, 0.0f));
+		quat_ = rigid_body_->get_quat();
+		model = glm::rotate(model, quat_.x + glm::radians(270.0f), vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, quat_.y, vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, quat_.z, vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, scale_);
 	}
 	void PlayMusic(float deltaTime) {
@@ -213,15 +209,6 @@ public:
 		Structure(real_world_, place, quat, path, scale, mass, box[0], shininess, draw) 
 	{
 		rigid_body_ = new phys_body(real_world_, btVector3(place.x, place.y, place.z), btVector3(box[0].x, box[0].y, box[0].z), btScalar(0));
-		//if (i = place.size() != box.size()) {
-		//	throw GameException(__LINE__, __func__, string( "error structure, wrong size place and box\n"));
-		//}
-		//while (i > 1) {
-		//	phys_body* tmp  = new phys_body(real_world_, btVector3(place[i-1].x, place[i-1].y, place[i-1].z), btVector3(box[i-1].x, box[i-1].y, box[i-1].z), btScalar(0));
-		//	walls.push_back(tmp);
-		//	i--;
-		//}
-		//walls.push_back(new phys_body(real_world_, btVector3(251, 6, 39), btVector3(1,50,5), btScalar(0)));
 	}
 	~ChurchModel() {
 		int i = walls.size();
@@ -256,9 +243,8 @@ public:
 	irrklang::vec3df a;
 	void Move(mat4& model, float deltaTime) override {
 		PlayMusic(deltaTime);
-		//quat_ += vec3(1, 1, 1);
 		quat_ = rigid_body_->get_quat();
-		model = glm::translate(model, rigid_body_->get_pos());
+		model = glm::translate(model, rigid_body_->get_pos() - vec3(0.0f, 4.0f, 0.0f));
 		model = glm::rotate(model, quat_.x, vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, quat_.y, vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, quat_.z, vec3(0.0f, 0.0f, 1.0f));

@@ -10,7 +10,7 @@
 #include <vector>
 #include <assimp\matrix4x4.h>
 
-#define TERMINAL 1
+#define TERMINAL 0
 #if TERMINAL
 #define DEBUG_GAME		0
 #define DEBUG_MODEL		0
@@ -81,6 +81,8 @@ void ReadFromFile(ifstream& fin, const string& what, int& ret);
 void ReadFromFile(ifstream& fin, const string& what, double& ret);
 void ReadFromFile(ifstream& fin, const string& what, vec3& ret);
 
+class Camera;
+extern Camera camera;
 extern GLFWwindow* game_window;
 static vector<string> DarkStormy {
 	("textures/skybox/DarkStormy_lf.png"),
@@ -98,11 +100,11 @@ const string FontFile = "textures/font.ttf";
 const string LoadFile = "Load.file";
 const uint HeightFont = 48u;
 const uint WidthFont = 0u;
-const float lightSky = 0.6f;
+const float lightSky = 1.0f;
 const GLuint WIDTH = 1280, HEIGHT = 720;
 const vec3 direction(-0.2f, -1.0f, -0.3f);
 const vec3 diffuse(0.05f, 0.05f, 0.05f);
 const vec3 specular(0.1f, 0.1f, 0.1f);
-const vec3 ambient(1.0f, 1.0f, 1.0f);
+const vec3 ambient(0.0f, 0.0f, 0.0f);
 
 #endif

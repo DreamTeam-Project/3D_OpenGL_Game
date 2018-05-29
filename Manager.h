@@ -79,6 +79,7 @@ public:
 	bool GameMenu(GLFWwindow *window);
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
+	void ProcessInputInGame(GLFWwindow *window, float deltaTime);
 	bool play;
 
 	phys_world real_world_;
@@ -104,6 +105,8 @@ private:
 	
 	irrklang::ISoundEngine* engine3d;
 	irrklang::ISound* music;
+	float accum;
+	bool flag_shoot;
 	Image Loading;
 	Skybox box;
 	GameText text;

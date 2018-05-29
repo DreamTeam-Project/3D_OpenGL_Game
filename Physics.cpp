@@ -1,29 +1,27 @@
 #include "Physics.h"
-extern Camera camera;
 
-static int timer = 0;
-vector<phys_body*> to_create;
-vector<phys_body*> bullets;
+vector<phys_body*>&  get_bullets() {
+	static vector<phys_body*> bullets;
+	return bullets;
+}
 
-phys_body* persona;
-vector<phys_body*> get_creation() {
-	return to_create;
+phys_body* get_camera(phys_body* tmp) {
+	static phys_body* camera;
+	if (tmp == nullptr) {
+		return camera;
+	}
+	camera = tmp;
+	return camera;
 }
 
 void phys_body::set_velosity(btVector3 vel) {
 	body->setLinearVelocity(vel);
 }
 
-struct collided_id {
-	phys_body* your;
-	char type_ag;
-	phys_body* with;
-};
-
-vector<phys_body*> enemies;
-
-
-vector<struct collided_id> collided;
+vector<struct collided_id>& get_collided() {
+	static vector<struct collided_id> collided;
+	return collided;
+}
 
 phys_body::phys_body(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass, int type):
 type_(type) {
@@ -61,7 +59,6 @@ phys_world::phys_world() {
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	gContactAddedCallback = callbackFunc;
 	dynamicsWorld->setGravity(btVector3(0, -10, 0));
-	//world_saver = this;
 }
 
 phys_world::~phys_world() {
@@ -78,7 +75,6 @@ phys_world::~phys_world() {
 		delete obj;
 	}
 
-	//delete collision shapes
 	for (int j = 0; j < collisionShapes.size(); j++)
 	{
 		btCollisionShape* shape = collisionShapes[j];
@@ -86,31 +82,26 @@ phys_world::~phys_world() {
 		delete shape;
 	}
 
-	//delete dynamics world
 	delete dynamicsWorld;
 
-	//delete solver
 	delete solver;
 
-	//delete broadphase
 	delete overlappingPairCache;
 
-	//delete dispatcher
 	delete dispatcher;
 
 	delete collisionConfiguration;
 
-	//world_saver = nullptr;
 }
 
 glm::vec3 phys_body::get_pos() {
-	//printf("%p\n", this);
 	btVector3 tmp = body->getCenterOfMassPosition();
 	return glm::vec3(tmp.getX(), tmp.getY(), tmp.getZ());
 }
 
-bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2) {
-	//std::cout << "collision" << std::endl;
+bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, 
+		const btCollisionObjectWrapper* obj2, int id2, int index2) {
+
 	const btCollisionObject* col_obj1 =obj1->getCollisionObject();
 	phys_body* body_1 = (phys_body*)col_obj1->getUserPointer();
 	char type_1 = body_1->type_;
@@ -124,17 +115,13 @@ bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int
 	return false;
 }
 
-
-
-
 void phys_world::do_step(btScalar time, phys_world& world) {
 	dynamicsWorld->stepSimulation(time);
-	int i = collided.size();
-	//printf("i = %d\n", i);
+	int i = get_collided().size();
 	while (i > 0) {
-		collided[i-1].your->collidedwith(collided[i-1].type_ag, collided[i-1].with);
+		get_collided()[i-1].your->collidedwith(get_collided()[i-1].type_ag, get_collided()[i-1].with);
 		i--;
-		collided.pop_back();
+		get_collided().pop_back();
 	}
 	i = enemies.size();
 	while (i > 0) {
@@ -145,23 +132,21 @@ void phys_world::do_step(btScalar time, phys_world& world) {
 }
 
 void phys_body::hit(char type, phys_body* with) {
-	//std::cout << "hello" << std::endl;
 	struct collided_id a;
 	a.type_ag = type;
 	a.your = this;
 	a.with = with;
-	collided.push_back(a);
+	get_collided().push_back(a);
 }
 
 phys_body::phys_body() :
 	body(nullptr) {}
 
-
 void Character::jump() {
 	btScalar len = body->getLinearVelocity().length();
 	btScalar h = body->getCenterOfMassPosition().getY();
 
-	if (inair == false && len < 13 && h< 10 /*holloo % 1000 == 101*/) {
+	if (inair == false && len < 13 && h< 10 ) {
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 4, 0));
 		inair = true;
 	}
@@ -173,27 +158,23 @@ int Character::getHealth() {
 }
 
 phys_body* find_free_bullet(phys_world& real_world) {
-	if (bullets.empty()) {
+	if (get_bullets().empty()) {
 		Bullet* tmp = new Bullet(real_world, btVector3(1, 1, 1), btVector3(1, 1, 1), btScalar(1));
-		//bullets.push_back(tmp);
 		return tmp;
 	}
-	int i = bullets.size();
-	//printf("%d\n", i);
+	int i = get_bullets().size();
 	while (i > 0) {
-		if (bullets[i - 1]->get_able() == 0) {
-			bullets[i - 1]->set_able(1);
-			return bullets[i - 1];
+		if (get_bullets()[i - 1]->get_able() == 0) {
+			get_bullets()[i - 1]->set_able(1);
+			return get_bullets()[i - 1];
 		}
 			
 		i--;
 	}
-	//printf("after all\n");
 	Bullet* tmp = new Bullet(real_world, btVector3(1,1,1), btVector3(1, 1, 1), btScalar(1));
-	bullets.push_back(tmp);
+	get_bullets().push_back(tmp);
 	return tmp;
 }
-
 
 phys_body* Character::aim(phys_world& real_world) {
 	if (bullets > 0) {
@@ -288,7 +269,6 @@ void Character::collidedwith(char type, phys_body* with) {
 }
 
 void phys_body::collidedwith(char type, phys_body* with) {
-
 	return;
 }
 
@@ -300,6 +280,7 @@ void Enemy_close::collidedwith(char type, phys_body* with) {
 		break;
 	case bullet:
 		if (with->get_able() == 1) {
+			with->set_able(false);
 			health -= 10;
 		}
 		
@@ -313,21 +294,19 @@ void Enemy_close::collidedwith(char type, phys_body* with) {
 }
 
 void Bullet::collidedwith(char type, phys_body* with) {
-	able = false;
-	//body->setActivationState(DISABLE_SIMULATION);
 	return;
 }
 
 int Enemy_close::do_something(phys_world& world) {
-	btScalar len = (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).length();
+	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
 	if (health > 0 && len < 100) {
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
+		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
 		btTransform btt;
 		body->getMotionState()->getWorldTransform(btt);
 		btt.setOrigin(body->getCenterOfMassPosition());
-		btVector3 used = -(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		btVector3 used = -(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition());
 		if (used.getZ() > 0) {
 			btt.setRotation(btQuaternion(glm::atan(used.getX() / used.getZ()), 0, 0));
 		}
@@ -349,26 +328,16 @@ int Enemy_close::do_something(phys_world& world) {
 	return 0;
 }
 
-
 int Enemy_dis::do_something(phys_world& world) {
-	//timer++;
-	//printf("do_somth_dist\n");
-	/*if (timer % 1000 == 101 && health>0) {
-		phys_body* tmp = find_free_bullet(world);
-		to_create.push_back(tmp);
+	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
+	if (health > 0 && len < 100) {
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setLinearVelocity(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
-		body->setAngularVelocity(btVector3(0, 0, 1));
-	}*/
-	btScalar len = (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).length();
-	if (health > 0&& len < 100) {
-		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setLinearVelocity(-2 * (body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition()).normalize());
+		body->setLinearVelocity(-4 * (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
 		btTransform btt;
 		body->getMotionState()->getWorldTransform(btt);
 		btt.setOrigin(body->getCenterOfMassPosition());
-		btVector3 used = -(body->getCenterOfMassPosition() - persona->body->getCenterOfMassPosition());
+		btVector3 used = -(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition());
 		if (used.getZ() > 0) {
 			btt.setRotation(btQuaternion(glm::atan(used.getX() / used.getZ()), 0, 0));
 		}
@@ -378,7 +347,6 @@ int Enemy_dis::do_something(phys_world& world) {
 
 		body->getMotionState()->setWorldTransform(btt);
 		body->setCenterOfMassTransform(btt);
-		//printf("%f %f %f\n", this->get_pos().x, this->get_pos().y, this->get_pos().z);
 
 
 	}

@@ -1,3 +1,4 @@
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #define GLEW_STATIC
 
 #include <cstdio>
@@ -27,13 +28,8 @@ static void DrawInWindow();
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-void ProcessInputInGame(GLFWwindow *window);
 
 GLFWwindow* game_window = nullptr;
-
-GameManager* game_man;
-
-
 Camera camera(vec3(0.0f, 10.0f, 0.0f));
 
 GLfloat lastX = WIDTH / 2.0;
@@ -105,14 +101,13 @@ static void DrawInWindow() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GameManager Manager;
-	game_man = &Manager;
 	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window)) {
 
 		while (!glfwWindowShouldClose(game_window) && Manager.play) {
 			GLfloat currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
-			ProcessInputInGame(game_window);
+			Manager.ProcessInputInGame(game_window, deltaTime);
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -146,41 +141,4 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
-}
-
-void ProcessInputInGame(GLFWwindow *window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camera.ProcessKeyboard(LEFT, deltaTime);
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camera.ProcessKeyboard(RIGHT, deltaTime);
-	}
-	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-//		printf("just R\n");
-		static int press = 0;
-		press++;
-		if (press % 200 == 11) {
-			phys_body* tmp = camera.position->aim(game_man->real_world_);
-			if (tmp == nullptr) {
-
-//				printf("null\n");
-				return;
-			}
-			game_man->GetCopy(1, tmp);
-//			printf("created bullet\n");
-		}
-
-	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		camera.position->jump();
-	}
 }

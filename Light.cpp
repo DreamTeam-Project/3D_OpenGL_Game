@@ -1,5 +1,4 @@
 #include "Light.h"
-extern Camera camera;
 
 void GameLight::SetPointLights(const GameShader& shader) {
 	string buf;

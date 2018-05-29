@@ -1,15 +1,12 @@
 #include "Manager.h"
 
-extern Camera camera;
-
 GameManager::GameManager() : 
 	Loading(LoadImage, true), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), 
-	play(false), real_world_(phys_world())
+	play(false), real_world_(phys_world()), accum(0), flag_shoot(false)
 {
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
 	music = engine3d->play3D(menuSound, irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
-	//music->setVolume(0.01);
 	LoadInfoAboutLevels();
 }
 
@@ -294,24 +291,13 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	Shader.setVec3("viewPos", camera.Position);
 	for (int i = 0; i<Models.size();i++) {
 		if (i == 0) {
-			//Models[i]->quat_.x = -camera.Pitch;
 			Models[i]->quat_.y = 90-camera.Yaw;
-			/*if (Models[0]->rigid_body_->get_status() == DEAD_Sound) {
-				this->play = false;
-			}*/
 		}
 		if (Models[i]->draw_) {
 			Models[i]->SetShaderParameters(Shader, time);
 			Models[i]->Draw(Shader);
 		}
 	}
-
-	/*for (auto& it : Models) {
-		if (it->draw_) {
-			it->SetShaderParameters(Shader, time);
-			it->Draw(Shader);
-		}
-	}*/
 }
 
 bool GameManager::GameMenu(GLFWwindow* window) {
@@ -334,15 +320,19 @@ bool GameManager::GameMenu(GLFWwindow* window) {
 }
 
 void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
-	real_world_.do_step(time, real_world_);
-	vector<phys_body*> to_create = get_creation();
-	int a = to_create.size();
-	while (a > 0) {
-		printf("get vector to Rander world %p\n", to_create[0]);
-		this->GetCopy(1, to_create[a - 1]);
-		a--;
+	accum -= time;
+	if (accum <= 0) {
+		accum = 0;
 	}
-	to_create.clear();
+	if (flag_shoot) {
+		phys_body* tmp = get_camera()->aim(real_world_);
+		if (tmp == nullptr) {
+			return;
+		}
+		GetCopy(1, tmp);
+		flag_shoot = false;
+	}
+	real_world_.do_step(time, real_world_);
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
 	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 14, (float)WIDTH / 10 * 9, 0.9f, vec3(1.0f, 0.0f, 0.0f));
@@ -463,4 +453,31 @@ int GameManager::ChooseLevel(GLFWwindow* window) {
 
 	SysText.clear();
 	return -1;
+}
+
+void GameManager::ProcessInputInGame(GLFWwindow *window, float deltaTime) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+		if (accum == 0) {
+			flag_shoot = true;
+			accum = 0.5;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		camera.position->jump();
+	}
 }

@@ -1,38 +1,17 @@
-
 #ifndef PHYSICS_H
 #define PHYSICS_H
+
 #define GLEW_STATIC
-//#include "Manager.h"
+
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
-
 #include "Camera.h"
-
-
-
 #include "System.h"
-
-
 #include <glm/glm.hpp>
-
 #include "Sound.h"
-
-
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/quaternion.hpp>
-//#include <glm/gtx/quaternion.hpp>
 #include <vector>
 
-//#include <GLFW/glfw3.h>
 class phys_body;
-extern phys_body* persona;
-extern vector<phys_body*> to_create;
-extern vector<phys_body*> bullets;
-extern vector<phys_body*> enemies;
-
-vector<phys_body*> get_creation();
-
-
 
 enum Physicalobj {
 	character,
@@ -44,18 +23,29 @@ enum Physicalobj {
 	box_bullet,
 	hp_box
 };
+struct collided_id {
+	phys_body* your;
+	char type_ag;
+	phys_body* with;
+};
+phys_body* get_camera(phys_body* tmp = nullptr);
+vector<struct collided_id>& get_collided();
+vector<phys_body*>&  get_bullets();
 
 class phys_world {
 public:
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-	btDefaultCollisionConfiguration* collisionConfiguration; //= new btDefaultCollisionConfiguration();
-	btCollisionDispatcher* dispatcher;// = new btCollisionDispatcher(collisionConfiguration);
-	btBroadphaseInterface* overlappingPairCache;// = new btDbvtBroadphase();
-	btSequentialImpulseConstraintSolver* solver;// = new btSequentialImpulseConstraintSolver;
-	btDiscreteDynamicsWorld* dynamicsWorld;// = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+	vector<phys_body*> bullets;
+	vector<phys_body*> enemies;
+	btDiscreteDynamicsWorld* dynamicsWorld;
+	~phys_world();
 	phys_world();
 	void do_step(btScalar time, phys_world& world);
-	~phys_world();
+
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	btDefaultCollisionConfiguration* collisionConfiguration;
+	btCollisionDispatcher* dispatcher;
+	btBroadphaseInterface* overlappingPairCache;
+	btSequentialImpulseConstraintSolver* solver;
 };
 
 class phys_body {
@@ -127,7 +117,6 @@ public:
 	void legs();
 	int getHealth();
 	int get_status() override {
-		//printf("char_get\n");
 		if (health <= 0) {
 			return DEAD_Sound;
 		}
@@ -150,35 +139,12 @@ public:
 		bullets(50),
 		inair(false)
 	{
-		persona = this;
+		get_camera(this);
 	}
 };
 
 class Enemy_dis :public phys_body {
 public:
-	//int shoot;
-	/*int do_something(phys_world& world) override;
-	int get_status() override {
-		if (health <= 0) {
-			return DEAD_Sound;
-		}
-		if (shoot == 1) {
-			shoot = 0;
-			return ATTACK_Sound;
-		}
-		if (body->getLinearVelocity().norm() > 0) {
-			return WALK_Sound;
-		}
-		return ALIVE_Sound;
-		return 0;
-	}
-	void collidedwith(char type, phys_body* with) override;
-	Enemy_dis(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
-		phys_body(world, position, col_shape, mass, enemy_dis),
-		health(50)
-	{
-		enemies.push_back(this);
-	}*/
 	int health;
 	int do_something(phys_world& world) override;
 	void collidedwith(char type, phys_body* with) override;
@@ -186,7 +152,7 @@ public:
 		phys_body(world, position, col_shape, mass, enemy_dis),
 		health(50)
 	{
-		enemies.push_back(this);
+		world.enemies.push_back(this);
 	}
 	int get_status() override {
 		if (health < 0) {
@@ -202,10 +168,6 @@ public:
 	}
 
 };
-
-
-
-
 
 class Enemy_close : public phys_body {
 public:
@@ -216,7 +178,7 @@ public:
 		phys_body(world, position, col_shape, mass, enemy_close),
 		health(50)
 	{
-		enemies.push_back(this);
+		world.enemies.push_back(this);
 	}
 	int getHealth() override {
 		return health;
@@ -230,7 +192,6 @@ public:
 		}
 		return ALIVE_Sound;
 	}
-
 };
 
 class Bullet : public phys_body {
@@ -244,7 +205,7 @@ public:
 		phys_body(world, position, col_shape, mass, bullet),
 		able(true)
 	{
-		bullets.push_back(this);
+		world.bullets.push_back(this);
 	}
 	bool get_able() override {
 		return able;
@@ -257,7 +218,6 @@ public:
 class Box_bullet : public phys_body {
 public:
 	bool able;
-
 	Box_bullet(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, box_bullet),
 		able(1)
@@ -297,8 +257,5 @@ public:
 };
 
 bool callbackFunc(btManifoldPoint& cp, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2);
-
-
-
 
 #endif
