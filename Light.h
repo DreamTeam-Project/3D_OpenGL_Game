@@ -43,10 +43,11 @@ struct PointLight {
 struct SpotLight {
 	SpotLight() = delete;
 	SpotLight(GameModel* mod, const vec3& pos, const vec3& diff, const vec3& amb,
-		const vec3& dir, const vec3& spec, float con, float lin, float quad, float cut, float out) :
-		model(mod), position_(pos), direction_(dir), ambient_(amb), diffuse_(diff), specular_(spec), 
+		const vec3& dir, const vec3& spec, float con, float lin, float quad, float cut, float out, bool light = true) :
+		model(mod), position_(pos), direction_(dir), ambient_(amb), diffuse_(diff), specular_(spec), light_on(light), 
 		constant_(con), quadratic_(quad), cutOff_(glm::cos(glm::radians(cut))), outerCutOff_(glm::cos(glm::radians(out))), linear_(lin)
 	{  }
+	bool light_on;
 	GameModel* model;
 	vec3 position_;
 	vec3 direction_;

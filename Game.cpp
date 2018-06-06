@@ -69,7 +69,7 @@ static void StartWindow() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	game_window = glfwCreateWindow(WIDTH, HEIGHT, "Test window", nullptr, nullptr);
+	game_window = glfwCreateWindow(WIDTH, HEIGHT, "Game", nullptr, nullptr);
 	if (game_window == nullptr) {
 		glfwTerminate();
 		throw GameException(__LINE__, __func__, "Error: Failed to create GLFW window");

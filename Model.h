@@ -126,6 +126,7 @@ public:
 		rigid_body_ = new Character(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
 		camera.position = rigid_body_;
 	}
+
 	SoundHero hero;
 	irrklang::vec3df a;
 	void Move(mat4& model, float deltaTime) override {

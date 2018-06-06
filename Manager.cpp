@@ -2,7 +2,7 @@
 
 GameManager::GameManager() : 
 	Loading(LoadImage, true), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), 
-	play(false), real_world_(phys_world()), accum(0), flag_shoot(false)
+	play(false), real_world_(phys_world()), accum(0), flag_shoot(false), accum_fire(0)
 {
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
@@ -61,7 +61,8 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case CHARACTER:
 		NewModel = new CharacterModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 0.8f), vec3(0.5f, 0.5f, 0.5f), camera.Front, vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.014f, 0.0007f, 5.0f, 22.5f));
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f), vec3(1.0f, 1.0f, 0.8f), vec3(0.5f), camera.Front, vec3(0.0f), 1.0f, 0.014f, 0.0007f, 5.0f, 22.5f));
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f), vec3(20.0f, 10.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), camera.Front, vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.09f, 0.032f, 5.0f, 40.5f, false));
 		break;
 	case STRUCTURE:
 		NewModel = new Structure(real_world_, type, place, quat, path, scale, mass, box[0], 8.0f, true);
@@ -84,6 +85,7 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case HP_BOX:
 		NewModel = new XPBoxModel(real_world_, type, place, quat, path, scale, mass, box[0], 32.0f, true);
+		Light.PointLights.push_back(PointLight(NewModel, vec3(0.0f, 5.0f, 0.0f), vec3(1.0f), vec3(0.2f), vec3(0.0f), 0.09f, 1.0f, 0.032f));
 		break;
 	case CHURCH:
 		NewModel = new ChurchModel(real_world_, type, place, quat, path, scale, mass, box, sounds, engine3d, LoadedSounds, 16.0f, true);
@@ -321,8 +323,13 @@ bool GameManager::GameMenu(GLFWwindow* window) {
 
 void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
 	accum -= time;
+	accum_fire -= time;
 	if (accum <= 0) {
 		accum = 0;
+	}
+	if (accum_fire <= 0) {
+		accum_fire = 0;
+		Light.SpotLights[1].light_on = false;
 	}
 	if (flag_shoot) {
 		phys_body* tmp = get_camera()->aim(real_world_);
@@ -330,11 +337,14 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 			return;
 		}
 		GetCopy(1, tmp);
+		Light.SpotLights[1].light_on = true;
+		accum_fire = 0.04;
 		flag_shoot = false;
 	}
 	real_world_.do_step(time, real_world_);
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
+	text.RenderText(string("o"), (float)HEIGHT / 500 * 248, (float)WIDTH / 9 * 4, 0.2f, vec3(1.0f, 0.0f, 0.0f));
 	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 14, (float)WIDTH / 10 * 9, 0.9f, vec3(1.0f, 0.0f, 0.0f));
 	text.RenderText(string("BT ") + to_string(camera.position->get_bullets()), (float)HEIGHT / 14, (float)WIDTH / 10 * 8, 0.9f, vec3(1.0f, 0.0f, 0.0f));
 }
@@ -471,11 +481,14 @@ void GameManager::ProcessInputInGame(GLFWwindow *window, float deltaTime) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
-	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		if (accum == 0) {
 			flag_shoot = true;
 			accum = 0.5;
 		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		play = false;
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 		camera.position->jump();

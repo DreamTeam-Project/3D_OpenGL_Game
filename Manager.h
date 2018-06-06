@@ -106,6 +106,7 @@ private:
 	irrklang::ISoundEngine* engine3d;
 	irrklang::ISound* music;
 	float accum;
+	float accum_fire;
 	bool flag_shoot;
 	Image Loading;
 	Skybox box;

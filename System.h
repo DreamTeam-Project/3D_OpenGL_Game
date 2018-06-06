@@ -94,13 +94,14 @@ static vector<string> DarkStormy {
 };
 const string GameName = "Wasteland of Nightmare";
 const string LoadImage = "textures/LoadImage.jpg";
+const string ShootImage = "textures/ShootImage.jpg";
 const string MenuSound = "textures/MenuSound.mp3";
 const string MenuImage = "textures/MenuImage.jpg";
 const string FontFile = "textures/font.ttf";
 const string LoadFile = "Load.file";
 const uint HeightFont = 48u;
 const uint WidthFont = 0u;
-const float lightSky = 1.0f;
+const float lightSky = 0.5f;
 const GLuint WIDTH = 1280, HEIGHT = 720;
 const vec3 direction(-0.2f, -1.0f, -0.3f);
 const vec3 diffuse(0.05f, 0.05f, 0.05f);

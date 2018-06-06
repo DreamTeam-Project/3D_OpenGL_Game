@@ -31,6 +31,8 @@ struct PointLight
 
 struct SpotLight 
 {
+	bool light;
+
     vec3 position;
     vec3 direction;
     float cutOff;
@@ -46,7 +48,7 @@ struct SpotLight
 };
 
 #define NR_POINT_LIGHTS 15
-#define NR_SPOT_LIGHTS 10
+#define NR_SPOT_LIGHTS 3
 
 in VS_OUT {
     vec3 FragPos;
@@ -77,8 +79,13 @@ void main()
 	for(int i = 0; i < numPointLights; i++)
         result += CalcPointLight(pointLights[i], norm, fs_in.FragPos, viewDir);    
     // phase 3: spot light
-	for(int i = 0; i < numSpotLights; i++)
-		result += CalcSpotLight(spotLights[i], norm, fs_in.FragPos, viewDir);
+	for(int i = 0; i < numSpotLights; i++) 
+	{
+		if(spotLights[i].light)
+		{ 
+			result += CalcSpotLight(spotLights[i], norm, fs_in.FragPos, viewDir);
+		}
+	}
 
 	FragColor = vec4(result, 1.0);
 }
