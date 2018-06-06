@@ -76,14 +76,17 @@ public:
 
 class SoundHero : public SoundCharacter {
 public:
-	irrklang::ik_f32 L0 = SOADLENGTH;
+	irrklang::ik_f32 L0 ;
 	irrklang::ik_f32 dt;
 	irrklang::ISound* SOAD;
+	irrklang::ISound* boom;
 	SoundHero() = delete;
 	SoundHero(irrklang::vec3df& pos0, const vector<string>& path0, enum CharacterSound stat0, irrklang::ISoundEngine* engine3d_, map<string, irrklang::ISoundSource*>& GlobalMusicDataBase)
 		: SoundCharacter::SoundCharacter(pos0, path0, stat0, engine3d_, GlobalMusicDataBase) {
 		SOAD = engine3d->play3D(ObjectSounds[BACKBATTLE_Sound], Pos, true, true, true);
 		SOAD->setVolume(BACKGROUNDVOLUME);
+		boom = engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos, false, true, true);
+		L0 = 0;
 	}
 	void Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum CharacterSound action, irrklang::ik_f32& dt);
 	void DoSound();
