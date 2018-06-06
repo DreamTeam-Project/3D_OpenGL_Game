@@ -66,10 +66,14 @@ void SoundHero::Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum Ch
 
 void SoundHero::DoSound() {
 	if (Status != ATTACK_Sound) {
-		if (L0 > 0) {
-			L0 = L0 - dt;
+		if (L0 > boom->getPlayLength - 10) {
+			boom->setIsPaused();
+			boom->setPlayPosition(0);
 		}
-		if (L0 <= 0) {
+		if (L0 < SOADLENGTH) {
+			L0 = L0 + dt;
+		}
+		if (L0 > SOADLENGTH) {
 			SOAD->setIsPaused();
 			SOAD->setPlayPosition(0);
 		}
@@ -83,16 +87,21 @@ void SoundHero::DoSound() {
 		IsDead = true;
 	}
 	if (Status == ATTACK_Sound) {
-		L0 = SOADLENGTH;
+		L0 = L0 + dt;
 		Walk->setIsPaused();
 		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ATTACK_Sound]);
 		if (!check) {
-			engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos);
+			boom->setIsPaused(false);
+		}
+		else {
+			boom->setPlayPosition(0);
+			boom->setIsPaused(false);
 		}
 		bool check2 = engine3d->isCurrentlyPlaying(ObjectSounds[BACKBATTLE_Sound]);
 		if (check2) {
 			SOAD->setIsPaused(false);
 		}
+		L0 = 0;
 	}
 	if (Status == JUMP_Sound) {
 		Walk->setIsPaused();
@@ -198,4 +207,3 @@ void SoundWorld::DoSound() {
 	if (Status == BIRDS2_Sound) {
 		engine3d->play3D(ObjectSounds[BIRDS2_Sound], Pos);
 	}
-}
