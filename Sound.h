@@ -9,7 +9,7 @@
 
 #define SOADLENGTH 200.0
 #define MAXDISTANCE 100.0
-#define BACKGROUNDVOLUME 0.05
+#define BACKGROUNDVOLUME 0.1
 #define BACKVOICE_DISTANCE 20.0
 
 using std::string;
