@@ -7,9 +7,9 @@
 #include <string>
 #include <map>
 
-#define SOADLENGTH 200.0
+#define SOADLENGTH 100.0
 #define MAXDISTANCE 100.0
-#define BACKGROUNDVOLUME 0.1
+#define BACKGROUNDVOLUME 1
 #define BACKVOICE_DISTANCE 20.0
 
 using std::string;
@@ -79,13 +79,11 @@ public:
 	irrklang::ik_f32 L0 ;
 	irrklang::ik_f32 dt;
 	irrklang::ISound* SOAD;
-	irrklang::ISound* boom;
 	SoundHero() = delete;
 	SoundHero(irrklang::vec3df& pos0, const vector<string>& path0, enum CharacterSound stat0, irrklang::ISoundEngine* engine3d_, map<string, irrklang::ISoundSource*>& GlobalMusicDataBase)
 		: SoundCharacter::SoundCharacter(pos0, path0, stat0, engine3d_, GlobalMusicDataBase) {
 		SOAD = engine3d->play3D(ObjectSounds[BACKBATTLE_Sound], Pos, true, true, true);
 		SOAD->setVolume(BACKGROUNDVOLUME);
-		boom = engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos, false, true, true);
 		L0 = 0;
 	}
 	void Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum CharacterSound action, irrklang::ik_f32& dt);
