@@ -79,8 +79,9 @@ public:
 	bool GameMenu(GLFWwindow *window);
 	void EndLevel();
 	void RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time = 0);
-	void ProcessInputInGame(GLFWwindow *window, float deltaTime);
-	bool play;
+	bool Status() {
+		return play && mobs != 0 && camera.position->getHealth() > 0;
+	}
 
 	phys_world real_world_;
 	phys_body camera_;
@@ -101,13 +102,18 @@ private:
 	void LoadInfoAboutModels(uint levelNumber);
 	int ChooseLevel() { return 0; }
 	int ChooseLevel(GLFWwindow* window);
+	void ProcessInputInGame(GLFWwindow *window, float deltaTime);
 	void ProcessInputInMenu(GLFWwindow* window, uint& key_pressed);
+	void ProcessInputInEnd(GLFWwindow* window, uint& key_pressed);
 	
 	irrklang::ISoundEngine* engine3d;
 	irrklang::ISound* music;
-	float accum;
+	float accum_shoot;
 	float accum_fire;
+	uint mobs;
+	bool play;
 	bool flag_shoot;
+	Image Menu;
 	Image Loading;
 	Skybox box;
 	GameText text;

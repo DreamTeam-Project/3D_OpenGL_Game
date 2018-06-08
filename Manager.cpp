@@ -1,8 +1,8 @@
 #include "Manager.h"
 
 GameManager::GameManager() : 
-	Loading(LoadImage, true), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"), 
-	play(false), real_world_(phys_world()), accum(0), flag_shoot(false), accum_fire(0)
+	Loading(LoadImage, true), Menu(MenuImage), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"),
+	play(false), real_world_(phys_world()), accum_shoot(0), flag_shoot(false), accum_fire(0), mobs(0)
 {
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
@@ -78,9 +78,11 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		NewModel = new FloorModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 8.0f, true);
 		break;
 	case ENEMY_CLOSE:
+		mobs++;
 		NewModel = new EnemyCloseModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 32.0f, true);
 		break;
 	case ENEMY_DIS:
+		mobs++;
 		NewModel = new EnemyDisModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d, LoadedSounds, 32.0f, true);
 		break;
 	case HP_BOX:
@@ -322,10 +324,12 @@ bool GameManager::GameMenu(GLFWwindow* window) {
 }
 
 void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Camera& camera, float time) {
-	accum -= time;
+	ProcessInputInGame(game_window, time);
+
+	accum_shoot -= time;
 	accum_fire -= time;
-	if (accum <= 0) {
-		accum = 0;
+	if (accum_shoot <= 0) {
+		accum_shoot = 0;
 	}
 	if (accum_fire <= 0) {
 		accum_fire = 0;
@@ -345,8 +349,9 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	RenderModels(projection, view, camera, time);
 	box.RenderBox(camera, projection);
 	text.RenderText(string("o"), (float)HEIGHT / 500 * 248, (float)WIDTH / 9 * 4, 0.2f, vec3(1.0f, 0.0f, 0.0f));
-	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 14, (float)WIDTH / 10 * 9, 0.9f, vec3(1.0f, 0.0f, 0.0f));
-	text.RenderText(string("BT ") + to_string(camera.position->get_bullets()), (float)HEIGHT / 14, (float)WIDTH / 10 * 8, 0.9f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(string("Mobs ") + to_string(mobs), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 43, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 47, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(string("BT ") + to_string(camera.position->get_bullets()), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 45, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
@@ -367,13 +372,66 @@ void GameManager::ProcessInputInMenu(GLFWwindow* window, uint& key_pressed) {
 	}
 }
 
+void GameManager::ProcessInputInEnd(GLFWwindow* window, uint& key_pressed) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+		key_pressed = 3;
+		return;
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		key_pressed = 1;
+		return;
+	}
+}
+
 void GameManager::EndLevel() {
-	Loading.RenderImage(true);
+	uint key = 0;
+	ProcessInputInEnd(game_window, key);
+	if (mobs == 0) {
+		Menu.RenderImage(true);
+	}
+	bool status = false;
+	while (!status && !glfwWindowShouldClose(game_window)) {
+		if (mobs == 0) {
+			text.RenderText(string("you saved the world"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 32, 0.8f, vec3(0.2f));
+			text.RenderText(string("you are so cool"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 30, 0.8f, vec3(0.2f));
+			text.RenderText(string("but its a battle"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 28, 0.8f, vec3(0.2f));
+			text.RenderText(string("theres gonna be a war"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 26, 0.8f, vec3(0.2f));
+		}
+		if (camera.position->getHealth() <= 0) {
+			text.RenderText(string("the GOAT warrior"), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 32, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string("the awesome guy"), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 30, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string("see you in glory "), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 28, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string(" of Odins hall "), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 26, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+		}
+		if (key == 1) {
+			text.RenderText(string("you left the battle"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 32, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string("and you will never see"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 30, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string("the greatest ever view"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 28, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+			text.RenderText(string("from top of Odins hall"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 26, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+		}
+		text.RenderText(string("Press H to go to menu"), (float)HEIGHT / 25 * 7.7, (float)WIDTH / 50 * 40, 0.7f, vec3(0.5f));
+		ProcessInputInEnd(game_window, key);
+		if (key == 3) {
+			status = true;
+		}
+		glfwSwapBuffers(game_window);
+		glfwPollEvents();
+	}
+	for (auto& it : LoadedSounds) {
+		engine3d->removeSoundSource(it.first.c_str());
+	}
+	music->setIsPaused(false);
+	Light.Clear();
+	accum_shoot = 0;
+	accum_fire = 0;
+	mobs = 0;
 	SysText.clear();
 	Models.clear();
 	LoadedModels.clear();
 	LoadedSounds.clear();
-	music->setIsPaused(false);
 }
 
 void GameManager::LoadModels() {
@@ -401,12 +459,12 @@ int GameManager::ChooseLevel(GLFWwindow* window) {
 	uint chosen = 1;
 	GLdouble deltaTime, currentFrame, lastFrame = 0.0;
 	GLdouble accumulator = 0.0;
-	Image Menu(MenuImage);
+	
 	SysText.clear();
 
-	SysText.push_back(SysStrings(GameName, (float)HEIGHT / 4.5f, (float)WIDTH / 7 * 6, 0.85f, vec3(0.5f)));
+	SysText.push_back(SysStrings(GameName, (float)HEIGHT / 4.5f, (float)WIDTH / 7 * 6, 0.85f, vec3(0.2f)));
 	for (uint i = 0; i < Levels.size(); i++) {
-		SysText.push_back(SysStrings(Levels[i].name_, (float)HEIGHT / 6, (float)WIDTH / 14 * (11 - (i + 1)), 0.7f, vec3(0.5f)));
+		SysText.push_back(SysStrings(Levels[i].name_, (float)HEIGHT / 6, (float)WIDTH / 14 * (11 - (i + 1)), 0.7f, vec3(0.4f)));
 	}
 
 	SysText[chosen].color_ = vec3(1.0f, 0.0f, 0.0f);
@@ -482,9 +540,9 @@ void GameManager::ProcessInputInGame(GLFWwindow *window, float deltaTime) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-		if (accum == 0) {
+		if (accum_shoot == 0) {
 			flag_shoot = true;
-			accum = 0.5;
+			accum_shoot = 0.5;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {

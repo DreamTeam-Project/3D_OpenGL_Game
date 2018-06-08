@@ -103,11 +103,11 @@ static void DrawInWindow() {
 	GameManager Manager;
 	while (!glfwWindowShouldClose(game_window) && Manager.GameMenu(game_window)) {
 
-		while (!glfwWindowShouldClose(game_window) && Manager.play) {
+		while (!glfwWindowShouldClose(game_window) && Manager.Status()) {
 			GLfloat currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
-			Manager.ProcessInputInGame(game_window, deltaTime);
+
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

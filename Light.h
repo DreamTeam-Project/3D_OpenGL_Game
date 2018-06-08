@@ -70,6 +70,10 @@ public:
 	vector<SpotLight> SpotLights;
 	GlobalLight Global;
 	void SetLight(const GameShader& shader);
+	void Clear() {
+		PointLights.clear();
+		SpotLights.clear();
+	}
 private:
 	void SetPointLights(const GameShader& shader);
 	void SetSpotLights(const GameShader& shader);
