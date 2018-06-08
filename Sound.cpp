@@ -68,12 +68,9 @@ void SoundHero::DoSound() {
 	if (Status != ATTACK_Sound) {
 		if (L0 < SOADLENGTH) {
 			L0 = L0 + dt;
-<<<<<<< HEAD
 			Walk->setIsPaused();
 		}
 		if (L0 > SOADLENGTH && !IsCalm) {
-=======
->>>>>>> 1d8f1dd316b27c0a144c11c963d788f706d47c25
 			SOAD->setIsPaused();
 			SOAD->setPlayPosition(0);
 			Walk->setIsPaused(false);
@@ -88,19 +85,13 @@ void SoundHero::DoSound() {
 		IsDead = true;
 	}
 	if (Status == ATTACK_Sound) {
-<<<<<<< HEAD
-=======
->>>>>>> 1d8f1dd316b27c0a144c11c963d788f706d47c25
 		Walk->setIsPaused();
 		bool check = engine3d->isCurrentlyPlaying(ObjectSounds[ATTACK_Sound]);
 		if (!check) {
 			engine3d->play3D(ObjectSounds[ATTACK_Sound], Pos);
 		}
 		SOAD->setIsPaused(false);
-<<<<<<< HEAD
 		IsCalm = false;
-=======
->>>>>>> 1d8f1dd316b27c0a144c11c963d788f706d47c25
 		L0 = 0;
 	}
 	if (Status == JUMP_Sound) {
