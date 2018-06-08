@@ -7,7 +7,11 @@
 #include <string>
 #include <map>
 
+<<<<<<< HEAD
 #define SOADLENGTH 10.0
+=======
+#define SOADLENGTH 100.0
+>>>>>>> 1d8f1dd316b27c0a144c11c963d788f706d47c25
 #define MAXDISTANCE 100.0
 #define BACKGROUNDVOLUME 1
 #define BACKVOICE_DISTANCE 20.0
@@ -85,8 +89,11 @@ public:
 		: SoundCharacter::SoundCharacter(pos0, path0, stat0, engine3d_, GlobalMusicDataBase) {
 		SOAD = engine3d->play3D(ObjectSounds[BACKBATTLE_Sound], Pos, true, true, true);
 		SOAD->setVolume(BACKGROUNDVOLUME);
+<<<<<<< HEAD
 		L0 = SOADLENGTH + 10;
 		IsCalm = true;
+=======
+>>>>>>> 1d8f1dd316b27c0a144c11c963d788f706d47c25
 	}
 	void Refresh(irrklang::vec3df& pos0, irrklang::vec3df& lpos0, enum CharacterSound action, irrklang::ik_f32& dt);
 	void DoSound();
@@ -146,4 +153,3 @@ public:
 	void DoSound();
 };
 
-#endif
