@@ -352,6 +352,8 @@ int Enemy_close::do_something(phys_world& world) {
 		body->setActivationState(DISABLE_SIMULATION);
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
+	}
+	if (health < 0) {
 		return 1;
 	}
 	
@@ -384,6 +386,9 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setActivationState(DISABLE_SIMULATION);
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
+		
+	}
+	if (health < 0) {
 		return 1;
 	}
 
