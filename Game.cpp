@@ -1,4 +1,3 @@
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #define GLEW_STATIC
 
 #include <cstdio>

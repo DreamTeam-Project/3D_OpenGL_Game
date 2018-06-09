@@ -305,6 +305,8 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	Shader.setVec3("viewPos", camera.Position);
 	for (int i = 0; i<Models.size();i++) {
 		//int  a = Models[i]->rigid_body_->get_status();
+=======
+>>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		if (Models[i]->draw_) {
 			Models[i]->SetShaderParameters(Shader, time);
 			Models[i]->Draw(Shader);
@@ -397,8 +399,14 @@ void GameManager::ProcessInputInEnd(GLFWwindow* window, uint& key_pressed) {
 void GameManager::EndLevel() {
 	uint key = 0;
 	ProcessInputInEnd(game_window, key);
+<<<<<<< HEAD
 	if (key == 1) {
 		key = 5;
+=======
+	real_world_.clear_world();
+	if (mobs == 0) {
+		Menu.RenderImage(true);
+>>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 	}
 	real_world_.clear_world();
 	bool status = false;

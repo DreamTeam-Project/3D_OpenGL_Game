@@ -36,13 +36,23 @@ GameModel::GameModel(phys_world& real_world_, const vec3& place, const vec3& qua
 	scale_(scale) {  }
 
 void GameModel::Move(mat4& model, float deltaTime) {
+<<<<<<< HEAD
+=======
+	if (a == ALIVE_Sound) {
+		draw_ = true;
+>>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		model = glm::translate(model, rigid_body_->get_pos());
 		quat_ = rigid_body_->get_quat();
 		model = glm::rotate(model, quat_.x, vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, quat_.y, vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, quat_.z, vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, scale_);
+<<<<<<< HEAD
 
+=======
+	}
+	draw_ == false;
+>>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 }
 
 void Structure::Move(mat4& model, float deltaTime) {
