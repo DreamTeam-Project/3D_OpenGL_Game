@@ -2,7 +2,7 @@
 
 GameManager::GameManager() : 
 	Loading(LoadImage, true), Menu(MenuImage), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"),
-	play(false), real_world_(phys_world()), accum_shoot(0), flag_shoot(false), accum_fire(0), mobs(0)
+	play(false), real_world_(phys_world(&mobs)), accum_shoot(0), flag_shoot(false), accum_fire(0), mobs(0)
 {
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
@@ -288,15 +288,38 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 }
 
 void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time) {
+	
+	Models[0]->quat_.y = 90 - camera.Yaw;
+	
+	while (Models[0]->quat_.y >= 360) {
+		Models[0]->quat_.y -= 360;
+	}
+	while (Models[0]->quat_.y <= -360) {
+		Models[0]->quat_.y += 360;
+	}
+	//printf(".y = %f\n", Models[0]->quat_.y);
+	/*if (Models[0]->quat_.y <= 90 || Models[0]->quat_.y >=260) {
+		Models[0]->quat_.x = -camera.Pitch;
+	}
+	if (Models[0]->quat_.y >= 90 && Models[0]->quat_.y <= 260) {
+		Models[0]->quat_.x = camera.Pitch;
+	}*/
+	/*Models[0]->quat_.z = camera.Pitch;
+	Models[0]->quat_.x =90;*/
+	//Models[0]->quat_.x =- camera.Pitch;
+	while (Models[0]->quat_.x >= 360) {
+		Models[0]->quat_.x -= 360;
+	}
+	while (Models[0]->quat_.x <= -360) {
+		Models[0]->quat_.x += 360;
+	}
+	//printf(".x = %f\n", Models[0]->quat_.x);
 	Shader.Use();
 	Light.SetLight(Shader);
 	Shader.setMat4("projection", projection);
 	Shader.setMat4("view", view);
 	Shader.setVec3("viewPos", camera.Position);
 	for (int i = 0; i<Models.size();i++) {
-		if (i == 0) {
-			Models[i]->quat_.y = 90-camera.Yaw;
-		}
 		if (Models[i]->draw_) {
 			Models[i]->SetShaderParameters(Shader, time);
 			Models[i]->Draw(Shader);
@@ -389,6 +412,7 @@ void GameManager::ProcessInputInEnd(GLFWwindow* window, uint& key_pressed) {
 void GameManager::EndLevel() {
 	uint key = 0;
 	ProcessInputInEnd(game_window, key);
+	real_world_.clear_world();
 	if (mobs == 0) {
 		Menu.RenderImage(true);
 	}

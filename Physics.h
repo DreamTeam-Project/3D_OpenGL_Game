@@ -38,9 +38,10 @@ public:
 	vector<phys_body*> enemies;
 	btDiscreteDynamicsWorld* dynamicsWorld;
 	~phys_world();
-	phys_world();
+	phys_world(uint* count_enemies_);
 	void do_step(btScalar time, phys_world& world);
-
+	uint* count_enemies;
+	void clear_world();
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 	btDefaultCollisionConfiguration* collisionConfiguration;
 	btCollisionDispatcher* dispatcher;

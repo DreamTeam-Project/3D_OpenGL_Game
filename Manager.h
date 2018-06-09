@@ -82,7 +82,7 @@ public:
 	bool Status() {
 		return play && mobs != 0 && camera.position->getHealth() > 0;
 	}
-
+	uint mobs;
 	phys_world real_world_;
 	phys_body camera_;
 
@@ -110,7 +110,6 @@ private:
 	irrklang::ISound* music;
 	float accum_shoot;
 	float accum_fire;
-	uint mobs;
 	bool play;
 	bool flag_shoot;
 	Image Menu;

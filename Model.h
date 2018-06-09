@@ -131,7 +131,9 @@ public:
 	irrklang::vec3df a;
 	void Move(mat4& model, float deltaTime) override {
 		PlayMusic(deltaTime);
-		model = glm::translate(model, rigid_body_->get_pos() + vec3(camera.Front) * 0.3f + vec3(0, -1,0));
+		model = glm::translate(model, rigid_body_->get_pos()
+			+ vec3(camera.Front) * 0.3f + vec3(0, -1,0)
+		);
 		model = glm::rotate(model, glm::radians(quat_.x), vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(quat_.y), vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(quat_.z), vec3(0.0f, 0.0f, 1.0f));

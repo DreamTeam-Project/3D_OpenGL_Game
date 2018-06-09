@@ -51,7 +51,30 @@ type_(type) {
 	world.dynamicsWorld->addRigidBody(body);
 }
 
-phys_world::phys_world() {
+void phys_world::clear_world() {
+	for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+	{
+		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+		btRigidBody* body = btRigidBody::upcast(obj);
+		if (body && body->getMotionState())
+		{
+			delete body->getMotionState();
+		}
+		dynamicsWorld->removeCollisionObject(obj);
+		delete obj;
+	}
+
+	for (int j = 0; j < collisionShapes.size(); j++)
+	{
+		btCollisionShape* shape = collisionShapes[j];
+		collisionShapes[j] = 0;
+		delete shape;
+	}
+}
+
+phys_world::phys_world(uint* count_enemies_) {
+	count_enemies = count_enemies_;
+	//printf("%ud\n", *count_enemies);
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	overlappingPairCache = new btDbvtBroadphase();
@@ -125,7 +148,13 @@ void phys_world::do_step(btScalar time, phys_world& world) {
 	}
 	i = enemies.size();
 	while (i > 0) {
-		enemies[i - 1]->do_something(world);
+		int res;
+		res = enemies[i - 1]->do_something(world);
+		if (res == 1) {
+			enemies.erase(enemies.begin()+i - 1);
+			(*count_enemies)--;
+			//printf("%ud\n", *count_enemies);
+		}
 		i--;
 	}
 
@@ -323,6 +352,7 @@ int Enemy_close::do_something(phys_world& world) {
 		body->setActivationState(DISABLE_SIMULATION);
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
+		return 1;
 	}
 	
 	return 0;
@@ -354,6 +384,7 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setActivationState(DISABLE_SIMULATION);
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
+		return 1;
 	}
 
 	return 0;
