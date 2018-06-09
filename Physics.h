@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include "Sound.h"
 #include <vector>
+#include <list>
+#include <iterator>
 
 class phys_body;
 
@@ -34,13 +36,14 @@ vector<phys_body*>&  get_bullets();
 
 class phys_world {
 public:
-	vector<phys_body*> bullets;
+	std::list<phys_body*> bullets;
 	vector<phys_body*> enemies;
 	btDiscreteDynamicsWorld* dynamicsWorld;
 	~phys_world();
-	phys_world();
+	phys_world(uint* count_enemies_);
 	void do_step(btScalar time, phys_world& world);
-
+	uint* count_enemies;
+	void clear_world();
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 	btDefaultCollisionConfiguration* collisionConfiguration;
 	btCollisionDispatcher* dispatcher;
@@ -135,8 +138,8 @@ public:
 	void collidedwith(char type, phys_body* with) override;
 	Character(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, character),
-		health(500),
-		bullets(50),
+		health(2000),
+		bullets(20),
 		inair(false)
 	{
 		get_camera(this);
@@ -150,7 +153,7 @@ public:
 	void collidedwith(char type, phys_body* with) override;
 	Enemy_dis(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, enemy_dis),
-		health(50)
+		health(10)
 	{
 		world.enemies.push_back(this);
 	}
@@ -176,7 +179,7 @@ public:
 	void collidedwith(char type, phys_body* with) override;
 	Enemy_close(phys_world& world, btVector3 position, btVector3 col_shape, btScalar mass) :
 		phys_body(world, position, col_shape, mass, enemy_close),
-		health(50)
+		health(30)
 	{
 		world.enemies.push_back(this);
 	}
@@ -211,7 +214,9 @@ public:
 		return able;
 	}
 	int get_status() override {
-		return ALIVE_Sound;
+		if(able == true)
+			return ALIVE_Sound;
+		return DEAD_Sound;
 	}
 };
 

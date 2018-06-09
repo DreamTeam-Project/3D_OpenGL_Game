@@ -30,25 +30,25 @@ void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime) {
 		if (direction == FORWARD) {
 			position->set_velosity(
 				position->body->getLinearVelocity() +
-				btVector3(Front.x* velosity, Front.y*velosity,
+				btVector3(Front.x* velosity, 0,
 					Front.z*velosity));
 		}
 		if (direction == BACKWARD) {
 			position->set_velosity(
 				position->body->getLinearVelocity() -
-				btVector3(Front.x* velosity, Front.y*velosity,
+				btVector3(Front.x* velosity, 0,
 					Front.z*velosity));
 		}
 		if (direction == LEFT) {
 			position->set_velosity(
 				position->body->getLinearVelocity()
-				- btVector3(Right.x* velosity, Right.y*velosity,
+				- btVector3(Right.x* velosity,0,
 					Right.z*velosity));
 		}
 		if (direction == RIGHT) {
 			position->set_velosity(
 				position->body->getLinearVelocity()
-				+ btVector3(Right.x* velosity, Right.y*velosity,
+				+ btVector3(Right.x* velosity, 0,
 					Right.z*velosity));
 		}
 	}

@@ -2,7 +2,7 @@
 
 GameManager::GameManager() : 
 	Loading(LoadImage, true), Menu(MenuImage), text(FontFile), box(DarkStormy, lightSky), Shader("Light.vs", "Light.fs"),
-	play(false), real_world_(phys_world()), accum_shoot(0), flag_shoot(false), accum_fire(0), mobs(0)
+	play(false), real_world_(phys_world(&mobs)), accum_shoot(0), flag_shoot(false), accum_fire(0), mobs(0)
 {
 	engine3d = irrklang::createIrrKlangDevice();
 	menuSound = engine3d->addSoundSourceFromFile(MenuSound.c_str(), irrklang::ESM_STREAMING, true);
@@ -61,7 +61,7 @@ void GameManager::MadeModels(const int& type, const vec3& place, const vec3& qua
 		break;
 	case CHARACTER:
 		NewModel = new CharacterModel(real_world_, type, place, quat, path, scale, mass, box[0], sounds, engine3d , LoadedSounds, 32.0f, true);
-		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f), vec3(1.0f, 1.0f, 0.8f), vec3(0.5f), camera.Front, vec3(0.0f), 1.0f, 0.014f, 0.0007f, 5.0f, 22.5f));
+		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f), vec3(10.0f, 10.0f, 8.0f), vec3(0.5f), camera.Front, vec3(0.0f), 1.0f, 0.09f, 0.032f, 5.0f, 18.0f));
 		Light.SpotLights.push_back(SpotLight(NewModel, vec3(0.0f), vec3(20.0f, 10.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), camera.Front, vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.09f, 0.032f, 5.0f, 40.5f, false));
 		break;
 	case STRUCTURE:
@@ -288,15 +288,23 @@ void GameManager::LoadInfoAboutModels(uint levelNumber) {
 }
 
 void GameManager::RenderModels(const mat4& projection, const mat4& view, const Camera& camera, float time) {
+	
+	Models[0]->quat_.y = 90 - camera.Yaw;
+	
+	while (Models[0]->quat_.y >= 360) {
+		Models[0]->quat_.y -= 360;
+	}
+	while (Models[0]->quat_.y <= -360) {
+		Models[0]->quat_.y += 360;
+	}
+	Models[0]->quat_.y = glm::radians(Models[0]->quat_.y);
 	Shader.Use();
 	Light.SetLight(Shader);
 	Shader.setMat4("projection", projection);
 	Shader.setMat4("view", view);
 	Shader.setVec3("viewPos", camera.Position);
 	for (int i = 0; i<Models.size();i++) {
-		if (i == 0) {
-			Models[i]->quat_.y = 90-camera.Yaw;
-		}
+		//int  a = Models[i]->rigid_body_->get_status();
 		if (Models[i]->draw_) {
 			Models[i]->SetShaderParameters(Shader, time);
 			Models[i]->Draw(Shader);
@@ -337,11 +345,11 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	}
 	if (flag_shoot) {
 		phys_body* tmp = get_camera()->aim(real_world_);
-		if (tmp == nullptr) {
-			return;
+		if (tmp != nullptr) {
+			GetCopy(1, tmp);
+			Light.SpotLights[1].light_on = true;
 		}
-		GetCopy(1, tmp);
-		Light.SpotLights[1].light_on = true;
+		
 		accum_fire = 0.04;
 		flag_shoot = false;
 	}
@@ -350,7 +358,7 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	box.RenderBox(camera, projection);
 	text.RenderText(string("o"), (float)HEIGHT / 500 * 248, (float)WIDTH / 9 * 4, 0.2f, vec3(1.0f, 0.0f, 0.0f));
 	text.RenderText(string("Mobs ") + to_string(mobs), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 43, 0.8f, vec3(1.0f, 0.0f, 0.0f));
-	text.RenderText(string("HP ") + to_string(camera.position->getHealth()), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 47, 0.8f, vec3(1.0f, 0.0f, 0.0f));
+	text.RenderText(string("HP ") + to_string(camera.position->getHealth() / 10), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 47, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 	text.RenderText(string("BT ") + to_string(camera.position->get_bullets()), (float)HEIGHT / 50 * 1, (float)WIDTH / 50 * 45, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 }
 
@@ -389,9 +397,10 @@ void GameManager::ProcessInputInEnd(GLFWwindow* window, uint& key_pressed) {
 void GameManager::EndLevel() {
 	uint key = 0;
 	ProcessInputInEnd(game_window, key);
-	if (mobs == 0) {
-		Menu.RenderImage(true);
+	if (key == 1) {
+		key = 5;
 	}
+	real_world_.clear_world();
 	bool status = false;
 	while (!status && !glfwWindowShouldClose(game_window)) {
 		if (mobs == 0) {
@@ -406,7 +415,7 @@ void GameManager::EndLevel() {
 			text.RenderText(string("see you in glory "), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 28, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 			text.RenderText(string(" of Odins hall "), (float)HEIGHT / 50 * 16, (float)WIDTH / 50 * 26, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 		}
-		if (key == 1) {
+		if (key == 5) {
 			text.RenderText(string("you left the battle"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 32, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 			text.RenderText(string("and you will never see"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 30, 0.8f, vec3(1.0f, 0.0f, 0.0f));
 			text.RenderText(string("the greatest ever view"), (float)HEIGHT / 50 * 13, (float)WIDTH / 50 * 28, 0.8f, vec3(1.0f, 0.0f, 0.0f));

@@ -51,7 +51,32 @@ type_(type) {
 	world.dynamicsWorld->addRigidBody(body);
 }
 
-phys_world::phys_world() {
+void phys_world::clear_world() {
+	for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+	{
+		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+		btRigidBody* body = btRigidBody::upcast(obj);
+		if (body && body->getMotionState())
+		{
+			delete body->getMotionState();
+		}
+		dynamicsWorld->removeCollisionObject(obj);
+		delete obj;
+	}
+
+	for (int j = 0; j < collisionShapes.size(); j++)
+	{
+		btCollisionShape* shape = collisionShapes[j];
+		collisionShapes[j] = 0;
+		delete shape;
+	}
+	enemies.clear();
+	bullets.clear();
+}
+
+phys_world::phys_world(uint* count_enemies_) {
+	count_enemies = count_enemies_;
+	//printf("%ud\n", *count_enemies);
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	overlappingPairCache = new btDbvtBroadphase();
@@ -125,7 +150,14 @@ void phys_world::do_step(btScalar time, phys_world& world) {
 	}
 	i = enemies.size();
 	while (i > 0) {
-		enemies[i - 1]->do_something(world);
+		int res;
+		res = enemies[i - 1]->do_something(world);
+		if (res == 1) {
+			enemies.erase(enemies.begin()+i - 1);
+			(*count_enemies)--;
+			break;
+			//printf("%ud\n", *count_enemies);
+		}
 		i--;
 	}
 
@@ -146,7 +178,7 @@ void Character::jump() {
 	btScalar len = body->getLinearVelocity().length();
 	btScalar h = body->getCenterOfMassPosition().getY();
 
-	if (inair == false && len < 13 && h< 10 ) {
+	if (inair == false && len < 13 && h< 4 ) {
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 4, 0));
 		inair = true;
 	}
@@ -215,12 +247,13 @@ void Enemy_dis::collidedwith(char type, phys_body* with) {
 		break;
 	case bullet:
 		if (with->get_able() == true) {
-			with->set_able(false);
+			
 			health -= 10;
 		}
 		if (health < 0) {
 			body->setActivationState(DISABLE_SIMULATION);
 		}
+		with->set_able(false);
 		break;
 	default:
 		break;
@@ -240,6 +273,7 @@ void Character::collidedwith(char type, phys_body* with) {
 			with->set_able(false);
 			health -= 10;
 		}
+		with->set_able(false);
 			
 		break;
 	case box_bullet:
@@ -256,7 +290,7 @@ void Character::collidedwith(char type, phys_body* with) {
 	case hp_box:
 		if (with->get_able() == 1) {
 			with->set_able(0);
-			health += 10;
+			health += 500;
 		}
 		break;
 	case enemy_dis:
@@ -269,6 +303,17 @@ void Character::collidedwith(char type, phys_body* with) {
 }
 
 void phys_body::collidedwith(char type, phys_body* with) {
+	switch (type) {
+	case standart:
+		break;
+	case character:
+		break;
+	case bullet:
+		with->set_able(false);
+		break;
+	default:
+		break;
+	}
 	return;
 }
 
@@ -279,11 +324,11 @@ void Enemy_close::collidedwith(char type, phys_body* with) {
 	case character:
 		break;
 	case bullet:
-		if (with->get_able() == 1) {
+		if (with->get_able() == true) {
 			with->set_able(false);
 			health -= 10;
 		}
-		
+		with->set_able(false);
 		break;
 	case enemy_close:
 		break;
@@ -299,9 +344,9 @@ void Bullet::collidedwith(char type, phys_body* with) {
 
 int Enemy_close::do_something(phys_world& world) {
 	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
-	if (health > 0 && len < 100) {
+	if (health > 0 && len < 50) {
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
+		body->setLinearVelocity(-11*(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
 		btTransform btt;
 		body->getMotionState()->getWorldTransform(btt);
@@ -324,15 +369,18 @@ int Enemy_close::do_something(phys_world& world) {
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
 	}
+	if (health <= 0) {
+		return 1;
+	}
 	
 	return 0;
 }
 
 int Enemy_dis::do_something(phys_world& world) {
 	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
-	if (health > 0 && len < 100) {
+	if (health > 0 && len < 25) {
 		body->setActivationState(DISABLE_DEACTIVATION);
-		body->setLinearVelocity(-4 * (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
+		body->setLinearVelocity(-13 * (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
 		btTransform btt;
 		body->getMotionState()->getWorldTransform(btt);
@@ -354,6 +402,10 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setActivationState(DISABLE_SIMULATION);
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
+		
+	}
+	if (health <= 0) {
+		return 1;
 	}
 
 	return 0;

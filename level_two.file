@@ -11,17 +11,44 @@
 	< textures\Mob\MobJump.mp3 >					< 1 >
 	< textures\Mob\MobDead.mp3 >					< 1 >
 	< textures\Mob\MobAlive.mp3 >					< 1 >
+< end >
 
-	< textures\Spider\SpiderWalk.mp3 >				< 1 >
-	< textures\Spider\SpiderAttack.mp3 >			< 1 >
-	< textures\Spider\SpiderJump.mp3 >				< 1 >
-	< textures\Spider\SpiderDead.mp3 >				< 1 >
-	< textures\Spider\SpiderAlive.mp3 >				< 1 >
+< unit >
+	< type  >   < 2 >
+	< path  >   < textures\obj\shotgun\Shotgun.obj >
+	< mass  >	< 100.0 >
 
-	< textures\Structure\StructureFloor.mp3 >		< 1 >
-	< textures\Structure\StructureChurch.mp3 >		< 1 >
-	< textures\Structure\StructureDoor.mp3 >		< 1 >
-	< textures\Structure\StructureKachel.mp3 >		< 1 >
+	< num   >   < 1 >
+	< place >   <  -20.0 8.0 50.0         >
+	< quat  >   <  0.0 270.0 0.0         > 
+	< scale >   <  0.1 0.1 0.1   >
+
+	< num   >   < 1 >
+	< box   >	< 4.0 4.0 4.0 >
+
+	< num   >   < 6 >
+	< sound >   < textures\Hero\HeroDead.mp3 >
+	< sound >   < textures\Hero\HeroWalk.mp3 >
+	< sound >   < textures\Hero\HeroShoot.mp3 >
+	< sound >   < textures\Hero\HeroJump.mp3 >
+	< sound >   < textures\Hero\HeroAlive.mp3 >
+	< sound >   < textures\Hero\HeroBackBattle.mp3 >
+< end >
+
+< unit >
+	< type  >   < 3 >
+	< path  >   < textures\obj\Bullet\Bullet1.obj >
+	< mass  >	< 0.2 >
+
+	< num   >   < 1 >
+	< place >   <  -10.0 -10.0 -10.0   >
+	< quat  >   <  0.0 0.0 0.0         > 
+	< scale >   <  0.0025 0.0025 0.0025   >
+
+	< num   >   < 1 >
+	< box   >	< 0.2 0.2 0.2 >
+
+	< num   >   < 0 > 
 < end >
 
 < unit >
@@ -32,186 +59,48 @@
 	< num   >   < 1 >
 	< place >   <  0.0 0.0 0.0         >
 	< quat  >   <  0.0 0.0 0.0         > 
-	< scale >   <  1.0 1.0 1.0   >
+	< scale >   <  4.0 4.0 4.0   >
 
 	< num   >   < 1 >
-	< box   >	< 50.0 -0.1 50.0 >
+	< box   >	< 200.0 -0.1 200.0 >
 
 	< num   >   < 0 > 
 < end >
 
+
 < unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Radio Station\3ds file.3DS >
-	< mass  >	< 0.0 >
+	< type  >   < 6 >
+	< path  >   < textures\obj\walkingmob\MobWalking.obj >
+	< mass  >	< 20.0 >
 
 	< num   >   < 1 >
-	< place >   <  0.0 0.0 -20.0   >		< quat >   <  270.0 0.0 0.0 >		< scale >   <  1.3 1.3 1.3  >
+	< place >   <  40.0 0.1 -24.0 >		< quat  >   < 0.0 0.0 0.0  >			< scale >   <  0.03 0.03 0.03 >
 
 	< num   >   < 1 >
-	< box   >	< 16.5 10.0 15.5 >
+	< box   >	< 2 4.0 2 >
 
-	< num   >   < 0 >
+	< num   >   < 5 >
+	< sound >	< textures\Mob\MobDead.mp3 >
+	< sound >	< textures\Mob\MobWalk.mp3 >
+	< sound >	< textures\Mob\MobShoot.mp3 >
+	< sound >	< textures\Mob\MobJump.mp3 >
+	< sound >	< textures\Mob\MobAlive.mp3 >
 < end >
 
 < unit >
 	< type  >   < 1 >
-	< path  >   < textures\obj\Truck\truck.obj >
+	< path  >   < textures\obj\wood\Woodbase-BrickSupport-Fence.obj >
 	< mass  >	< 0.0 >
 
-	< num   >   < 1 >
-	< place >   <  18.0 0.0 -30.0   >		< quat >   <  00.0 90.0 0.0 >		< scale >   <  1.3 1.3 1.3  >
+	< num   >   < 2 >
+	< place >   <  -30.0 0.0 40.0 >		< quat  >   <  0.0 0.0 0.0 >	< scale >   <  2.5 2.5 2.5   >
+	< place >   <  -13 0.0 40.0 >		< quat  >   <  0.0 0.0 0.0 >	< scale >   <  2.5 2.5 2.5   >
 
 	< num   >   < 1 >
-	< box   >	< 8.0 10.0 5.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\oil\oildrum.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  20.0 0.0 -20.0   >		< quat >   <  00.0 90.0 0.0 >		< scale >   <  3.0 3.0 3.0  >
-
-	< num   >   < 1 >
-	< box   >	< 8.0 10.0 5.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\oil\oildrum.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  20.0 0.0 -10.0   >		< quat >   <  00.0 90.0 0.0 >		< scale >   <  3.0 3.0 3.0  >
-
-	< num   >   < 1 >
-	< box   >	< 8.0 10.0 5.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\car_scrap\car_scrap.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  -10.0 0.0 0.0   >		< quat >   <  0.0 180.0 0.0 >		< scale >   <  1.3 1.3 1.3  >
-
-	< num   >   < 1 >
-	< box   >	< 2.5 5.0 5.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Barrack\Barrack.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  20.0 0.0 30.0   >		< quat >   <  0.0 0.0 0.0 >		< scale >   <  1.0 1.0 1.0  >
-
-	< num   >   < 1 >
-	< box   >	< 15 10.0 8 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Barrack\Barrack.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  -20.0 0.0 30.0   >		< quat >   <  0.0 0.0 0.0 >		< scale >   <  1.0 1.0 1.0  >
-
-	< num   >   < 1 >
-	< box   >	< 15 10.0 8 >
-
-	< num   >   < 0 >
-< end >
-
-
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Floor\GR.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  0.0 0.0 0.0         >
-	< quat  >   <  0.0 0.0 0.0         > 
-	< scale >   <  1.0 1.0 1.0   >
-
-	< num   >   < 1 >
-	< box   >	< 150.0 -0.1 50.0 >
+	< box   >	< 10 10 0.1 >
 
 	< num   >   < 0 > 
 < end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Farmhouse\farmhouse_obj.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  100.0 0.0 0.0   >		< quat >   <  0.0 0.0 0.0 >		< scale >   <  0.7 0.7 0.7  >
-
-	< num   >   < 1 >
-	< box   >	< 8.0 10.0 23.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\Truck\truck.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  0.0 0.0 -20.0   >		< quat >   <  0.0 270.0 0.0 >		< scale >   <  1.2 1.2 1.2  >
-
-	< num   >   < 1 >
-	< box   >	< 0.0 0.0 0.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\item01\Item01.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  20.0 -0.1 -20.0   >		< quat >   <  0.0 270.0 0.0 >		< scale >   <  0.4 0.4 0.4  >
-
-	< num   >   < 1 >
-	< box   >	< 3.0 10.0 3.0 >
-
-	< num   >   < 0 >
-< end >
-
-< unit >
-	< type  >   < 1 >
-	< path  >   < textures\obj\house\old house.obj >
-	< mass  >	< 0.0 >
-
-	< num   >   < 1 >
-	< place >   <  30.0 0.0 30.0   >		< quat >   <  270.0 0.0 0.0 >		< scale >   <  2.0 2.0 2.0  >
-
-	< num   >   < 1 >
-	< box   >	< 8.0 10.0 14.0 >
-
-	< num   >   < 0 >
-< end >
-
 
 
 
