@@ -360,11 +360,11 @@ void GameManager::RenderWorld(const mat4& projection, const mat4& view, const Ca
 	}
 	if (flag_shoot) {
 		phys_body* tmp = get_camera()->aim(real_world_);
-		if (tmp == nullptr) {
-			return;
+		if (tmp != nullptr) {
+			GetCopy(1, tmp);
+			Light.SpotLights[1].light_on = true;
 		}
-		GetCopy(1, tmp);
-		Light.SpotLights[1].light_on = true;
+		
 		accum_fire = 0.04;
 		flag_shoot = false;
 	}
