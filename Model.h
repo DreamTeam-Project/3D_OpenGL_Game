@@ -185,7 +185,7 @@ public:
 		GameModel(real_world_, place, quat, path, scale, mass, box, shininess, draw) 
 	{
 		rigid_body_ = new Bullet(real_world_, btVector3(place.x, place.y, place.z), btVector3(box.x, box.y, box.z), btScalar(mass));
-	}
+	}	
 };
 
 class XPBoxModel : public Structure {

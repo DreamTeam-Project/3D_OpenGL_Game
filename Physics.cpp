@@ -244,12 +244,13 @@ void Enemy_dis::collidedwith(char type, phys_body* with) {
 		break;
 	case bullet:
 		if (with->get_able() == true) {
-			with->set_able(false);
+			
 			health -= 10;
 		}
 		if (health < 0) {
 			body->setActivationState(DISABLE_SIMULATION);
 		}
+		with->set_able(false);
 		break;
 	default:
 		break;
@@ -269,6 +270,7 @@ void Character::collidedwith(char type, phys_body* with) {
 			with->set_able(false);
 			health -= 10;
 		}
+		with->set_able(false);
 			
 		break;
 	case box_bullet:
@@ -298,6 +300,17 @@ void Character::collidedwith(char type, phys_body* with) {
 }
 
 void phys_body::collidedwith(char type, phys_body* with) {
+	switch (type) {
+	case standart:
+		break;
+	case character:
+		break;
+	case bullet:
+		with->set_able(false);
+		break;
+	default:
+		break;
+	}
 	return;
 }
 
@@ -308,11 +321,11 @@ void Enemy_close::collidedwith(char type, phys_body* with) {
 	case character:
 		break;
 	case bullet:
-		if (with->get_able() == 1) {
+		if (with->get_able() == true) {
 			with->set_able(false);
 			health -= 10;
 		}
-		
+		with->set_able(false);
 		break;
 	case enemy_close:
 		break;
@@ -328,7 +341,7 @@ void Bullet::collidedwith(char type, phys_body* with) {
 
 int Enemy_close::do_something(phys_world& world) {
 	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
-	if (health > 0 && len < 100) {
+	if (health > 0 && len < 25) {
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(-4*(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
@@ -362,7 +375,7 @@ int Enemy_close::do_something(phys_world& world) {
 
 int Enemy_dis::do_something(phys_world& world) {
 	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
-	if (health > 0 && len < 100) {
+	if (health > 0 && len < 25) {
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(-4 * (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 

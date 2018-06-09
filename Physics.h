@@ -212,7 +212,9 @@ public:
 		return able;
 	}
 	int get_status() override {
-		return ALIVE_Sound;
+		if(able == true)
+			return ALIVE_Sound;
+		return DEAD_Sound;
 	}
 };
 
