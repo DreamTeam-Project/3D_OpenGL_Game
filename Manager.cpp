@@ -297,23 +297,7 @@ void GameManager::RenderModels(const mat4& projection, const mat4& view, const C
 	while (Models[0]->quat_.y <= -360) {
 		Models[0]->quat_.y += 360;
 	}
-	//printf(".y = %f\n", Models[0]->quat_.y);
-	/*if (Models[0]->quat_.y <= 90 || Models[0]->quat_.y >=260) {
-		Models[0]->quat_.x = -camera.Pitch;
-	}
-	if (Models[0]->quat_.y >= 90 && Models[0]->quat_.y <= 260) {
-		Models[0]->quat_.x = camera.Pitch;
-	}*/
-	/*Models[0]->quat_.z = camera.Pitch;
-	Models[0]->quat_.x =90;*/
-	//Models[0]->quat_.x =- camera.Pitch;
-	while (Models[0]->quat_.x >= 360) {
-		Models[0]->quat_.x -= 360;
-	}
-	while (Models[0]->quat_.x <= -360) {
-		Models[0]->quat_.x += 360;
-	}
-	//printf(".x = %f\n", Models[0]->quat_.x);
+	Models[0]->quat_.y = glm::radians(Models[0]->quat_.y);
 	Shader.Use();
 	Light.SetLight(Shader);
 	Shader.setMat4("projection", projection);

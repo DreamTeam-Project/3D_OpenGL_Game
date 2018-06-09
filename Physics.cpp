@@ -175,7 +175,7 @@ void Character::jump() {
 	btScalar len = body->getLinearVelocity().length();
 	btScalar h = body->getCenterOfMassPosition().getY();
 
-	if (inair == false && len < 13 && h< 10 ) {
+	if (inair == false && len < 13 && h< 5 ) {
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 4, 0));
 		inair = true;
 	}
