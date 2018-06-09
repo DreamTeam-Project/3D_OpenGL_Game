@@ -70,10 +70,8 @@ void phys_world::clear_world() {
 		collisionShapes[j] = 0;
 		delete shape;
 	}
-<<<<<<< HEAD
 	enemies.clear();
 	bullets.clear();
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 }
 
 phys_world::phys_world(uint* count_enemies_) {
@@ -157,10 +155,7 @@ void phys_world::do_step(btScalar time, phys_world& world) {
 		if (res == 1) {
 			enemies.erase(enemies.begin()+i - 1);
 			(*count_enemies)--;
-<<<<<<< HEAD
 			break;
-=======
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 			//printf("%ud\n", *count_enemies);
 		}
 		i--;
@@ -183,11 +178,7 @@ void Character::jump() {
 	btScalar len = body->getLinearVelocity().length();
 	btScalar h = body->getCenterOfMassPosition().getY();
 
-<<<<<<< HEAD
 	if (inair == false && len < 13 && h< 4 ) {
-=======
-	if (inair == false && len < 13 && h< 5 ) {
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0, 4, 0));
 		inair = true;
 	}
@@ -353,11 +344,7 @@ void Bullet::collidedwith(char type, phys_body* with) {
 
 int Enemy_close::do_something(phys_world& world) {
 	btScalar len = (body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).length();
-<<<<<<< HEAD
 	if (health > 0 && len < 50) {
-=======
-	if (health > 0 && len < 25) {
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		body->setActivationState(DISABLE_DEACTIVATION);
 		body->setLinearVelocity(-11*(body->getCenterOfMassPosition() - get_camera()->body->getCenterOfMassPosition()).normalize());
 
@@ -382,11 +369,7 @@ int Enemy_close::do_something(phys_world& world) {
 		body->setAngularVelocity(btVector3(0, 0, 0));
 		body->setLinearVelocity(btVector3(0, 0, 0));
 	}
-<<<<<<< HEAD
 	if (health <= 0) {
-=======
-	if (health < 0) {
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		return 1;
 	}
 	
@@ -421,11 +404,7 @@ int Enemy_dis::do_something(phys_world& world) {
 		body->setLinearVelocity(btVector3(0, 0, 0));
 		
 	}
-<<<<<<< HEAD
 	if (health <= 0) {
-=======
-	if (health < 0) {
->>>>>>> 3e701c33a52ab5bdc151a53e3f483f2e03cba840
 		return 1;
 	}
 
